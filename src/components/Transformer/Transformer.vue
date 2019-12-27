@@ -1,0 +1,112 @@
+<template>
+  <div>
+    <div class="columns settings-control" v-if="isSettings">
+      <div class="column">
+        <b-field label="Автодополнение">
+          <div class="autocomplate-control">
+            <b-switch size="is-small" v-model="isAutocomplete">{{ isAutocomplete ? 'вкл' : 'выкл'}}</b-switch>
+          </div>
+        </b-field>
+      </div>
+      <div class="column">
+        <b-field label="Задержка автодополнения" style="max-width: 250px;">
+          <b-numberinput size="is-small" v-model="interval" controls-rounded :min="1"></b-numberinput>
+        </b-field>
+      </div>
+      <div class="column">
+        <b-field label="Количество автодополняемых слов">
+          <b-slider size="is-small" :min="1" :max="60" v-model="length" rounded>
+            <template v-for="val in [10, 20, 30, 40, 50]">
+              <b-slider-tick :value="val" :key="val">{{ val }}</b-slider-tick>
+            </template>
+          </b-slider>
+        </b-field>
+      </div>
+    </div>
+
+    <div class="box" v-bind:class="{ isError: isError }">
+      <div id="editorjs"></div>
+
+      <div class="columns is-mobile controls-pane">
+        <div class="column is-1">
+          <div class="tools">
+            <b-button size="is-small" type icon-left="settings" @click="isSettings = !isSettings" />
+          </div>
+        </div>
+        <div class="column has-text-centered">
+          <b-button
+            size="is-small"
+            type="is-primary"
+            :icon-left="lastReply ? 'restart' : 'send'"
+            :loading="isLoading"
+            :disabled="!prompt"
+            class="transform-btn"
+            @click="transform"
+          >{{ (lastReply ? 'Варианты' : 'Дополнить') + ' (Tab)' }}</b-button>
+        </div>
+
+        <div class="column is-1">
+          <div class="tools is-pulled-right">
+            <b-button size="is-small" type icon-right="close" @click="escape">Esc</b-button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column has-text-centered">
+        <b-button type icon-left="content-copy" :disabled="!prompt" @click="copyToClipboard"></b-button>
+        <b-button
+          type
+          icon-left="camera"
+          :disabled="!prompt"
+          @click="isShareModalActive = !isShareModalActive"
+        >Получить картинку</b-button>
+      </div>
+    </div>
+
+    <b-modal :active.sync="isShareModalActive" :width="620">
+      <Share v-if="isShareModalActive" :content="content"></Share>
+    </b-modal>
+  </div>
+</template>
+
+<script lang="ts" src="./Transformer.ts">
+</script>
+
+<style>
+
+.ql-editor {
+  min-height: 150px;
+  white-space: pre-wrap;
+}
+.ql-editor::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: text;
+}
+.ql-editor,
+.ql-editor:focus {
+  outline: none;
+}
+.ql-clipboard {
+  display: none;
+}
+</style>
+
+
+<style scoped>
+.box.isError {
+  box-shadow: 0 2px 3px rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(255, 2, 2, 0.36);
+}
+
+.controls-pane {
+  padding-top: 10px;
+}
+
+.transform-btn {
+  width: 115px;
+}
+</style>
