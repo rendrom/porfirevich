@@ -1,4 +1,4 @@
-module.exports = {
+{
    "type": "sqlite",
    "database": "srv/data/line.sqlite",
    "synchronize": true,

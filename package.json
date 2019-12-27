@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint",
     "express": "vue-cli-service express:watch",
     "express:run": "vue-cli-service express:run",
-    "migration:run": "npm run typeorm migration:run -f ormconfig-cli",
+    "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run",
     "typeorm": "ts-node ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
