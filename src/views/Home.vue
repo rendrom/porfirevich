@@ -4,6 +4,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+//@ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
 
 @Component({
