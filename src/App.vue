@@ -1,10 +1,20 @@
 <template>
   <div>
     <div class="main">
-      <b-navbar type fixed-top>
+      <b-navbar
+        type
+        fixed-top
+      >
         <template slot="brand">
-          <b-navbar-item tag="router-link" :to="{ path: '/' }">
-            <img src="logo.png" alt="Нейропоэт" class="neuro-logo" />
+          <b-navbar-item
+            tag="router-link"
+            :to="{ path: '/' }"
+          >
+            <img
+              src="logo.png"
+              alt="Нейропоэт"
+              class="neuro-logo"
+            >
           </b-navbar-item>
         </template>
         <!-- <template slot="start">
@@ -14,14 +24,19 @@
         </template>-->
 
         <template slot="end">
-          <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
+          <b-navbar-item
+            tag="router-link"
+            to="/about"
+          >
+            О проекте
+          </b-navbar-item>
         </template>
       </b-navbar>
 
       <section class="section">
         <div class="columns is-mobile">
           <div class="column is-full">
-            <router-view></router-view>
+            <router-view />
           </div>
         </div>
       </section>
@@ -29,8 +44,14 @@
       <footer class="footer">
         <div class="content has-text-centered">
           <p>
-            <a href="https://github.com/mgrankin/ru_transformers" target="_blank">
-              <b-icon size="is-large" icon="github-circle"></b-icon>
+            <a
+              href="https://github.com/mgrankin/ru_transformers"
+              target="_blank"
+            >
+              <b-icon
+                size="is-large"
+                icon="github-circle"
+              />
             </a>
           </p>
         </div>
@@ -40,7 +61,7 @@
 </template>
 
 <script>
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class App extends Vue {

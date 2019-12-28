@@ -1,10 +1,10 @@
 <template>
-  <Transformer></Transformer>
+  <Transformer />
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-//@ts-ignore
+// @ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
 
 @Component({

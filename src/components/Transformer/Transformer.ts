@@ -46,28 +46,28 @@ export default class extends Vue {
   promptMaxLength = 1000;
   debouncedTransform!: () => void;
 
-  get prompt() {
+  get prompt () {
     return this._stripHtml(this.text)
       .replace(this.lastReply, '')
       .trimLeft();
   }
 
   @Watch('isAutocomplete')
-  abort() {
+  abort () {
     this.abortControllers.forEach(x => x.abort());
     this.abortControllers = [];
     this.isError = false;
   }
 
   @Watch('interval')
-  bindDebounceTransform() {
+  bindDebounceTransform () {
     this.debouncedTransform = debounce(
       () => this.transform(),
       this.interval * 1000
     );
   }
 
-  mounted() {
+  mounted () {
     this.bindDebounceTransform();
     this._createQuill();
     window.addEventListener('keyup', event => {
@@ -75,17 +75,17 @@ export default class extends Vue {
     });
   }
 
-  setContent() {
+  setContent () {
     this.content = this.quill.root.innerHTML;
   }
 
-  clean() {
+  clean () {
     this.abort();
     this.text = '';
     this.quill.clipboard.dangerouslyPasteHTML(this.text, 'api');
   }
 
-  escape() {
+  escape () {
     if (this.isLoading) {
       this.abort();
     } else if (this.lastReply) {
@@ -95,7 +95,7 @@ export default class extends Vue {
     }
   }
 
-  cleanLastReply() {
+  cleanLastReply () {
     const text = this.quill.getText();
     const index = text.indexOf(this.lastReply);
     if (index !== -1) {
@@ -106,7 +106,7 @@ export default class extends Vue {
     this.setCursor();
   }
 
-  onTextChange(delta: Delta, oldDelta: Delta, source: Sources) {
+  onTextChange (delta: Delta, oldDelta: Delta, source: Sources) {
     this.setContent();
     this.text = this.quill.getText();
     this.setPlaceholder();
@@ -142,7 +142,7 @@ export default class extends Vue {
     }
   }
 
-  onKeydown(e: KeyboardEvent) {
+  onKeydown (e: KeyboardEvent) {
     if (e.keyCode === ALT) {
       // this.isAutocomplete = !this.isAutocomplete;
     } else if (e.keyCode === TAB) {
@@ -156,7 +156,7 @@ export default class extends Vue {
     }
   }
 
-  async transform() {
+  async transform () {
     this.abort();
     const mem = { isAborted: false };
     try {
@@ -191,12 +191,12 @@ export default class extends Vue {
       }
       this.isLoading = false;
     } catch (err) {
-      if (err && err.name == 'AbortError') {
+      if (err && err.name === 'AbortError') {
         // aborted
         mem.isAborted = true;
       } else {
         this.isError = true;
-        this._handleRequestError(err);
+        this._handleRequestError();
       }
     } finally {
       this.isLoading = false;
@@ -204,7 +204,7 @@ export default class extends Vue {
     }
   }
 
-  setCursor() {
+  setCursor () {
     const length = this.text ? this.text.length : 0;
     setTimeout(() => {
       this.quill.focus();
@@ -212,18 +212,18 @@ export default class extends Vue {
     }, 0);
   }
 
-  setPlaceholder() {
+  setPlaceholder () {
     const q = this.quill;
     const text = q.getText();
     // TODO: remove always first '/n' to set init length 0
     q.root.dataset.placeholder = text.length > 1 ? '' : this.placeholder;
   }
 
-  copyToClipboard() {
+  copyToClipboard () {
     copyStory(this.quill.getText(), 'text');
   }
 
-  private _handleRequestError(err: any) {
+  private _handleRequestError () {
     Snackbar.open({
       duration: 5000,
       message: '<b>Ошибка</b></br>Нейросеть не отвечает.',
@@ -237,7 +237,7 @@ export default class extends Vue {
     });
   }
 
-  private async _request(prompt: string) {
+  private async _request (prompt: string) {
     const controller = new AbortController();
     this.abortControllers.push(controller);
 
@@ -260,7 +260,7 @@ export default class extends Vue {
     return data;
   }
 
-  private _createQuill() {
+  private _createQuill () {
     const bindings = {
       // This will overwrite the default binding also named 'tab'
       tab: {
@@ -283,7 +283,7 @@ export default class extends Vue {
     );
   }
 
-  private _stripHtml(html: string) {
+  private _stripHtml (html: string) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';

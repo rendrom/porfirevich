@@ -4,7 +4,7 @@ import { stripHtml } from './stripHtml';
 
 export type CopyType = 'html' | 'text' | 'quote';
 
-export function copyToClipboard(str: string) {
+export function copyToClipboard (str: string) {
   const el = document.createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
@@ -40,7 +40,7 @@ export function copyToClipboard(str: string) {
   }
 }
 
-export function copyStory(content: string, type: CopyType = 'text') {
+export function copyStory (content: string, type: CopyType = 'text') {
   if (type === 'text' || type === 'quote') {
     content = stripHtml(content);
   }

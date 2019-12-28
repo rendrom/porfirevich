@@ -2,7 +2,7 @@ import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class About extends Vue {
-  render(h: Vue.CreateElement): Vue.VNode {
+  render (h: Vue.CreateElement): Vue.VNode {
     return (
       <div class="box">
         <article class>
