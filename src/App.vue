@@ -11,7 +11,7 @@
             :to="{ path: '/' }"
           >
             <img
-              src="logo.png"
+              src="images/logo.png"
               alt="Нейропоэт"
               class="neuro-logo"
             >

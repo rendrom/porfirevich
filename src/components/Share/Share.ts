@@ -1,5 +1,5 @@
-import '../../images/logo.png';
-// @ts-ignore
+// import '../../images/logo.png';
+//@ts-ignore
 import VueHtml2Canvas from 'vue-html2canvas';
 
 import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
@@ -18,22 +18,22 @@ export default class extends Vue {
   isError = false;
   output: string | false = false;
 
-  get location () {
-    return config.site; // window.location.origin;
+  get location() {
+    return config.site; //window.location.origin;
   }
 
-  mounted () {
+  mounted() {
     this.print();
   }
 
-  async print () {
+  async print() {
     const node = this.htmlToShare;
     const options = {
       type: 'dataURL'
     };
     this.isLoading = true;
     try {
-      // @ts-ignore
+      //@ts-ignore
       this.output = await this.$html2canvas(node, options);
     } catch (er) {
       console.error('oops, something went wrong!', er);
@@ -44,11 +44,11 @@ export default class extends Vue {
     }
   }
 
-  copyToClipboard (type: CopyType) {
+  copyToClipboard(type: CopyType) {
     copyStory(this.content, type);
   }
 
-  private _clean () {
+  private _clean() {
     const node = this.hiddenBlock;
     const parent = node.parentElement;
     if (parent) {
@@ -56,7 +56,7 @@ export default class extends Vue {
     }
   }
 
-  private _appendErrorMessage () {
+  private _appendErrorMessage() {
     this.isError = true;
   }
 }

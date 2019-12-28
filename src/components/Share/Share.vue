@@ -20,7 +20,7 @@
               <div class="media-left">
                 <figure class="image">
                   <img
-                    src="logo.png"
+                    src="images/logo.png"
                     alt="Нейропоэт"
                     class="share-logo"
                   >

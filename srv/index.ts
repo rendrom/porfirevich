@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import { Application } from 'express';
-import * as bodyParser from 'body-parser';
-import * as helmet from 'helmet';
-import * as cors from 'cors';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import cors from 'cors';
 import routes from './routers';
 
 export default (app: Application) => {
