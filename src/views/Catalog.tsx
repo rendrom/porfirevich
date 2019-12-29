@@ -4,8 +4,8 @@ import { catalogModule } from '../store/catalog';
 
 @Component
 export default class Catalog extends Vue {
-  render (h: Vue.CreateElement): Vue.VNode {
-    const items = catalogModule.items.map((x: any) => {
+  render (): Vue.VNode {
+    const items = catalogModule.stories.map((x: any) => {
       return <div>{x.title}</div>;
     });
 

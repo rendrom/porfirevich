@@ -1,10 +1,9 @@
-import { Router, Request, Response } from "express";
-import auth from "./auth";
-import user from "./user";
+import { Router } from 'express';
+
+import story from './story';
 
 const routes = Router();
 
-routes.use("/auth", auth);
-routes.use("/user", user);
+routes.use('/api/story', story);
 
 export default routes;

@@ -10,8 +10,9 @@ module.exports = {
   parserOptions: {
     parser: '@typescript-eslint/parser'
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['vue', '@typescript-eslint'],
   extends: [
+    'plugin:@typescript-eslint/recommended',
     'plugin:vue/recommended',
     '@vue/standard',
     '@vue/typescript'
@@ -21,6 +22,10 @@ module.exports = {
     quotes: ['error', 'single'],
     semi: ['error', 'always'],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-useless-constructor': 0,
+    '@typescript-eslint/ban-ts-ignore': 0,
+    '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/explicit-function-return-type': 0
   }
 };

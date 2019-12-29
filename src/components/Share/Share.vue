@@ -14,7 +14,7 @@
           <div class="card-content">
             <p
               class="subtitle"
-              v-html="content"
+              v-html="html"
             />
             <div class="media">
               <div class="media-left">
@@ -70,6 +70,9 @@
             :src="output"
             class="image-share"
           >
+        </div>
+        <div>
+          {{ shareUrl }}
         </div>
         <div>
           <p v-if="isError">

@@ -1,10 +1,22 @@
-import Story from '../models/Story';
-import StoryApiResponse from '../models/StoryApiResponse';
+import { Story } from '../../srv/entity/Story'
 
-export default class StoryService {
-  async getStory (id: string): Promise<string> {
-    const data = await fetch('/api/story');
-    const json = (await data.json()) as StoryApiResponse;
-    return json.text;
+
+export default {
+  async one(id: string) {
+    const resp = await fetch('/api/story/' + id);
+    const json = (await resp.json()) as Story;
+    return json;
+  },
+
+  async create(data: { content: string, description?: string }) {
+    const resp = await fetch('/api/story', {
+      method: 'POST',
+      body: JSON.stringify(data), headers: {
+        "Content-Type": "application/json"
+      }
+    }
+    );
+    const json = (await resp.json()) as Story;
+    return json;
   }
 }

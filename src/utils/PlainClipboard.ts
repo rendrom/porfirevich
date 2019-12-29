@@ -4,7 +4,7 @@ const Clipboard = Quill.import('modules/clipboard');
 const Delta = Quill.import('delta');
 
 class PlainClipboard extends Clipboard {
-  onPaste(e: any) {
+  onPaste (e: any) {
     e.preventDefault();
     const range = this.quill.getSelection();
     const text = e.clipboardData.getData('text/plain');
