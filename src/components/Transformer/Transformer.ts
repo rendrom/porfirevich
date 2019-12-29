@@ -1,4 +1,4 @@
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
+import { Vue, Component, Watch, Emit, Model } from 'vue-property-decorator';
 import Quill, { Sources } from 'quill';
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
 import debounce from 'debounce';
@@ -7,9 +7,7 @@ import { copyStory } from '../../utils/copyToClipboard';
 import PlainClipboard from '../../utils/PlainClipboard';
 import { Delta, Scheme } from '../../interfaces';
 import { PRIMARY_COLOR } from '../../config';
-import StoryService from '@/services/StoryService';
-import { schemeToDelta } from '@/utils/schemeUtils';
-// import Share from '../Share/Share.vue';
+import { schemeToDelta, deltaToScheme } from '../../utils/schemeUtils';
 
 const ESC = 27;
 const TAB = 9;
@@ -30,8 +28,7 @@ interface TransformResp {
   }
 })
 export default class extends Vue {
-  @Prop({type: Object, default: () => ({ops: []})}) delta!: Delta;
-  content: Delta = { ops: [] };
+  @Model('change', { type: Array, default: () => ([]) }) readonly scheme!: Scheme;
   text = '';
   html = '';
   isLoading = false;
@@ -45,6 +42,8 @@ export default class extends Vue {
   length = 30;
   placeholder = 'Придумайте начало истории';
   quill!: Quill;
+
+  localScheme: Scheme = [];
 
   abortControllers: AbortController[] = [];
   promptMaxLength = 1000;
@@ -79,16 +78,19 @@ export default class extends Vue {
     });
   }
 
+  @Emit('change')
   setContent () {
     const content = this.quill.getContents();
-    this.content = this.quill.getContents();
     this.html = this.quill.root.innerHTML;
+    this.localScheme = deltaToScheme(content);
+    return this.localScheme;
   }
 
   clean () {
     this.abort();
     this.text = '';
-    this.quill.clipboard.dangerouslyPasteHTML(this.text, 'api');
+    this.html = '';
+    this.quill.setText('', 'api');
   }
 
   escape () {
@@ -237,7 +239,7 @@ export default class extends Vue {
       body: JSON.stringify({
         prompt,
         length: this.length,
-        num_samples: 4
+        num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
       })
     });
     const data: TransformResp = await resp.json();
@@ -269,10 +271,12 @@ export default class extends Vue {
       (delta: Delta, oldDelta: Delta, source: Sources) =>
         this.onTextChange(delta, oldDelta, source)
     );
-    const ops = this.delta && this.delta.ops;
-    if (ops && ops.length) {
-      //@ts-ignore
+    if (this.scheme && this.scheme.length) {
+      const delta = schemeToDelta(this.scheme);
+      const ops = delta.ops;
+      // @ts-ignore
       this.quill.setContents(ops, 'api');
+      this.setCursor();
     }
   }
 

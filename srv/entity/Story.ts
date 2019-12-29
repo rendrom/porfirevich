@@ -1,18 +1,20 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   Unique,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
   Generated
 } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
+import shortid from 'shortid';
 
 @Entity()
 @Unique(['id', 'editId'])
 export class Story {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id!: string;
 
   @Column()
@@ -33,5 +35,10 @@ export class Story {
   @Column()
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @BeforeInsert()
+  protected beforeInsert() {
+    this.id = shortid.generate();
+  }
 
 }

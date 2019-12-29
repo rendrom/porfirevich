@@ -69,6 +69,7 @@
     "eslint-plugin-vue": "^6.1.1",
     "node-sass": "^4.13.0",
     "sass-loader": "^8.0.0",
+    "shortid": "^2.2.15",
     "sqlite3": "^4.1.1",
     "typescript": "^3.7.4",
     "vue-cli-plugin-express": "^1.0.2",

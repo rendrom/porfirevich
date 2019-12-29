@@ -6,7 +6,7 @@ import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
 import config from '../../../config';
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import StoryService from '../../services/StoryService';
-import { Delta } from '../../interfaces';
+import { Scheme } from '../../interfaces';
 import { deltaToScheme } from '../../utils/schemeUtils';
 
 Vue.use(VueHtml2Canvas);
@@ -14,7 +14,7 @@ Vue.use(VueHtml2Canvas);
 @Component
 export default class extends Vue {
   @Prop({ type: String }) html!: string;
-  @Prop({ type: Object }) content!: Delta;
+  @Prop({ type: Array }) scheme!: Scheme;
   @Ref('HtmlToShare') readonly htmlToShare!: HTMLElement;
   @Ref('HiddenBlock') readonly hiddenBlock!: HTMLElement;
 
@@ -24,29 +24,34 @@ export default class extends Vue {
 
   id?: string | false = false;
 
-  get location () {
+  get location() {
     return config.site; // window.location.origin;
   }
 
   get shareUrl() {
     if (this.id) {
-      return `${this.location }/${ this.id }`;
+      return `${this.location}/${this.id}`;
     }
   }
 
   async beforeMount() {
-    const content = JSON.stringify(deltaToScheme(this.content));
-    const story = await StoryService.create({content});
-    if (story) {
-      this.id = story.id;
+    if (!this.$route.params.id) {
+      const content = JSON.stringify(this.scheme);
+      const story = await StoryService.create({ content });
+      if (story) {
+        this.id = story.id;
+        this.$router.push('/' + this.id);
+      }
+    } else {
+      this.id = this.$route.params.id;
     }
   }
 
-  mounted () {
+  mounted() {
     this.print();
   }
 
-  async print () {
+  async print() {
     const node = this.htmlToShare;
     const options = {
       type: 'dataURL'
@@ -64,11 +69,11 @@ export default class extends Vue {
     }
   }
 
-  copyToClipboard (type: CopyType) {
+  copyToClipboard(type: CopyType) {
     copyStory(this.html, type);
   }
 
-  private _clean () {
+  private _clean() {
     const node = this.hiddenBlock;
     const parent = node.parentElement;
     if (parent) {
@@ -76,7 +81,7 @@ export default class extends Vue {
     }
   }
 
-  private _appendErrorMessage () {
+  private _appendErrorMessage() {
     this.isError = true;
   }
 }

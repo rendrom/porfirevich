@@ -9,6 +9,7 @@ export default new Router({
   routes: [
     {
       path: '/:id?',
+      name: 'transformer',
       props: true,
       component: () => import('../views/Home.vue')
     },

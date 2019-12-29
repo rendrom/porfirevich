@@ -3,7 +3,7 @@ import StoryController from '../controller/StoryController';
 
 const router = Router();
 
-const idDef = '/:id([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})'
+const idDef = '/:id([0-9A-z_\-]+)'
 
 //Get all users
 router.get('/', [], StoryController.all);

@@ -101,13 +101,13 @@
         <b-button
           type
           icon-left="content-copy"
-          :disabled="!prompt"
+          :disabled="!prompt || isLoading"
           @click="copyToClipboard"
         />
         <b-button
           type
           icon-left="camera"
-          :disabled="!prompt"
+          :disabled="!prompt || isLoading"
           @click="isShareModalActive = !isShareModalActive"
         >
           Получить картинку
@@ -121,7 +121,7 @@
     >
       <Share
         v-if="isShareModalActive"
-        :content="content"
+        :scheme="localScheme"
         :html="html"
       />
     </b-modal>

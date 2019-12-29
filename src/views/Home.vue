@@ -1,7 +1,7 @@
 <template>
   <Transformer
     v-if="!isLoading"
-    :delta="content"
+    v-model="scheme"
   />
 </template>
 
@@ -9,9 +9,8 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 // @ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
-import { Delta, Scheme } from '../interfaces';
+import { Scheme } from '../interfaces';
 import StoryService from '../services/StoryService';
-import { schemeToDelta } from '../utils/schemeUtils';
 
 @Component({
   components: {
@@ -20,7 +19,7 @@ import { schemeToDelta } from '../utils/schemeUtils';
 })
 export default class Home extends Vue {
   @Prop({ type: String, default: '' }) id!: string;
-  content: Delta = { ops: [] };
+  scheme: Scheme = [];
 
   isLoading = false;
 
@@ -31,19 +30,21 @@ export default class Home extends Vue {
         const story = await StoryService.one(this.id);
         if (story && story.content) {
           const scheme = JSON.parse(story.content) as Scheme;
-          this.content = schemeToDelta(scheme);
+          this.scheme = scheme;
         }
       } catch {
         //
       } finally {
-        this._cleanId();
+        this.isLoading = false;
       }
     }
+    setTimeout(() => this.$watch('scheme', () => this.cleanId()));
   }
 
-  private _cleanId () {
-    this.isLoading = false;
-    this.$router.push('/');
+  cleanId () {
+    if (this.$route.params.id) {
+      this.$router.push('/');
+    }
   }
 }
 </script>
