@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 import { validate } from 'class-validator';
 
 import { Story } from '../entity/Story';
+import { postcard } from '../utils/postcard';
 
 export default class StoryController {
 
@@ -48,6 +49,7 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const newStory = await repository.save(story);
+      postcard();
       res.send(newStory);
     } catch (e) {
       res.status(409).send('can\'t save story');
@@ -102,5 +104,20 @@ export default class StoryController {
 
     // After all send a 204 (no content, but accepted) response
     res.status(204).send();
+  };
+
+  static postcard = async (req: Request, res: Response) => {
+    //Get the ID from the url
+    const id: string = req.params.id;
+
+    const repository = getRepository(Story);
+    try {
+      const story = await repository.findOneOrFail(id, {
+        select: ['id', 'content']
+      });
+      postcard();
+    } catch (error) {
+      res.status(404).send('Story not found');
+    }
   };
 };
