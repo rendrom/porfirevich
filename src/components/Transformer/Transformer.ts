@@ -122,6 +122,28 @@ export default class extends Vue {
     this.replies = [];
     this.abort();
     if (source === 'user') {
+      let insert: string | undefined;
+      let retain = 0;
+      delta.ops.forEach(x => {
+        if (x.insert) {
+          insert = x.insert;
+        } else if (x.retain) {
+          retain = x.retain;
+        }
+        x.attributes = [];
+      });
+      if (insert) {
+        this.quill.removeFormat(retain, insert.length);
+        this.quill.formatText(
+          retain,
+          insert.length,
+          {
+            bold: false,
+            color: '#000'
+          },
+          'api'
+        );
+      }
       if (this.isAutocomplete) {
         this.debouncedTransform();
       }

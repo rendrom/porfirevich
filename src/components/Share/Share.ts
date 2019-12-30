@@ -3,11 +3,11 @@
 import VueHtml2Canvas from 'vue-html2canvas';
 
 import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
-import config from '../../../config';
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import StoryService from '../../services/StoryService';
 import { Scheme } from '../../interfaces';
 import { Story } from '../../../srv/entity/Story';
+import { SITE } from '../../config';
 
 Vue.use(VueHtml2Canvas);
 
@@ -25,7 +25,7 @@ export default class extends Vue {
   id?: string | false = false;
 
   get location() {
-    return config.site; // window.location.origin;
+    return SITE; // window.location.origin;
   }
 
   get shareUrl() {
@@ -79,8 +79,10 @@ export default class extends Vue {
     }
   }
 
-  copyToClipboard(type: CopyType) {
-    copyStory(this.html, type);
+  copyToClipboard(type?: CopyType, text?: string) {
+    console.log(text);
+    text = text !== undefined ? text : this.html;
+    copyStory(text, type);
   }
 
   private _clean() {
