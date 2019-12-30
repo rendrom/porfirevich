@@ -105,9 +105,9 @@
             </b-button>
           </div>
         </div>
-        <div class="has-text-grey-light is-size-6 has-text-right">
+        <!-- <div class="has-text-grey-light is-size-6 has-text-right">
           Используйте тег <code>#порфирьевич</code> для социальных сетей
-        </div>
+        </div> -->
       </div>
     </div>
     <b-loading :active.sync="isLoading" />

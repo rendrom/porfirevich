@@ -7,7 +7,7 @@ import config from '../../../config';
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import StoryService from '../../services/StoryService';
 import { Scheme } from '../../interfaces';
-import { deltaToScheme } from '../../utils/schemeUtils';
+import { Story } from '../../../srv/entity/Story';
 
 Vue.use(VueHtml2Canvas);
 
@@ -34,21 +34,32 @@ export default class extends Vue {
     }
   }
 
-  async beforeMount() {
-    if (!this.$route.params.id) {
-      const content = JSON.stringify(this.scheme);
-      const story = await StoryService.create({ content });
-      if (story) {
-        this.id = story.id;
-        this.$router.push('/' + this.id);
-      }
-    } else {
-      this.id = this.$route.params.id;
-    }
+  mounted() {
+    this.load();
   }
 
-  mounted() {
-    this.print();
+  async load() {
+    this.isLoading = true;
+    let story: Story | undefined;
+    const id = this.$route.params.id;
+    if (!id) {
+      const content = JSON.stringify(this.scheme);
+      story = await StoryService.create({ content });
+    } else {
+      story = await StoryService.one(id)
+    }
+    if (story) {
+      this._clean();
+      this.id = story.id;
+      this.$router.push('/' + this.id);
+      if (story.postcard) {
+        this.output = story.postcard;
+      }
+    } else {
+      this.id = id;
+      await this.print();
+    }
+    this.isLoading = false;
   }
 
   async print() {
@@ -56,7 +67,7 @@ export default class extends Vue {
     const options = {
       type: 'dataURL'
     };
-    this.isLoading = true;
+
     try {
       // @ts-ignore
       this.output = await this.$html2canvas(node, options);
@@ -64,7 +75,6 @@ export default class extends Vue {
       console.error('oops, something went wrong!', er);
       this._appendErrorMessage();
     } finally {
-      this.isLoading = false;
       this._clean();
     }
   }

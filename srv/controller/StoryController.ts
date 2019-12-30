@@ -24,7 +24,7 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const story = await repository.findOneOrFail(id, {
-        select: ['id', 'content']
+        select: ['id', 'content', 'postcard']
       });
       res.send(story);
     } catch (error) {
@@ -47,9 +47,10 @@ export default class StoryController {
 
     const repository = getRepository(Story);
     try {
-      const newStory = await repository.save(story);
+      let newStory = await repository.save(story);
       const postcardPath = await postcard(newStory);
       story.postcard = postcardPath;
+      newStory = await repository.save(story);
 
       res.send(newStory);
     } catch (e) {
@@ -114,7 +115,7 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const story = await repository.findOneOrFail(id, {
-        select: ['id', 'content']
+        select: ['id', 'content', 'postcard']
       });
       // await postcard(story);
     } catch (error) {
