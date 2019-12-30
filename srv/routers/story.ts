@@ -3,17 +3,17 @@ import StoryController from '../controller/StoryController';
 
 const router = Router();
 
-const idDef = '/:id([0-9A-z_\-]+)'
+export const idDef = '/:id([0-9A-z_\-]+)'
 
 
-router.get('/idDef/postcard', [], StoryController.postcard);
 router.get('/', [], StoryController.all);
-
 router.get(
   idDef,
   [],
   StoryController.one
 );
+router.get(idDef + '/postcard', [], StoryController.postcard);
+
 
 router.post('/', StoryController.create);
 

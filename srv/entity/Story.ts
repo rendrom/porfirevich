@@ -28,6 +28,9 @@ export class Story {
   @Column({nullable: true, length: 300})
   description?: string;
 
+  @Column({nullable: true})
+  postcard?: string;
+
   @Column()
   @CreateDateColumn()
   createdAt!: Date;

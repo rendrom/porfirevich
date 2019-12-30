@@ -11,7 +11,7 @@ export default class StoryController {
     // Get stories from database
     const repository = getRepository(Story);
     const stories = await repository.find({
-      select: ['id', 'content']
+      select: ['id', 'content', 'postcard']
     });
 
     // Send the story object
@@ -21,7 +21,6 @@ export default class StoryController {
   static one = async (req: Request, res: Response) => {
     //Get the ID from the url
     const id: string = req.params.id;
-
     const repository = getRepository(Story);
     try {
       const story = await repository.findOneOrFail(id, {
@@ -49,7 +48,9 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const newStory = await repository.save(story);
-      postcard();
+      const postcardPath = await postcard(newStory);
+      story.postcard = postcardPath;
+
       res.send(newStory);
     } catch (e) {
       res.status(409).send('can\'t save story');
@@ -115,7 +116,7 @@ export default class StoryController {
       const story = await repository.findOneOrFail(id, {
         select: ['id', 'content']
       });
-      postcard();
+      // await postcard(story);
     } catch (error) {
       res.status(404).send('Story not found');
     }

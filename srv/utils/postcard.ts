@@ -1,16 +1,63 @@
-import puppeteer from 'puppeteer';
+import path from 'path';
+import puppeteer, { Page } from 'puppeteer';
+import { Story } from '../entity/Story';
 
-export async function postcard() {
+
+interface DomScreenshotOptions {
+  selector: string;
+  page: Page;
+  path: string;
+  padding?: number;
+}
+
+export async function postcard(story: Story) {
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
   await page.setViewport({
-    width: 960,
+    width: 600,
     height: 760,
     deviceScaleFactor: 1,
   });
+  const postcardPath = path.join('media', story.id + '.png');
   await page.setContent(getHtml());
-  await page.screenshot({ path: 'example.png' });
+  await screenshotDOMElement({
+    page,
+    path: postcardPath,
+    selector: '#postcard'
+  });
   await browser.close();
+  return postcardPath;
+}
+
+async function screenshotDOMElement(opts: DomScreenshotOptions) {
+  const padding = opts.padding !== undefined ? opts.padding : 0;
+  const path = opts.path;
+  const selector = opts.selector;
+  const page = opts.page;
+
+  if (!selector)
+      throw Error('Please provide a selector.');
+
+  const rect = await page.evaluate(selector => {
+      const element = document.querySelector(selector);
+      if (!element)
+          return null;
+      const {x, y, width, height} = element.getBoundingClientRect();
+      return {left: x, top: y, width, height, id: element.id};
+  }, selector);
+
+  if (!rect)
+      throw Error(`Could not find element that matches selector: ${selector}.`);
+
+  return await page.screenshot({
+    path,
+    clip: {
+        x: rect.left - padding,
+        y: rect.top - padding,
+        width: rect.width + padding * 2,
+        height: rect.height + padding * 2
+      }
+  });
 }
 
 
