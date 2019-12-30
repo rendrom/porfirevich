@@ -7,8 +7,6 @@ import routes from './routers';
 
 export function api (app: Application) {
 
-  const mediaPath = resolve(__dirname, '../media');
-  app.use('/media',express.static(mediaPath));
   app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());

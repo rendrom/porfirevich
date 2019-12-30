@@ -4,11 +4,13 @@ import express from 'express';
 import { api } from './api';
 import { idDef } from './routers/story';
 import { appendOgImage } from './middleware/appendOgImage';
+import { appConfig } from './appConfig';
 
 
 createConnection()
   .then(async connection => {
     const app = express();
+    appConfig(app);
     api(app);
 
     const publicPath = resolve(__dirname, '../dist');

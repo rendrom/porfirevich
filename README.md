@@ -1,29 +1,37 @@
 # porfirevich
 
+UI for [ru_transformers](https://github.com/mgrankin/ru_transformers)
+[LIVE](https://text.skynet.center/)
+
 ## Project setup
-```
+
+```bash
 npm install
 ```
 
-### Compiles and hot-reloads for development
+## Production
+
+```bash
+npm run build
+npm start
 ```
+
+## Development
+
+```bash
+npm run express
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
 ### Run your tests
-```
+
+```bash
 npm run test
 ```
 
 ### Lints and fixes files
-```
+
+```bash
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

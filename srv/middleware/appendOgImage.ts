@@ -21,7 +21,6 @@ export async function appendOgImage(req: Request, res: Response, next: NextFunct
     html = html.replace('<!-- META -->', `<meta property="og:image" content="${ogImage}" />`);
     res.send(html);
   } catch (error) {
-    res.status(404).send('Story not found');
     res.sendFile(htmlPath);
   }
 

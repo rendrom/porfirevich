@@ -72,15 +72,22 @@
           >
         </div>
         <div>
-          {{ shareUrl }}
-        </div>
-        <div>
           <p v-if="isError">
             Копировать:
           </p>
           <p v-else>
             или скопируйте:
           </p>
+
+          <div>
+            <b-button
+              type="is-text"
+              icon-left="link"
+              @click="copyToClipboard('test', shareUrl)"
+            >
+              {{ shareUrl }}
+            </b-button>
+          </div>
           <div>
             <b-button
               type="is-text"
@@ -105,9 +112,9 @@
             </b-button>
           </div>
         </div>
-        <div class="has-text-grey-light is-size-6 has-text-right">
+        <!-- <div class="has-text-grey-light is-size-6 has-text-right">
           Используйте тег <code>#порфирьевич</code> для социальных сетей
-        </div>
+        </div>-->
       </div>
     </div>
     <b-loading :active.sync="isLoading" />
@@ -125,7 +132,6 @@
 </style>
 
 <style scoped>
-
 .output-block {
   padding-top: 1rem;
 }
@@ -156,7 +162,7 @@
 }
 
 .html-to-share {
-  border: 1px solid rgba(0,0,0,.3);
+  border: 1px solid rgba(0, 0, 0, 0.3);
   min-width: 550px;
 }
 

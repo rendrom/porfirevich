@@ -1,5 +1,5 @@
-import 'core-js';
-import 'regenerator-runtime/runtime';
+// import 'core-js';
+// import 'regenerator-runtime/runtime';
 import 'unfetch/polyfill';
 import 'abortcontroller-polyfill';
 

@@ -1,6 +1,6 @@
 import { ToastProgrammatic as Toast } from 'buefy';
-import config from '../../config';
 import { stripHtml } from './stripHtml';
+import { SITE } from '../config';
 
 export type CopyType = 'html' | 'text' | 'quote';
 
@@ -18,7 +18,7 @@ export function copyToClipboard (str: string) {
   try {
     document.execCommand('copy');
     Toast.open({
-      message: 'История скопирована',
+      message: 'Копирование завершено',
       type: 'is-success',
       position: 'is-bottom'
     });
@@ -45,7 +45,7 @@ export function copyStory (content: string, type: CopyType = 'text') {
     content = stripHtml(content);
   }
   if (type === 'quote') {
-    content = `«${content}»\r\nнаписано с помощью нейронной сети\r\n#порфирьевич\r\n${config.site}`;
+    content = `«${content}»\r\nнаписано с помощью нейронной сети\r\n#порфирьевич\r\n${SITE}`;
   }
   copyToClipboard(content);
 }

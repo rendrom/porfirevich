@@ -1,13 +1,14 @@
 import { createConnection } from 'typeorm';
 import { Application } from 'express';
 import { api } from './api';
+import { appConfig } from './appConfig';
 
 
 export default (app: Application) => {
 
   createConnection()
     .then(async connection => {
-
+      appConfig(app);
       api(app);
 
       app.listen(3000, () => {

@@ -11,8 +11,8 @@
             :to="{ path: '/' }"
           >
             <img
-              src="images/logo.png"
-              alt="Нейропоэт"
+              src="images/logo.svg"
+              alt="Порфирьевич"
               class="neuro-logo"
             >
           </b-navbar-item>
@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import '../public/images/logo.svg';
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component
