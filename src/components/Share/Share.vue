@@ -81,6 +81,7 @@
 
           <div>
             <b-button
+              v-if="story"
               type="is-text"
               icon-left="link"
               @click="copyToClipboard('test', shareUrl)"

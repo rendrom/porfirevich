@@ -21,7 +21,7 @@ export default class extends Vue {
   isLoading = false;
   isError = false;
   output: string | false = false;
-
+  story: Story | false = false;
   id?: string | false = false;
 
   get location() {
@@ -42,13 +42,18 @@ export default class extends Vue {
     this.isLoading = true;
     let story: Story | undefined;
     const id = this.$route.params.id;
-    if (!id) {
-      const content = JSON.stringify(this.scheme);
-      story = await StoryService.create({ content });
-    } else {
-      story = await StoryService.one(id)
+    try {
+      if (!id) {
+        const content = JSON.stringify(this.scheme);
+        story = await StoryService.create({ content });
+      } else {
+        story = await StoryService.one(id)
+      }
+    } catch (er) {
+      console.error(er);
     }
     if (story) {
+      this.story = story;
       this._clean();
       this.id = story.id;
       this.$router.push('/' + this.id);
