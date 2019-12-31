@@ -72,7 +72,7 @@ function getHtml(story: Story) {
   const text = content.reduce((a, b) => {
     const str = b[0];
     length += str.length;
-    a += b[1] ? `<strong style="color:${color};"><${str}</strong>` : str;
+    a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
     return a;
   }, '');
 
