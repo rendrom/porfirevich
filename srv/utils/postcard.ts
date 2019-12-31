@@ -77,12 +77,12 @@ function getHtml(story: Story) {
   }, '');
 
   const textSizeFromLength: ([number, number])[] = [
-    [100, 20],
-    [1000, 18],
-    [2000, 16],
-    [3000, 14],
-    [8000, 12],
-    [16000, 6],
+    [100, 40],
+    [1000, 36],
+    [2000, 32],
+    [3000, 28],
+    [8000, 24],
+    [16000, 12],
   ];
   const size = textSizeFromLength.find(x => x[0] > length);
   if (size) {
