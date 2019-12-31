@@ -18,7 +18,7 @@ export async function postcard(story: Story) {
   await page.setViewport({
     width: 1300,
     height: 200000,
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 10,
   });
   const postcardPath = path.join('media', story.id + '.png');
   await page.setContent(getHtml(story));
