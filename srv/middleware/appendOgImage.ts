@@ -18,7 +18,7 @@ export async function appendOgImage(req: Request, res: Response, next: NextFunct
 
     let html = fs.readFileSync(htmlPath, 'utf8');
     const ogImage = req.protocol + '://' + req.hostname + '/media/' + story.id + '.png';
-    html = html.replace('<!-- META -->', `<meta property="og:image" content="${ogImage}" />`);
+    html = html.replace('<meta charset=utf-8>', `<meta charset=utf-8><meta property="og:image" content="${ogImage}" />`);
     res.send(html);
   } catch (error) {
     res.sendFile(htmlPath);
