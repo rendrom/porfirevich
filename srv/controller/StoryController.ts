@@ -35,6 +35,7 @@ export default class StoryController {
   static create = async (req: Request, res: Response) => {
     const { content, description } = req.body;
     const story = new Story();
+    let newStory: Story | undefined;
     story.content = content;
     story.description = description;
 
@@ -47,15 +48,23 @@ export default class StoryController {
 
     const repository = getRepository(Story);
     try {
-      let newStory = await repository.save(story);
+      newStory = await repository.save(story);
+    } catch (e) {
+      res.status(500).send(e);
+      return;
+    }
+    try {
       const postcardPath = await postcard(newStory);
       story.postcard = postcardPath;
       newStory = await repository.save(story);
-
-      res.send(newStory);
     } catch (e) {
-      res.status(409).send('can\'t save story');
+      res.status(500).send(e);
       return;
+    }
+    if (newStory) {
+      res.send(newStory);
+    } else {
+      res.status(500).send('can\'t save story');
     }
   };
 
