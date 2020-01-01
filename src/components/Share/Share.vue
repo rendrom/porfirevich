@@ -1,46 +1,6 @@
 <template>
   <div>
     <div
-      id="js-hidden-block"
-      ref="HiddenBlock"
-      class="hidden-block box"
-    >
-      <!-- <div class="box" id="js-hidden-block" ref="HiddenBlock"> -->
-      <div
-        ref="HtmlToShare"
-        class="html-to-share share-container"
-      >
-        <div class="card">
-          <div class="card-content">
-            <p
-              class="subtitle"
-              v-html="html"
-            />
-            <div class="media">
-              <div class="media-left">
-                <figure class="image">
-                  <img
-                    src="images/logo.png"
-                    alt="Нейропоэт"
-                    class="share-logo"
-                  >
-                </figure>
-              </div>
-              <div class="media-content">
-                <p class="title is-6">
-                  написано с помощью нейронной сети
-                </p>
-                <p class="subtitle is-6">
-                  {{ location }}
-                </p>
-                <!-- <p class="subtitle is-6">#порфирьевич</p> -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
       v-show="!isLoading"
       class="box"
     >

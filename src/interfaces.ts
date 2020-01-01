@@ -4,6 +4,10 @@ export interface Delta {
   ops: DeltaOperation[];
 }
 
+export interface SchemeToHtmlOptions {
+  color?: string;
+}
+
 /**
  * 0 - user
  * 1 - AI

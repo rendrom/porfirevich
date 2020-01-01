@@ -1,36 +1,74 @@
 <template>
-  <Transformer
-    v-if="!isLoading"
-    v-model="scheme"
-  />
+  <div>
+    <Transformer
+      v-if="!isLoading"
+      v-model="scheme"
+      @loading="checkTransformLoading"
+    />
+    <div class="save-control columns">
+      <div class="column has-text-centered">
+        <b-button
+          type
+          icon-left="content-copy"
+          :disabled="isShareDisabled"
+          @click="copyToClipboard"
+        />
+        <b-button
+          type
+          icon-left="camera"
+          :disabled="isShareDisabled"
+          @click="saveStory"
+        >
+          Получить картинку
+        </b-button>
+      </div>
+    </div>
+
+    <b-modal
+      :active.sync="isShareModalActive"
+      :width="620"
+    >
+      <Share
+        v-if="isShareModalActive"
+      />
+    </b-modal>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import { copyStory } from '../utils/copyToClipboard';
 // @ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
+import { appModule } from '../store/app';
 import { Scheme } from '../interfaces';
-import StoryService from '../services/StoryService';
+import { schemeToHtml } from '../utils/schemeUtils';
 
 @Component({
   components: {
-    Transformer
+    Transformer,
+    // @ts-ignore
+    Share: () => import(/* webpackChunkName: "share" */ '../components/Share/Share.vue')
   }
 })
 export default class Home extends Vue {
   @Prop({ type: String, default: '' }) id!: string;
   scheme: Scheme = [];
-
+  isShareModalActive = false;
   isLoading = false;
+  isTransformLoading = false;
+
+  get isShareDisabled () {
+    return !this.scheme.filter(x => x[0] !== '\n').length || this.isTransformLoading;
+  }
 
   async beforeMount () {
     if (this.id) {
       this.isLoading = true;
       try {
-        const story = await StoryService.one(this.id);
-        if (story && story.content) {
-          const scheme = JSON.parse(story.content) as Scheme;
-          this.scheme = scheme;
+        const story = await appModule.getStory(this.id);
+        if (story) {
+          this.scheme = JSON.parse(story.content) as Scheme;
         }
       } catch {
         //
@@ -38,13 +76,36 @@ export default class Home extends Vue {
         this.isLoading = false;
       }
     }
-    setTimeout(() => this.$watch('scheme', () => this.cleanId()));
+    setTimeout(() => this.$watch('scheme', () => this.clean()));
   }
 
-  cleanId () {
+  async saveStory () {
+    this.isShareModalActive = true;
+    if (!appModule.story) {
+      await appModule.createStory(this.scheme);
+    }
+  }
+
+  checkTransformLoading (val: boolean) {
+    this.isTransformLoading = val;
+  }
+
+  clean () {
+    this.isShareModalActive = false;
+    appModule.removeActiveStory();
     if (this.$route.params.id) {
       this.$router.push('/');
     }
   }
+
+  copyToClipboard () {
+    copyStory(schemeToHtml(this.scheme), 'text');
+  }
 }
 </script>
+
+<style scoped>
+.save-control {
+  padding-top: 20px;
+};
+</style>

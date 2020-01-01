@@ -4,7 +4,6 @@ import config from '../../config';
 import { Scheme } from '../../src/interfaces';
 import { Story } from '../entity/Story';
 
-
 interface DomScreenshotOptions {
   selector: string;
   page: Page;

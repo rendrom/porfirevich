@@ -8,14 +8,14 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
+      path: '/about',
+      component: () => import('../views/About')
+    },
+    {
       path: '/:id?',
       name: 'transformer',
       props: true,
       component: () => import('../views/Home.vue')
-    },
-    {
-      path: '/about',
-      component: () => import('../views/About')
     }
   ]
 });

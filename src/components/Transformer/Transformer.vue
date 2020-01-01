@@ -96,35 +96,6 @@
         </div>
       </div>
     </div>
-    <div class="columns">
-      <div class="column has-text-centered">
-        <b-button
-          type
-          icon-left="content-copy"
-          :disabled="!prompt || isLoading"
-          @click="copyToClipboard"
-        />
-        <b-button
-          type
-          icon-left="camera"
-          :disabled="!prompt || isLoading"
-          @click="isShareModalActive = !isShareModalActive"
-        >
-          Получить картинку
-        </b-button>
-      </div>
-    </div>
-
-    <b-modal
-      :active.sync="isShareModalActive"
-      :width="620"
-    >
-      <Share
-        v-if="isShareModalActive"
-        :scheme="localScheme"
-        :html="html"
-      />
-    </b-modal>
   </div>
 </template>
 

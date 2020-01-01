@@ -3,7 +3,6 @@ import Quill, { Sources } from 'quill';
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
 import debounce from 'debounce';
 import config from '../../../config';
-import { copyStory } from '../../utils/copyToClipboard';
 import PlainClipboard from '../../utils/PlainClipboard';
 import { Delta, Scheme } from '../../interfaces';
 import { PRIMARY_COLOR } from '../../config';
@@ -21,12 +20,7 @@ interface TransformResp {
   detail?: string;
 }
 
-@Component({
-  components: {
-    // Share
-    Share: () => import(/* webpackChunkName: "share" */ '../Share/Share.vue')
-  }
-})
+@Component
 export default class extends Vue {
   @Model('change', { type: Array, default: () => ([]) }) readonly scheme!: Scheme;
   text = '';
@@ -35,7 +29,6 @@ export default class extends Vue {
   isError = false;
   isAutocomplete = false;
   isSettings = false;
-  isShareModalActive = false;
   lastReply = '';
   replies: string[] = [];
   interval = 1;
@@ -68,6 +61,12 @@ export default class extends Vue {
       () => this.transform(),
       this.interval * 1000
     );
+  }
+
+  @Watch('isLoading')
+  @Emit()
+  loading(val: boolean) {
+    return val;
   }
 
   mounted () {
@@ -197,7 +196,6 @@ export default class extends Vue {
         this.lastReply = reply;
         this.replies = replies;
       }
-      this.isLoading = false;
     } catch (err) {
       if (err && err.name === 'AbortError') {
         // aborted
@@ -225,10 +223,6 @@ export default class extends Vue {
     const text = q.getText();
     // TODO: remove always first '/n' to set init length 0
     q.root.dataset.placeholder = text.length > 1 ? '' : this.placeholder;
-  }
-
-  copyToClipboard () {
-    copyStory(this.quill.getText(), 'text');
   }
 
   private _handleRequestError () {

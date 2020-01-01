@@ -1,6 +1,6 @@
-import { Delta, Scheme } from '../interfaces';
+import { Delta, Scheme, SchemeToHtmlOptions } from '../interfaces';
 import { DeltaOperation } from 'quill';
-import { PRIMARY_COLOR } from '../config';
+import config from '../../config';
 
 export function deltaToScheme (delta: Delta): Scheme {
   return delta.ops.map(x => {
@@ -13,9 +13,19 @@ export function schemeToDelta (scheme: Scheme): Delta {
     ops: scheme.map(x => {
       const op: DeltaOperation = { insert: x[0] };
       if (x[1]) {
-        op.attributes = { bold: true, color: PRIMARY_COLOR };
+        op.attributes = { bold: true, color: config.primaryColor };
       }
       return op;
     })
   };
+}
+
+export function schemeToHtml(scheme: Scheme, opt?: SchemeToHtmlOptions) {
+  const color = opt && opt.color || config.primaryColor ;
+  return scheme.reduce((a, b) => {
+    const str = b[0];
+    length += str.length;
+    a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
+    return a;
+  }, '');
 }
