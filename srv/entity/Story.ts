@@ -31,6 +31,9 @@ export class Story {
   @Column({nullable: true})
   postcard?: string;
 
+  @Column({default: 0, type: 'int'})
+  viewsCount!: number;
+
   @Column()
   @CreateDateColumn()
   createdAt!: Date;

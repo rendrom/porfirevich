@@ -1,21 +1,56 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { getRepository } from 'typeorm';
 import { validate } from 'class-validator';
 
 import { Story } from '../entity/Story';
 import { postcard } from '../utils/postcard';
+// import { StoryResponseSelect } from '../../src/interfaces';
+
+const select: (keyof Story)[] = ['id', 'content', 'createdAt', 'viewsCount', 'postcard'];
 
 export default class StoryController {
 
-  static all = async (req: Request, res: Response) => {
-    // Get stories from database
-    const repository = getRepository(Story);
-    const stories = await repository.find({
-      select: ['id', 'content', 'postcard']
-    });
+  static all = async (req: Request, res: Response, next: NextFunction) => {
+    // // Get stories from database
+    // const repository = getRepository(Story);
+    // const stories = await repository.find({
+    //   select: ['id', 'content', 'postcard', 'viewsCount']
+    // });
 
-    // Send the story object
-    res.send(stories);
+    // // Send the story object
+    // res.send(stories);
+
+    // This example assumes you've previously defined `Users`
+    // as `const Users = db.model('Users')` if you are using `mongoose`
+    // and that you are using Node v7.6.0+ which has async/await support
+    try {
+      const repository = getRepository(Story);
+      const [results, itemCount] = await Promise.all([
+        repository.createQueryBuilder()
+        .take(req.query.limit)
+        .skip(req.query.offset)
+        .orderBy('createdAt', 'DESC')
+        .getMany(),
+        repository.count({})
+      ]);
+
+      // const pageCount = Math.ceil(itemCount / req.query.limit);
+      const loaded = Number(req.query.offset) + Number(req.query.limit);
+      if (req.accepts('json')) {
+        // inspired by Stripe's API response for list objects
+        res.json({
+          object: 'list',
+          hasMore: itemCount > loaded,
+          count: itemCount,
+          data: results
+        });
+      }
+
+    } catch (err) {
+      next(err);
+    }
+
+
   };
 
   static one = async (req: Request, res: Response) => {
@@ -24,8 +59,10 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const story = await repository.findOneOrFail(id, {
-        select: ['id', 'content', 'postcard']
+        select: select
       });
+      story.viewsCount = story.viewsCount + 1;
+      repository.save(story);
       res.send(story);
     } catch (error) {
       res.status(404).send('Story not found');
@@ -124,8 +161,10 @@ export default class StoryController {
     const repository = getRepository(Story);
     try {
       const story = await repository.findOneOrFail(id, {
-        select: ['id', 'content', 'postcard']
+        select
       });
+      story.viewsCount = story.viewsCount + 1;
+      repository.save(story);
       // await postcard(story);
     } catch (error) {
       res.status(404).send('Story not found');

@@ -1,4 +1,5 @@
 import { DeltaOperation } from 'quill';
+import { Story } from '../srv/entity/Story';
 
 export interface Delta {
   ops: DeltaOperation[];
@@ -6,6 +7,21 @@ export interface Delta {
 
 export interface SchemeToHtmlOptions {
   color?: string;
+}
+
+export type StoryResponseSelect = 'id' | 'content' | 'createdAt' | 'viewsCount' | 'postcard';
+
+export type StoryResponse = Pick<Story, StoryResponseSelect>
+
+export interface GetStoriesOptions {
+  limit?: number;
+  offset?: number;
+}
+
+export interface StoriesResponse {
+  object: 'list',
+  hasMore: boolean;
+  data?: StoryResponse[];
 }
 
 /**

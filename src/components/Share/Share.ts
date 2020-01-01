@@ -4,7 +4,7 @@ import { schemeToHtml } from '../../utils/schemeUtils'
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import { SITE } from '../../config';
 import { appModule } from '../../store/app';
-import { Story } from '../../../srv/entity/Story';
+import { StoryResponse } from '../../interfaces';
 
 
 @Component
@@ -40,7 +40,7 @@ export default class extends Vue {
   }
 
   @Watch('story')
-  onStoryChange(story: Story) {
+  onStoryChange(story: StoryResponse) {
     const path = '/' + (story ? story.id : '');
     if (this.$route.path !== path) {
       this.$router.push(path);

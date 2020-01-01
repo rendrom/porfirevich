@@ -1,9 +1,16 @@
-import { Story } from '../../srv/entity/Story';
+import { StoriesResponse, StoryResponse, GetStoriesOptions } from '../interfaces';
+import { getQueryString } from '../utils/getQueryString';
 
 export default {
   async one (id: string) {
     const resp = await fetch('/api/story/' + id);
-    const json = (await resp.json()) as Story;
+    const json = (await resp.json()) as StoryResponse;
+    return json;
+  },
+
+  async all (opt?: GetStoriesOptions) {
+    const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''));
+    const json = (await resp.json()) as StoriesResponse;
     return json;
   },
 
@@ -16,7 +23,7 @@ export default {
       }
     }
     );
-    const json = (await resp.json()) as Story;
+    const json = (await resp.json()) as StoryResponse;
     return json;
   }
 };

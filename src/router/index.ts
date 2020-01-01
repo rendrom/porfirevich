@@ -12,6 +12,10 @@ export default new Router({
       component: () => import('../views/About')
     },
     {
+      path: '/gallery',
+      component: () => import('../views/Gallery.vue')
+    },
+    {
       path: '/:id?',
       name: 'transformer',
       props: true,

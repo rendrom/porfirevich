@@ -3,17 +3,34 @@ import {
   Module,
   getModule,
   Action,
+  MutationAction,
   Mutation
 } from 'vuex-module-decorators';
 import store from '.';
-import { Story } from '../../srv/entity/Story';
-import { Scheme } from '../interfaces';
+import { StoryResponse } from '../interfaces';
+import { Scheme, GetStoriesOptions } from '../interfaces';
 import StoryService from '../services/StoryService';
 
 @Module({ dynamic: true, store: store, name: 'catalog' })
 class AppStore extends VuexModule {
-  stories: Story[] = [];
-  story: Story | false = false;
+  stories: StoryResponse[] = [];
+  story: StoryResponse | false = false;
+  hasMore: boolean = false;
+
+  @MutationAction({ mutate: ['stories', 'hasMore'] })
+  async getStories(opt?: GetStoriesOptions) {
+    const resp = await StoryService.all(opt);
+    //@ts-ignore
+    let stories: StoryResponse[] = (this.state && this.state.stories) || [];
+    if (stories) {
+      stories = [...stories];
+      if (resp.data) {
+        stories = stories.concat(resp.data);
+      }
+    }
+
+    return { stories, hasMore: resp.hasMore };
+  }
 
   @Action({ commit: 'SET_STORY' })
   async createStory(scheme: Scheme) {
@@ -34,7 +51,7 @@ class AppStore extends VuexModule {
   }
 
   @Mutation
-  protected SET_STORY(story: Story | false) {
+  protected SET_STORY(story: StoryResponse | false) {
     this.story = story;
   }
 
