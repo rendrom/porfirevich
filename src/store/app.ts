@@ -7,20 +7,20 @@ import {
   Mutation
 } from 'vuex-module-decorators';
 import store from '.';
-import { StoryResponse } from '../interfaces';
-import { Scheme, GetStoriesOptions } from '../interfaces';
+import { StoryResponse, Scheme, GetStoriesOptions } from '../interfaces';
+
 import StoryService from '../services/StoryService';
 
 @Module({ dynamic: true, store: store, name: 'catalog' })
 class AppStore extends VuexModule {
   stories: StoryResponse[] = [];
   story: StoryResponse | false = false;
-  hasMore: boolean = false;
+  hasMore = false;
 
   @MutationAction({ mutate: ['stories', 'hasMore'] })
-  async getStories(opt?: GetStoriesOptions) {
+  async getStories (opt?: GetStoriesOptions) {
     const resp = await StoryService.all(opt);
-    //@ts-ignore
+    // @ts-ignore
     let stories: StoryResponse[] = (this.state && this.state.stories) || [];
     if (stories) {
       stories = [...stories];
@@ -33,28 +33,27 @@ class AppStore extends VuexModule {
   }
 
   @Action({ commit: 'SET_STORY' })
-  async createStory(scheme: Scheme) {
+  async createStory (scheme: Scheme) {
     const content = JSON.stringify(scheme);
     const story = await StoryService.create({ content });
     return story;
   }
 
   @Action({ commit: 'SET_STORY' })
-  async getStory(id: string) {
+  async getStory (id: string) {
     const story = await StoryService.one(id);
     return story;
   }
 
   @Action({ commit: 'SET_STORY' })
-  removeActiveStory() {
+  removeActiveStory () {
     return false;
   }
 
   @Mutation
-  protected SET_STORY(story: StoryResponse | false) {
+  protected SET_STORY (story: StoryResponse | false) {
     this.story = story;
   }
-
 }
 
 export const appModule = getModule(AppStore);

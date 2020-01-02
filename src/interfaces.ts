@@ -19,7 +19,7 @@ export interface GetStoriesOptions {
 }
 
 export interface StoriesResponse {
-  object: 'list',
+  object: 'list';
   hasMore: boolean;
   data?: StoryResponse[];
 }

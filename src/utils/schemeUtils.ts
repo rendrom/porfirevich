@@ -20,11 +20,10 @@ export function schemeToDelta (scheme: Scheme): Delta {
   };
 }
 
-export function schemeToHtml(scheme: Scheme, opt?: SchemeToHtmlOptions) {
-  const color = opt && opt.color || config.primaryColor ;
+export function schemeToHtml (scheme: Scheme, opt?: SchemeToHtmlOptions) {
+  const color = (opt && opt.color) || config.primaryColor;
   return scheme.reduce((a, b) => {
     const str = b[0];
-    length += str.length;
     a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
     return a;
   }, '');

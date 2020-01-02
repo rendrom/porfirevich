@@ -65,7 +65,7 @@ export default class extends Vue {
 
   @Watch('isLoading')
   @Emit()
-  loading(val: boolean) {
+  loading (val: boolean) {
     return val;
   }
 
