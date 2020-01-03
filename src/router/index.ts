@@ -13,6 +13,7 @@ export default new Router({
     },
     {
       path: '/gallery',
+      name: 'gallery',
       component: () => import('../views/Gallery.vue')
     },
     {

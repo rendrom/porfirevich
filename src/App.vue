@@ -26,6 +26,12 @@
         <template slot="end">
           <b-navbar-item
             tag="router-link"
+            to="/gallery"
+          >
+            Галерея
+          </b-navbar-item>
+          <b-navbar-item
+            tag="router-link"
             to="/about"
           >
             О проекте
