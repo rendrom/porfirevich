@@ -30,6 +30,7 @@
     >
       <Share
         v-if="isShareModalActive"
+        v-model="story"
       />
     </b-modal>
   </div>
@@ -37,6 +38,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Story } from '../../srv/entity/Story';
 import { copyStory } from '../utils/copyToClipboard';
 // @ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
@@ -48,7 +50,9 @@ import { schemeToHtml } from '../utils/schemeUtils';
   components: {
     Transformer,
     // @ts-ignore
-    Share: () => import(/* webpackChunkName: "share" */ '../components/Share/Share.vue')
+    Share: () =>
+      // @ts-ignore
+      import(/* webpackChunkName: "share" */ '../components/Share/Share.vue')
   }
 })
 export default class Home extends Vue {
@@ -59,7 +63,13 @@ export default class Home extends Vue {
   isTransformLoading = false;
 
   get isShareDisabled () {
-    return !this.scheme.filter(x => x[0] !== '\n').length || this.isTransformLoading;
+    return (
+      !this.scheme.filter(x => x[0] !== '\n').length || this.isTransformLoading
+    );
+  }
+
+  get story (): Story | false {
+    return appModule.story;
   }
 
   async beforeMount () {
@@ -82,7 +92,11 @@ export default class Home extends Vue {
   async saveStory () {
     this.isShareModalActive = true;
     if (!appModule.story) {
-      await appModule.createStory(this.scheme);
+      const story = await appModule.createStory(this.scheme);
+      const path = '/' + (story ? story.id : '');
+      if (this.$route.path !== path) {
+        this.$router.push(path);
+      }
     }
   }
 
@@ -107,5 +121,5 @@ export default class Home extends Vue {
 <style scoped>
 .save-control {
   padding-top: 20px;
-};
+}
 </style>

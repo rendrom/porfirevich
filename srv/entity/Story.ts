@@ -34,6 +34,9 @@ export class Story {
   @Column({default: 0, type: 'int'})
   viewsCount!: number;
 
+  @Column({default: false, type: 'boolean'})
+  isPublic!: boolean;
+
   @Column()
   @CreateDateColumn()
   createdAt!: Date;

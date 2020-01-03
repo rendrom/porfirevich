@@ -1,51 +1,53 @@
-import { Vue, Component, Watch } from 'vue-property-decorator';
+import { Vue, Component, Watch, Prop, Model } from 'vue-property-decorator';
 
+import { Story } from '../../../srv/entity/Story';
 import { schemeToHtml } from '../../utils/schemeUtils';
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import { SITE } from '../../config';
-import { appModule } from '../../store/app';
 import { StoryResponse } from '../../interfaces';
+import StoryService from '@/services/StoryService';
 
 @Component
 export default class extends Vue {
+
+  @Model('update', {}) readonly story!: Story;
+
   isError = false;
 
-  get location () {
+  get location() {
     return SITE; // window.location.origin;
   }
 
-  get shareUrl () {
+  get shareUrl() {
     if (this.story) {
       return `${this.location}/${this.story.id}`;
     }
   }
 
-  get story () {
-    return appModule.story;
-  }
-
-  get isLoading () {
+  get isLoading() {
     return !this.story;
   }
 
-  get html () {
+  get html() {
     const html = this.story && schemeToHtml(JSON.parse(this.story.content));
     return html;
   }
 
-  get output () {
+  get output() {
     return this.story && this.story.postcard;
   }
 
-  @Watch('story')
-  onStoryChange (story: StoryResponse) {
-    const path = '/' + (story ? story.id : '');
-    if (this.$route.path !== path) {
-      this.$router.push(path);
+  @Watch('story.isPublic')
+  async onPublicChange(isPublic: boolean) {
+    if (this.story.editId) {
+      await StoryService.edit(this.story.id, {
+        editId: this.story.editId,
+        isPublic
+      })
     }
   }
 
-  copyToClipboard (type?: CopyType, text?: string | false) {
+  copyToClipboard(type?: CopyType, text?: string | false) {
     text = text !== undefined ? text : this.html;
     if (text) {
       copyStory(text, type);

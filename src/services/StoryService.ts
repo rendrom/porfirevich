@@ -1,5 +1,6 @@
 import { StoriesResponse, StoryResponse, GetStoriesOptions } from '../interfaces';
 import { getQueryString } from '../utils/getQueryString';
+import { Story } from '../../srv/entity/Story';
 
 export default {
   async one (id: string) {
@@ -17,6 +18,19 @@ export default {
   async create (data: { content: string; description?: string }) {
     const resp = await fetch('/api/story', {
       method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+    );
+    const json = (await resp.json()) as StoryResponse;
+    return json;
+  },
+
+  async edit (id: string, data: Partial<Story>) {
+    const resp = await fetch('/api/story/' + id, {
+      method: 'PATCH',
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'

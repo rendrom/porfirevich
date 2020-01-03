@@ -73,6 +73,14 @@
             </b-button>
           </div>
         </div>
+        <div>
+          <b-checkbox
+            v-if="story.editId"
+            v-model="story.isPublic"
+          >
+            Публиковать в галереи
+          </b-checkbox>
+        </div>
         <!-- <div class="has-text-grey-light is-size-6 has-text-right">
           Используйте тег <code>#порфирьевич</code> для социальных сетей
         </div>-->

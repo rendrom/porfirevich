@@ -11,7 +11,8 @@ export interface SchemeToHtmlOptions {
 
 export type StoryResponseSelect = 'id' | 'content' | 'createdAt' | 'viewsCount' | 'postcard';
 
-export type StoryResponse = Pick<Story, StoryResponseSelect>
+// export type StoryResponse = Pick<Story, StoryResponseSelect>
+export type StoryResponse = Story;
 
 export interface GetStoriesOptions {
   limit?: number;
@@ -21,7 +22,9 @@ export interface GetStoriesOptions {
 export interface StoriesResponse {
   object: 'list';
   hasMore: boolean;
-  data?: StoryResponse[];
+  data: StoryResponse[];
+  count: number;
+  beforeDate?: number
 }
 
 /**
