@@ -6,16 +6,22 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
-  Generated
+  Generated,
+  ManyToOne
 } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 import shortid from 'shortid';
+import { ModelWithUser } from '../interfaces';
+import { User } from './User';
 
 @Entity()
 @Unique(['id', 'editId'])
-export class Story {
+export class Story implements ModelWithUser {
   @PrimaryColumn()
   id!: string;
+
+  @ManyToOne(() => User, (author: User) => author.stories)
+  user?: User;
 
   @Column()
   @Generated('uuid')

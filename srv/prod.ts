@@ -3,7 +3,7 @@ import { createConnection } from 'typeorm';
 import express from 'express';
 import { api } from './api';
 import { idDef } from './routers/story';
-import { appendOgImage } from './middleware/appendOgImage';
+import { appendOgImage } from './middlewares/appendOgImage';
 import { appConfig } from './appConfig';
 
 

@@ -24,7 +24,7 @@ export interface StoriesResponse {
   hasMore: boolean;
   data: StoryResponse[];
   count: number;
-  beforeDate?: number
+  beforeDate?: number;
 }
 
 /**

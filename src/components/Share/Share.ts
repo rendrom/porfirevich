@@ -9,45 +9,44 @@ import StoryService from '@/services/StoryService';
 
 @Component
 export default class extends Vue {
-
   @Model('update', {}) readonly story!: Story;
 
   isError = false;
 
-  get location() {
+  get location () {
     return SITE; // window.location.origin;
   }
 
-  get shareUrl() {
+  get shareUrl () {
     if (this.story) {
       return `${this.location}/${this.story.id}`;
     }
   }
 
-  get isLoading() {
+  get isLoading () {
     return !this.story;
   }
 
-  get html() {
+  get html () {
     const html = this.story && schemeToHtml(JSON.parse(this.story.content));
     return html;
   }
 
-  get output() {
+  get output () {
     return this.story && this.story.postcard;
   }
 
   @Watch('story.isPublic')
-  async onPublicChange(isPublic: boolean) {
+  async onPublicChange (isPublic: boolean) {
     if (this.story.editId) {
       await StoryService.edit(this.story.id, {
         editId: this.story.editId,
         isPublic
-      })
+      });
     }
   }
 
-  copyToClipboard(type?: CopyType, text?: string | false) {
+  copyToClipboard (type?: CopyType, text?: string | false) {
     text = text !== undefined ? text : this.html;
     if (text) {
       copyStory(text, type);
