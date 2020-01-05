@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { getRepository } from "typeorm";
+import { Request, Response, NextFunction } from 'express';
+import { getRepository } from 'typeorm';
 import { User } from '../entity/User';
 
 export const isSuperuser = () => {
@@ -19,6 +19,8 @@ export const isSuperuser = () => {
     //Check if array of authorized roles includes the user's role
     if (obj && obj.isSuperuser) {
       next();
-    } else { res.status(401).send(); }
+    } else {
+      res.status(401).send();
+    }
   };
 };

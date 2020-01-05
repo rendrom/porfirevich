@@ -2,7 +2,7 @@ import { Router } from 'express';
 import UserController from '../controllers/UserController';
 import passport from 'passport';
 import { isSelf } from '../middlewares/isSelf';
-import { isSuperuser } from 'srv/middlewares/isSuperuser';
+import { isSuperuser } from '../middlewares/isSuperuser';
 
 const router = Router();
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import path from 'path';
 import puppeteer, { Page } from 'puppeteer';
 import config from '../../config';
@@ -12,8 +13,8 @@ interface DomScreenshotOptions {
 }
 
 export async function postcard(story: Story) {
-  const browser = await puppeteer.launch()
-  const page = await browser.newPage()
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
   await page.setViewport({
     width: 1300,
     height: 200000,
@@ -37,13 +38,11 @@ async function screenshotDOMElement(opts: DomScreenshotOptions) {
   const selector = opts.selector;
   const page = opts.page;
 
-  if (!selector)
-    throw Error('Please provide a selector.');
+  if (!selector) throw Error('Please provide a selector.');
 
   const rect = await page.evaluate(selector => {
     const element = document.querySelector(selector);
-    if (!element)
-      return null;
+    if (!element) return null;
     const { x, y, width, height } = element.getBoundingClientRect();
     return { left: x, top: y, width, height, id: element.id };
   }, selector);
@@ -62,7 +61,6 @@ async function screenshotDOMElement(opts: DomScreenshotOptions) {
   });
 }
 
-
 function getHtml(story: Story) {
   let fontSize = 6;
   const site = config.site;
@@ -76,19 +74,18 @@ function getHtml(story: Story) {
     return a;
   }, '');
 
-  const textSizeFromLength: ([number, number])[] = [
+  const textSizeFromLength: [number, number][] = [
     [100, 40],
     [1000, 36],
     [2000, 32],
     [3000, 28],
     [8000, 24],
-    [16000, 12],
+    [16000, 12]
   ];
   const size = textSizeFromLength.find(x => x[0] > length);
   if (size) {
     fontSize = size[1];
   }
-
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -191,7 +188,7 @@ function getHtml(story: Story) {
         </div>
         <div class="right">
           <div class="title">написано с помощью нейронной сети</div>
-          <div class="subtitle">${{site}}</div>
+          <div class="subtitle">${site}</div>
         </div>
       </div>
     </div>
@@ -199,5 +196,5 @@ function getHtml(story: Story) {
 </body>
 
 </html>
-`
+`;
 }

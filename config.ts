@@ -5,12 +5,12 @@ export interface Config {
   jwtSecret: string;
 }
 
-let localSettings: Partial<Config>;
+let localSettings: Partial<Config> | undefined;
 
 try {
   localSettings = require('./configLocal.ts');
 } catch {
-  throw new Error('No local config founded');
+  // throw new Error('No local config founded');
 }
 
 const defaultConfig: Partial<Config> = {
