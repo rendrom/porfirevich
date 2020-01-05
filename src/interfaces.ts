@@ -9,7 +9,12 @@ export interface SchemeToHtmlOptions {
   color?: string;
 }
 
-export type StoryResponseSelect = 'id' | 'content' | 'createdAt' | 'viewsCount' | 'postcard';
+export type StoryResponseSelect =
+  | 'id'
+  | 'content'
+  | 'createdAt'
+  | 'viewsCount'
+  | 'postcard';
 
 // export type StoryResponse = Pick<Story, StoryResponseSelect>
 export type StoryResponse = Story;
@@ -31,4 +36,4 @@ export interface StoriesResponse {
  * 0 - user
  * 1 - AI
  */
-export type Scheme = ([string, 0 | 1])[];
+export type Scheme = [string, 0 | 1][];

@@ -22,7 +22,7 @@ interface TransformResp {
 
 @Component
 export default class extends Vue {
-  @Model('change', { type: Array, default: () => ([]) }) readonly scheme!: Scheme;
+  @Model('change', { type: Array, default: () => [] }) readonly scheme!: Scheme;
   text = '';
   html = '';
   isLoading = false;

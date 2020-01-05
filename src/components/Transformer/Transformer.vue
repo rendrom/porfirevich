@@ -1,26 +1,17 @@
 <template>
   <div>
-    <div
-      v-if="isSettings"
-      class="columns settings-control"
-    >
+    <div v-if="isSettings" class="columns settings-control">
       <div class="column">
         <b-field label="Автодополнение">
           <div class="autocomplate-control">
-            <b-switch
-              v-model="isAutocomplete"
-              size="is-small"
-            >
+            <b-switch v-model="isAutocomplete" size="is-small">
               {{ isAutocomplete ? 'вкл' : 'выкл' }}
             </b-switch>
           </div>
         </b-field>
       </div>
       <div class="column">
-        <b-field
-          label="Задержка автодополнения"
-          style="max-width: 250px;"
-        >
+        <b-field label="Задержка автодополнения" style="max-width: 250px;">
           <b-numberinput
             v-model="interval"
             size="is-small"
@@ -31,18 +22,9 @@
       </div>
       <div class="column">
         <b-field label="Количество автодополняемых слов">
-          <b-slider
-            v-model="length"
-            size="is-small"
-            :min="1"
-            :max="60"
-            rounded
-          >
+          <b-slider v-model="length" size="is-small" :min="1" :max="60" rounded>
             <template v-for="val in [10, 20, 30, 40, 50]">
-              <b-slider-tick
-                :key="val"
-                :value="val"
-              >
+              <b-slider-tick :key="val" :value="val">
                 {{ val }}
               </b-slider-tick>
             </template>
@@ -51,10 +33,7 @@
       </div>
     </div>
 
-    <div
-      class="box"
-      :class="{ isError: isError }"
-    >
+    <div class="box" :class="{ isError: isError }">
       <div id="editorjs" />
 
       <div class="columns is-mobile controls-pane">
@@ -84,12 +63,7 @@
 
         <div class="column is-1">
           <div class="tools is-pulled-right">
-            <b-button
-              size="is-small"
-              type
-              icon-right="close"
-              @click="escape"
-            >
+            <b-button size="is-small" type icon-right="close" @click="escape">
               Esc
             </b-button>
           </div>
@@ -99,11 +73,9 @@
   </div>
 </template>
 
-<script lang="ts" src="./Transformer.ts">
-</script>
+<script lang="ts" src="./Transformer.ts"></script>
 
 <style>
-
 .ql-editor {
   min-height: 150px;
   white-space: pre-wrap;

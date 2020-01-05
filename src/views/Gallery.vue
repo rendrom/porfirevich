@@ -1,18 +1,9 @@
 <template>
   <div>
-    <div
-      v-for="(i, j) in items"
-      :key="j"
-      class="columns"
-    >
-      <div
-        class="column story-item"
-        v-html="i"
-      />
+    <div v-for="(i, j) in items" :key="j" class="columns">
+      <div class="column story-item" v-html="i" />
     </div>
-    <div
-      class="columns"
-    >
+    <div class="columns">
       <div class="column has-text-centered">
         <b-button
           type
@@ -54,7 +45,10 @@ export default class Gallery extends Vue {
   async loadMore () {
     this.isLoading = true;
     try {
-      await appModule.getStories({ limit: 50, offset: appModule.stories.length });
+      await appModule.getStories({
+        limit: 50,
+        offset: appModule.stories.length
+      });
     } catch (er) {
       //
     } finally {
@@ -62,7 +56,6 @@ export default class Gallery extends Vue {
     }
   }
 }
-
 </script>
 <style scoped>
 .story-item {

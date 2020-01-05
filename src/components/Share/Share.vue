@@ -1,20 +1,11 @@
 <template>
   <div>
-    <div
-      v-show="!isLoading"
-      class="box"
-    >
+    <div v-show="!isLoading" class="box">
       <div>
-        <p
-          v-if="isError"
-          class="subtitle"
-        >
+        <p v-if="isError" class="subtitle">
           Произошла ошибка!
         </p>
-        <p
-          v-else
-          class="subtitle"
-        >
+        <p v-else class="subtitle">
           Сохраните изображение ниже, чтобы поделиться историей
         </p>
       </div>
@@ -22,14 +13,10 @@
         <div v-if="isError">
           <p>Не удалось сгенерировать "открытку" из вашей истории.</p>
         </div>
-        <div
-          v-else
-          class="image-share-container"
-        >
-          <img
-            :src="output"
-            class="image-share"
-          >
+        <div v-else class="image-share-container">
+          <img :src="output"
+class="image-share"
+/>
         </div>
         <div>
           <p v-if="isError">
@@ -74,10 +61,7 @@
           </div>
         </div>
         <div>
-          <b-checkbox
-            v-if="story.editId"
-            v-model="story.isPublic"
-          >
+          <b-checkbox v-if="story.editId" v-model="story.isPublic">
             Публиковать в галереи
           </b-checkbox>
         </div>
@@ -90,8 +74,7 @@
   </div>
 </template>
 
-<script lang="ts" src="./Share.ts">
-</script>
+<script lang="ts" src="./Share.ts"></script>
 
 <style>
 .animation-content {

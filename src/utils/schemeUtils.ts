@@ -4,7 +4,7 @@ import config from '../../config';
 
 export function deltaToScheme (delta: Delta): Scheme {
   return delta.ops.map(x => {
-    return [x.insert, (x.attributes && x.attributes.bold) ? 1 : 0];
+    return [x.insert, x.attributes && x.attributes.bold ? 1 : 0];
   });
 }
 

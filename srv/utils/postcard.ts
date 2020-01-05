@@ -65,6 +65,7 @@ async function screenshotDOMElement(opts: DomScreenshotOptions) {
 
 function getHtml(story: Story) {
   let fontSize = 6;
+  const site = config.site;
   const color = config.primaryColor;
   const content = JSON.parse(story.content) as Scheme;
   let length = 0;
@@ -190,7 +191,7 @@ function getHtml(story: Story) {
         </div>
         <div class="right">
           <div class="title">написано с помощью нейронной сети</div>
-          <div class="subtitle">https://text.skynet.center</div>
+          <div class="subtitle">${{site}}</div>
         </div>
       </div>
     </div>

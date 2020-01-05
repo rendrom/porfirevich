@@ -1,16 +1,15 @@
-import { Request, Response } from "express";
-import { getRepository } from "typeorm";
-import { validate } from "class-validator";
+import { Request, Response } from 'express';
+import { getRepository } from 'typeorm';
+import { validate } from 'class-validator';
 
-import { User } from "../entity/User";
+import { User } from '../entity/User';
 
 class UserController {
-
   static listAll = async (req: Request, res: Response) => {
     //Get users from database
     const userRepository = getRepository(User);
     const users = await userRepository.find({
-      select: ["id", "username"] //We dont want to send the passwords on response
+      select: ['id', 'username'] //We dont want to send the passwords on response
     });
 
     //Send the users object
@@ -19,23 +18,23 @@ class UserController {
 
   static getOneById = async (req: Request, res: Response) => {
     //Get the ID from the url
-    const id: number = Number(req.params.id);
+    const id = Number(req.params.id);
 
     //Get the user from database
     const userRepository = getRepository(User);
     try {
       const user = await userRepository.findOneOrFail(id, {
-        select: ["id", "username"] //We dont want to send the password on response
+        select: ['id', 'username'] //We dont want to send the password on response
       });
     } catch (error) {
-      res.status(404).send("User not found");
+      res.status(404).send('User not found');
     }
   };
 
   static newUser = async (req: Request, res: Response) => {
     //Get parameters from the body
-    let { username, password, role } = req.body;
-    let user = new User();
+    const { username, password, role } = req.body;
+    const user = new User();
     user.username = username;
     user.password = password;
 
@@ -54,12 +53,12 @@ class UserController {
     try {
       await userRepository.save(user);
     } catch (e) {
-      res.status(409).send("username already in use");
+      res.status(409).send('username already in use');
       return;
     }
 
     //If all ok, send 201 response
-    res.status(201).send("User created");
+    res.status(201).send('User created');
   };
 
   static editUser = async (req: Request, res: Response) => {
@@ -76,7 +75,7 @@ class UserController {
       user = await userRepository.findOneOrFail(id);
     } catch (error) {
       //If not found, send a 404 response
-      res.status(404).send("User not found");
+      res.status(404).send('User not found');
       return;
     }
 
@@ -92,7 +91,7 @@ class UserController {
     try {
       await userRepository.save(user);
     } catch (e) {
-      res.status(409).send("username already in use");
+      res.status(409).send('username already in use');
       return;
     }
     //After all send a 204 (no content, but accepted) response
@@ -108,7 +107,7 @@ class UserController {
     try {
       user = await userRepository.findOneOrFail(id);
     } catch (error) {
-      res.status(404).send("User not found");
+      res.status(404).send('User not found');
       return;
     }
     userRepository.delete(id);
@@ -116,6 +115,6 @@ class UserController {
     //After all send a 204 (no content, but accepted) response
     res.status(204).send();
   };
-};
+}
 
 export default UserController;

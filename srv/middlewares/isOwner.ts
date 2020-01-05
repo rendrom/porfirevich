@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import { getRepository, ObjectType, EntitySchema } from "typeorm";
+import { Request, Response, NextFunction } from 'express';
+import { getRepository, ObjectType } from 'typeorm';
 
-// import { User } from "../entity/User";
 import { ModelWithUser } from '../interfaces';
 
-export const isOwner = <T extends ModelWithUser>(model: EntitySchema<T>) => {
+export const isOwner = <T extends ModelWithUser>(model: ObjectType<T>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     //Get the user ID from previous midleware
     const userId = res.locals.jwtPayload.userId;
@@ -21,6 +20,8 @@ export const isOwner = <T extends ModelWithUser>(model: EntitySchema<T>) => {
     //Check if array of authorized roles includes the user's role
     if (obj && obj.user && obj.user.id === userId) {
       next();
-    } else { res.status(401).send(); }
+    } else {
+      res.status(401).send();
+    }
   };
 };

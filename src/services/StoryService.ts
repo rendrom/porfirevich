@@ -1,4 +1,8 @@
-import { StoriesResponse, StoryResponse, GetStoriesOptions } from '../interfaces';
+import {
+  StoriesResponse,
+  StoryResponse,
+  GetStoriesOptions
+} from '../interfaces';
 import { getQueryString } from '../utils/getQueryString';
 import { Story } from '../../srv/entity/Story';
 
@@ -22,8 +26,7 @@ export default {
       headers: {
         'Content-Type': 'application/json'
       }
-    }
-    );
+    });
     const json = (await resp.json()) as StoryResponse;
     return json;
   },
@@ -35,8 +38,7 @@ export default {
       headers: {
         'Content-Type': 'application/json'
       }
-    }
-    );
+    });
     const json = (await resp.json()) as StoryResponse;
     return json;
   }

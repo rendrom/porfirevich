@@ -1,20 +1,12 @@
 <template>
   <div>
     <div class="main">
-      <b-navbar
-        type
-        fixed-top
-      >
+      <b-navbar type fixed-top>
         <template slot="brand">
-          <b-navbar-item
-            tag="router-link"
-            :to="{ path: '/' }"
-          >
-            <img
-              src="images/logo.svg"
-              alt="Порфирьевич"
-              class="neuro-logo"
-            >
+          <b-navbar-item tag="router-link" :to="{ path: '/' }">
+            <img src="images/logo.svg"
+alt="Порфирьевич" class="neuro-logo"
+/>
           </b-navbar-item>
         </template>
         <!-- <template slot="start">
@@ -24,16 +16,10 @@
         </template>-->
 
         <template slot="end">
-          <b-navbar-item
-            tag="router-link"
-            to="/gallery"
-          >
+          <b-navbar-item tag="router-link" to="/gallery">
             Галерея
           </b-navbar-item>
-          <b-navbar-item
-            tag="router-link"
-            to="/about"
-          >
+          <b-navbar-item tag="router-link" to="/about">
             О проекте
           </b-navbar-item>
         </template>
@@ -54,10 +40,7 @@
               href="https://github.com/mgrankin/ru_transformers"
               target="_blank"
             >
-              <b-icon
-                size="is-large"
-                icon="github-circle"
-              />
+              <b-icon size="is-large" icon="github-circle" />
             </a>
           </p>
         </div>
@@ -71,8 +54,7 @@ import '../public/images/logo.svg';
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component
-export default class App extends Vue {
-}
+export default class App extends Vue {}
 </script>
 
 <style lang="css" scoped>

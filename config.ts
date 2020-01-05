@@ -5,7 +5,6 @@ export interface Config {
   jwtSecret: string;
 }
 
-
 let localSettings: Partial<Config>;
 
 try {
@@ -17,8 +16,9 @@ try {
 const defaultConfig: Partial<Config> = {
   endpoint: 'https://models.dobro.ai',
   primaryColor: '#5371FF',
+  site: 'https://porfirevich.ru'
 };
 
 const config = { ...defaultConfig, ...localSettings } as Config;
 
-export default config
+export default config;

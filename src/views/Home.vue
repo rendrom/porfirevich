@@ -24,14 +24,8 @@
       </div>
     </div>
 
-    <b-modal
-      :active.sync="isShareModalActive"
-      :width="620"
-    >
-      <Share
-        v-if="isShareModalActive"
-        v-model="story"
-      />
+    <b-modal :active.sync="isShareModalActive" :width="620">
+      <Share v-if="isShareModalActive" v-model="story" />
     </b-modal>
   </div>
 </template>
