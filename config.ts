@@ -8,7 +8,7 @@ let localSettings: Partial<Config> | undefined;
 
 try {
   localSettings = require('./configLocal.ts');
-} catch {
+} catch (er) {
   // throw new Error('No local config founded');
 }
 

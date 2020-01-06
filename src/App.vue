@@ -4,9 +4,7 @@
       <b-navbar type fixed-top>
         <template slot="brand">
           <b-navbar-item tag="router-link" :to="{ path: '/' }">
-            <img src="images/logo.svg"
-alt="Порфирьевич" class="neuro-logo"
-/>
+            <img src="images/logo.svg" alt="Порфирьевич" class="neuro-logo" />
           </b-navbar-item>
         </template>
         <!-- <template slot="start">
@@ -16,12 +14,10 @@ alt="Порфирьевич" class="neuro-logo"
         </template>-->
 
         <template slot="end">
-          <b-navbar-item tag="router-link" to="/gallery">
-            Галерея
-          </b-navbar-item>
-          <b-navbar-item tag="router-link" to="/about">
-            О проекте
-          </b-navbar-item>
+          <b-navbar-item tag="router-link" to="/gallery">Галерея</b-navbar-item>
+          <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
+          <b-navbar-item v-if="user" @click="logout">Выход</b-navbar-item>
+          <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item>
         </template>
       </b-navbar>
 
@@ -36,10 +32,7 @@ alt="Порфирьевич" class="neuro-logo"
       <footer class="footer">
         <div class="content has-text-centered">
           <p>
-            <a
-              href="https://github.com/mgrankin/ru_transformers"
-              target="_blank"
-            >
+            <a href="https://github.com/mgrankin/ru_transformers" target="_blank">
               <b-icon size="is-large" icon="github-circle" />
             </a>
           </p>
@@ -49,12 +42,7 @@ alt="Порфирьевич" class="neuro-logo"
   </div>
 </template>
 
-<script>
-import '../public/images/logo.svg';
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class App extends Vue {}
+<script lang="ts" src="./App.ts">
 </script>
 
 <style lang="css" scoped>

@@ -20,7 +20,10 @@ export class Story implements ModelWithUser {
   @PrimaryColumn()
   id!: string;
 
-  @ManyToOne(() => User, (author: User) => author.stories)
+  @ManyToOne(
+    () => User,
+    (author: User) => author.stories
+  )
   user?: User;
 
   @Column()
@@ -31,16 +34,16 @@ export class Story implements ModelWithUser {
   @IsNotEmpty()
   content!: string;
 
-  @Column({nullable: true, length: 300})
+  @Column({ nullable: true, length: 300 })
   description?: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   postcard?: string;
 
-  @Column({default: 0, type: 'int'})
+  @Column({ default: 0, type: 'int' })
   viewsCount!: number;
 
-  @Column({default: false, type: 'boolean'})
+  @Column({ default: false, type: 'boolean' })
   isPublic!: boolean;
 
   @Column()
@@ -55,5 +58,4 @@ export class Story implements ModelWithUser {
   protected beforeInsert() {
     this.id = shortid.generate();
   }
-
 }

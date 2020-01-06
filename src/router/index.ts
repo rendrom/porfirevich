@@ -17,6 +17,11 @@ export default new Router({
       component: () => import('../views/Gallery.vue')
     },
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/Login')
+    },
+    {
       path: '/:id?',
       name: 'transformer',
       props: true,

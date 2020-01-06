@@ -17,11 +17,11 @@ const jwtOptions = {
 
 passport.use(
   new passportJwt.Strategy(jwtOptions, async (payload: any, done) => {
-    console.log(payload);
     const userRepository = getRepository(User);
     try {
-      const user = await userRepository.findOneOrFail(parseInt(payload.sub), {
-        select: ['uid', 'username'] //We dont want to send the password on response
+      const user = await userRepository.findOneOrFail({
+        where: { uid: payload.sub },
+        select: ['id', 'uid', 'username', 'photoUrl']
       });
       return done(null, user, payload);
     } catch (error) {

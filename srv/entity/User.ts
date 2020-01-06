@@ -7,14 +7,16 @@ import {
   UpdateDateColumn,
   OneToMany
 } from 'typeorm';
-import { Length } from 'class-validator';
+import { Length, IsEmail } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
 import { Story } from './Story';
 
 @Entity()
-@Unique(['username'])
 export class User {
   @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ nullable: true })
   uid!: string;
 
   @OneToMany(
@@ -24,12 +26,14 @@ export class User {
   stories!: Story[];
 
   @Column()
-  @Length(4, 20)
   username!: string;
 
   @Column()
   @Length(4, 100)
   password!: string;
+
+  @Column({ nullable: true })
+  email?: string;
 
   @Column({ default: false })
   isSuperuser!: boolean;

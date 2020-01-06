@@ -9,10 +9,11 @@ import '../auth/google';
 // Generate the Token for the user authenticated in the request
 function generateUserToken(req: Request, res: Response) {
   // @ts-ignore
-  const userId = req.user && req.user.id;
+  const userId = req.user && req.user.uid;
   if (userId) {
     const accessToken = generateAccessToken(userId);
-    res.send('JWT ' + accessToken);
+    // res.send('JWT ' + accessToken);
+    res.redirect('/?token=' + accessToken);
   }
 }
 

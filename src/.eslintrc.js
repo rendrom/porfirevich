@@ -12,10 +12,10 @@ module.exports = {
   },
   // plugins: ['vue', '@typescript-eslint'],
   extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:vue/recommended',
-    '@vue/standard',
-    '@vue/typescript'
+    // 'plugin:@typescript-eslint/recommended',
+    // 'plugin:vue/recommended',
+    // '@vue/standard',
+    // '@vue/typescript'
   ],
   rules: {
     'vue/no-v-html': 0,
