@@ -3,6 +3,9 @@ import AuthController from '../controllers/AuthController';
 import passport from 'passport';
 import { generateAccessToken } from '../token';
 
+import '../auth/jwt';
+import '../auth/google';
+
 // Generate the Token for the user authenticated in the request
 function generateUserToken(req: Request, res: Response) {
   // @ts-ignore

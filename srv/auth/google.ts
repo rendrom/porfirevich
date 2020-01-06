@@ -1,39 +1,54 @@
-// import passport from 'passport';
-// import passportGoogle from 'passport-google-oauth';
-// import config from '../config';
-// import { User } from '../entity/user';
+import passport from 'passport';
+import { OAuth2Strategy, IOAuth2StrategyOption } from 'passport-google-oauth';
+import { getRepository } from 'typeorm';
+import { validate } from 'class-validator';
+import config from '../config';
+import { User } from '../entity/user';
 
-// const passportConfig = {
-//   clientID:
-//     '459875133220-6b57t8jq619cnaab7v99f4ru16308u7m.apps.googleusercontent.com',
-//   clientSecret: 'dnTpZD6lCvAQkFms8efrdJbG',
-//   callbackURL: 'http://localhost:3000/api/authentication/google/redirect'
-// };
+const clientID = config.get('auth.google.clientID');
+const clientSecret = config.get('auth.google.clientSecret');
 
-// if (passportConfig.clientID) {
-//   passport.use(
-//     new passportGoogle.OAuth2Strategy(
-//       passportConfig,
-//       async (request, accessToken, refreshToken, profile, done) => {
-//         const userRepository = getRepository(User);
-//         try {
-//           const user = await userRepository.findOneOrFail(
-//             parseInt(payload.sub),
-//             {
-//               select: ['id', 'username'] //We dont want to send the password on response
-//             }
-//           );
-//           // const newUser = await User.create({
-//           //   name: profile.displayName,
-//           //   provider: 'google',
-//           //   uid: profile.id,
-//           //   photoUrl: profile.photos[0]
-//           // })
-//           return done(null, user);
-//         } catch (error) {
-//           return done(error);
-//         }
-//       }
-//     )
-//   );
-// }
+const passportConfig: IOAuth2StrategyOption = {
+  clientID,
+  clientSecret,
+  callbackURL: 'http://localhost:3000/api/auth/google/redirect'
+};
+
+if (passportConfig.clientID) {
+  passport.use(
+    new OAuth2Strategy(
+      passportConfig,
+      async (accessToken, refreshToken, profile, done) => {
+        const userRepository = getRepository(User);
+
+        const user = await userRepository.findOne(profile.id, {
+          select: ['uid', 'username'] //We dont want to send the password on response
+        });
+        if (!user) {
+          try {
+            const user = new User();
+            user.username = profile.displayName;
+            user.uid = profile.id;
+            const photo =
+              profile.photos && profile.photos[0] && profile.photos[0].value;
+            if (photo) {
+              user.photoUrl = photo;
+            }
+            // user.password = password;
+
+            //Validade if the parameters are ok
+            const errors = await validate(user);
+            if (errors.length > 0) {
+              return done(errors);
+            }
+            //Hash the password, to securely store on DB
+            user.hashPassword();
+          } catch (error) {
+            return done(error);
+          }
+        }
+        return done(null, user);
+      }
+    )
+  );
+}

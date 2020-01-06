@@ -18,7 +18,7 @@ export const isOwner = <T extends ModelWithUser>(model: ObjectType<T>) => {
     }
 
     //Check if array of authorized roles includes the user's role
-    if (obj && obj.user && obj.user.id === userId) {
+    if (obj && obj.user && obj.user.uid === userId) {
       next();
     } else {
       res.status(401).send();

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { getRepository } from "typeorm";
+import { Request, Response, NextFunction } from 'express';
+import { getRepository } from 'typeorm';
 import { User } from '../entity/User';
 
 export const isSelf = () => {
@@ -17,8 +17,10 @@ export const isSelf = () => {
     }
 
     //Check if array of authorized roles includes the user's role
-    if (obj && obj.id === userId) {
+    if (obj && obj.uid === userId) {
       next();
-    } else { res.status(401).send(); }
+    } else {
+      res.status(401).send();
+    }
   };
 };

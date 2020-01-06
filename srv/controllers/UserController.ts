@@ -9,7 +9,7 @@ class UserController {
     //Get users from database
     const userRepository = getRepository(User);
     const users = await userRepository.find({
-      select: ['id', 'username'] //We dont want to send the passwords on response
+      select: ['uid', 'username'] //We dont want to send the passwords on response
     });
 
     //Send the users object
@@ -24,7 +24,7 @@ class UserController {
     const userRepository = getRepository(User);
     try {
       const user = await userRepository.findOneOrFail(id, {
-        select: ['id', 'username'] //We dont want to send the password on response
+        select: ['uid', 'username'] //We dont want to send the password on response
       });
     } catch (error) {
       res.status(404).send('User not found');
@@ -33,7 +33,7 @@ class UserController {
 
   static newUser = async (req: Request, res: Response) => {
     //Get parameters from the body
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
     const user = new User();
     user.username = username;
     user.password = password;
@@ -66,7 +66,7 @@ class UserController {
     const id = req.params.id;
 
     //Get values from the body
-    const { username, role } = req.body;
+    const { username, isSuperuser } = req.body;
 
     //Try to find user on database
     const userRepository = getRepository(User);

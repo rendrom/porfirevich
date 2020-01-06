@@ -6,18 +6,21 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany
-} from "typeorm";
-import { Length } from "class-validator";
-import * as bcrypt from "bcryptjs";
+} from 'typeorm';
+import { Length } from 'class-validator';
+import * as bcrypt from 'bcryptjs';
 import { Story } from './Story';
 
 @Entity()
-@Unique(["username"])
+@Unique(['username'])
 export class User {
   @PrimaryGeneratedColumn()
-  id!: number;
+  uid!: string;
 
-  @OneToMany(() => Story, (story: Story) => story.user)
+  @OneToMany(
+    () => Story,
+    (story: Story) => story.user
+  )
   stories!: Story[];
 
   @Column()
@@ -38,6 +41,12 @@ export class User {
   @Column()
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Column({ default: 'porfirevich' })
+  provider!: string;
+
+  @Column({ nullable: true })
+  photoUrl?: string;
 
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);
