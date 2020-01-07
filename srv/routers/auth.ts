@@ -1,10 +1,13 @@
 import { Router, Request, Response } from 'express';
 import AuthController from '../controllers/AuthController';
 import passport from 'passport';
+import { Strategy as AnonymousStrategy } from 'passport-anonymous';
 import { generateAccessToken } from '../token';
 
 import '../auth/jwt';
 import '../auth/google';
+
+passport.use(new AnonymousStrategy());
 
 // Generate the Token for the user authenticated in the request
 function generateUserToken(req: Request, res: Response) {
@@ -12,7 +15,6 @@ function generateUserToken(req: Request, res: Response) {
   const userId = req.user && req.user.uid;
   if (userId) {
     const accessToken = generateAccessToken(userId);
-    // res.send('JWT ' + accessToken);
     res.redirect('/?token=' + accessToken);
   }
 }

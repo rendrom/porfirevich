@@ -16,15 +16,19 @@ import { User } from './User';
 
 @Entity()
 @Unique(['id', 'editId'])
-export class Story implements ModelWithUser {
+export class Story {
   @PrimaryColumn()
   id!: string;
 
   @ManyToOne(
     () => User,
-    (author: User) => author.stories
+    (author: User) => author.stories,
+    { onDelete: 'CASCADE' }
   )
   user?: User;
+
+  @Column({ type: 'int', nullable: true })
+  userId?: number | null;
 
   @Column()
   @Generated('uuid')
@@ -45,6 +49,9 @@ export class Story implements ModelWithUser {
 
   @Column({ default: false, type: 'boolean' })
   isPublic!: boolean;
+
+  @Column({ default: false, type: 'boolean' })
+  isDeleted!: boolean;
 
   @Column()
   @CreateDateColumn()

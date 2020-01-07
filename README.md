@@ -9,6 +9,24 @@ UI for [ru_transformers](https://github.com/mgrankin/ru_transformers)
 npm install
 ```
 
+Create node config
+
+```bash
+vim ./.env
+```
+
+and paste
+
+```text
+JWT_SIGNING_KEY=
+
+GOOGLE_CLIENTID=
+GOOGLE_CLIENTSECRET=
+
+FACEBOOK_CLIENTID=
+FACEBOOK_CLIENTSECRET=
+```
+
 ## Production
 
 ```bash

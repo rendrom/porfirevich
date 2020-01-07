@@ -5,18 +5,33 @@ import { validate } from 'class-validator';
 import { StoriesResponse } from '../../src/interfaces';
 import { Story } from '../entity/Story';
 import { postcard } from '../utils/postcard';
+import { User } from '../entity/User';
 
-const select: (keyof Story)[] = ['id', 'content', 'createdAt', 'viewsCount', 'postcard'];
+const select: (keyof Story)[] = [
+  'id',
+  'content',
+  'createdAt',
+  'viewsCount',
+  'postcard',
+  'userId'
+];
 
 const query = (rep: Repository<Story>, beforeDate: Date) => {
-  return rep.createQueryBuilder()
-  .where({ isPublic: true, createdAt: LessThan(beforeDate.toISOString()) })
+  return rep
+    .createQueryBuilder('story')
+    .where({
+      isPublic: true,
+      isDeleted: false,
+      createdAt: LessThan(beforeDate.toISOString())
+    })
+    .select(select.map(x => `story.${x}`));
 };
 
 export default class StoryController {
-
   static all = async (req: Request, res: Response, next: NextFunction) => {
-    const beforeDate = req.query.beforeDate ? new Date(req.query.beforeDate) : new Date();
+    const beforeDate = req.query.beforeDate
+      ? new Date(req.query.beforeDate)
+      : new Date();
     // // Get stories from database
     try {
       const repository = getRepository(Story);
@@ -39,15 +54,12 @@ export default class StoryController {
           count: itemCount,
           data: results,
           beforeDate: beforeDate.getTime()
-        }
+        };
         res.json(resp);
       }
-
     } catch (err) {
       next(err);
     }
-
-
   };
 
   static one = async (req: Request, res: Response) => {
@@ -72,6 +84,18 @@ export default class StoryController {
     let newStory: Story | undefined;
     story.content = content;
     story.description = description;
+
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+    if (userId) {
+      try {
+        const userRepository = getRepository(User);
+        const user = await userRepository.findOne(userId);
+        story.user = user;
+      } catch (er) {
+        // ignore
+      }
+    }
 
     // Validate if the parameters are ok
     const errors = await validate(story);
@@ -98,7 +122,7 @@ export default class StoryController {
     if (newStory) {
       res.send(newStory);
     } else {
-      res.status(500).send('can\'t save story');
+      res.status(500).send("can't save story");
     }
   };
 
@@ -129,7 +153,7 @@ export default class StoryController {
     try {
       story = await repository.save(story);
     } catch (e) {
-      res.status(409).send('can\'t save story');
+      res.status(409).send("can't save story");
       return;
     }
     res.send(story);
@@ -168,4 +192,4 @@ export default class StoryController {
       res.status(404).send('Story not found');
     }
   };
-};
+}

@@ -18,6 +18,7 @@ class AppStore extends VuexModule {
   story: StoryResponse | false = false;
   hasMore = false;
   user: User | false = false;
+  token: string | false = false;
 
   @MutationAction({ mutate: ['stories', 'hasMore'] })
   async getStories(opt?: GetStoriesOptions) {
@@ -39,10 +40,18 @@ class AppStore extends VuexModule {
     return user;
   }
 
+  @Action({ commit: 'SET_TOKEN' })
+  async setToken(token: string | false) {
+    return token;
+  }
+
   @Action({ commit: 'SET_STORY' })
   async createStory(scheme: Scheme) {
     const content = JSON.stringify(scheme);
-    const story = await StoryService.create({ content });
+    const story = await StoryService.create(
+      { content },
+      { token: this.token || '' }
+    );
     return story;
   }
 
@@ -57,6 +66,11 @@ class AppStore extends VuexModule {
     return false;
   }
 
+  @Action({ commit: 'SET_TOKEN' })
+  removeActiveToken() {
+    return false;
+  }
+
   @Mutation
   protected SET_STORY(story: StoryResponse | false) {
     this.story = story;
@@ -65,6 +79,11 @@ class AppStore extends VuexModule {
   @Mutation
   protected SET_USER(user: User | false) {
     this.user = user;
+  }
+
+  @Mutation
+  protected SET_TOKEN(token: string | false) {
+    this.token = token;
   }
 }
 

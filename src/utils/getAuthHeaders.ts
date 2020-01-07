@@ -1,7 +1,11 @@
-export function getAuthHeaders(token: string) {
-  return {
+export function getAuthHeaders(token?: string) {
+  const headers: { headers: Record<string, string> } = {
     headers: {
-      'Authorization': 'Bearer ' + token
+      'Content-Type': 'application/json'
     }
+  };
+  if (token) {
+    headers.headers.Authorization = 'Bearer ' + token;
   }
+  return headers;
 }

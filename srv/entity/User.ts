@@ -2,16 +2,17 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Unique,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany
+  OneToMany,
+  Index
 } from 'typeorm';
 import { Length, IsEmail } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
 import { Story } from './Story';
 
 @Entity()
+@Index(['email'], { unique: true, where: 'email IS NOT NULL' })
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -33,6 +34,7 @@ export class User {
   password!: string;
 
   @Column({ nullable: true })
+  @IsEmail()
   email?: string;
 
   @Column({ default: false })

@@ -21,14 +21,26 @@ if (passportConfig.clientID) {
       passportConfig,
       async (accessToken, refreshToken, profile, done) => {
         const userRepository = getRepository(User);
-
-        const user = await userRepository.findOne({
-          where: { uid: profile.id },
-          select: ['id', 'uid', 'username'] //We dont want to send the password on response
-        });
+        let user: User | undefined;
+        const verifiedEmail =
+          // @ts-ignore
+          profile.emails && profile.emails.find(x => x.verified);
+        const email = verifiedEmail && verifiedEmail.value;
+        if (email) {
+          user = await userRepository.findOne({
+            where: { email: email },
+            select: ['id', 'uid', 'username'] //We dont want to send the password on response
+          });
+        }
+        if (!user) {
+          user = await userRepository.findOne({
+            where: { uid: profile.id },
+            select: ['id', 'uid', 'username'] //We dont want to send the password on response
+          });
+        }
         if (!user) {
           try {
-            const user = new User();
+            user = new User();
             user.username = profile.displayName;
             user.uid = profile.id;
             user.password = shortid.generate();
@@ -38,8 +50,6 @@ if (passportConfig.clientID) {
             if (photo) {
               user.photoUrl = photo;
             }
-            const email =
-              profile.emails && profile.emails[0] && profile.emails[0].value;
             if (email) {
               user.email = email;
             }
@@ -51,7 +61,7 @@ if (passportConfig.clientID) {
             }
             //Hash the password, to securely store on DB
             user.hashPassword();
-            await userRepository.save(user);
+            user = await userRepository.save(user);
           } catch (error) {
             return done(error);
           }

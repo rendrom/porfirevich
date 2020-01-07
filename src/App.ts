@@ -8,7 +8,6 @@ import { appModule } from './store/app';
 
 @Component
 export default class App extends Vue {
-
   get urlParams() {
     return new UrlParams();
   }
@@ -25,9 +24,14 @@ export default class App extends Vue {
       token = localStorage.getItem('token');
     }
     if (token) {
-      UserService.getUser(token).then((user: User) => {
-        appModule.setUser(user);
-      });
+      appModule.setToken(token);
+      UserService.getUser(token)
+        .then((user: User) => {
+          appModule.setUser(user);
+        })
+        .catch(() => {
+          this.logout();
+        });
     }
     this.removeTokenFromUrl();
   }
@@ -35,6 +39,7 @@ export default class App extends Vue {
   logout() {
     localStorage.setItem('token', '');
     appModule.setUser(false);
+    appModule.setToken(false);
   }
 
   private removeTokenFromUrl() {
