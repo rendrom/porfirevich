@@ -2,6 +2,7 @@ import { createConnection } from 'typeorm';
 import { Application } from 'express';
 import { api } from './api';
 import { appConfig } from './appConfig';
+import config from './config';
 
 export default (app: Application) => {
   createConnection()
@@ -9,8 +10,9 @@ export default (app: Application) => {
       appConfig(app);
       api(app);
 
-      app.listen(3000, () => {
-        console.log('Development server started on port 3000!');
+      const port = config.get('http.port');
+      app.listen(port, () => {
+        console.log(`Development server started on port ${port}!`);
       });
     })
     .catch(error => console.log(error));

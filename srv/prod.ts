@@ -19,9 +19,9 @@ createConnection()
 
     app.use(express.static(publicPath, staticConf));
     app.use(idDef, appendOgImage);
-
-    app.listen(config.get('http.port'), () => {
-      console.log('Server started on port 3000!');
+    const port = config.get('http.port');
+    app.listen(port, () => {
+      console.log('Server started on port ' + port + '!');
     });
   })
   .catch(error => console.log(error));
