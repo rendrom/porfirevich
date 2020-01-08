@@ -23,9 +23,11 @@
 
       <section class="section">
         <div class="columns is-mobile">
-          <div class="column is-full">
+          <div class="column is-full" v-if="!isLoading">
             <router-view />
           </div>
+          <b-loading  v-else :is-full-page="false">
+          </b-loading>
         </div>
       </section>
 

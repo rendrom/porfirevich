@@ -150,12 +150,21 @@ export default class StoryController {
 
       await likeReposytory.save(like);
 
-      story.likesCount = story.likesCount + 1;
-      const newStory = await storyRepository.save(story);
+      res.status(200).send();
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  };
 
-      const { id, likesCount } = newStory;
-
-      res.send({ id, likesCount });
+  static dislike = async (req: Request, res: Response) => {
+    const storyId = req.params.id;
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+    const likeReposytory = getRepository(Like);
+    try {
+      const existLike = await likeReposytory.findOneOrFail({ userId, storyId });
+      likeReposytory.remove(existLike);
+      res.send();
     } catch (error) {
       res.status(500).send(error);
     }

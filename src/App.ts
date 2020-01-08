@@ -2,12 +2,12 @@ import '../public/images/logo.svg';
 
 import UrlParams from '@nextgis/url-runtime-params';
 import { Component, Vue } from 'vue-property-decorator';
-import { User } from '../srv/entity/User';
 import UserService from './services/UserService';
 import { appModule } from './store/app';
 
 @Component
 export default class App extends Vue {
+  isLoading = true;
   get urlParams() {
     return new UrlParams();
   }
@@ -16,7 +16,7 @@ export default class App extends Vue {
     return appModule.user;
   }
 
-  mounted() {
+  async mounted() {
     let token: string | null = this.urlParams.get('token') as string;
     if (token) {
       localStorage.setItem('token', token);
@@ -24,16 +24,16 @@ export default class App extends Vue {
       token = localStorage.getItem('token');
     }
     if (token) {
-      appModule.setToken(token);
-      UserService.getUser(token)
-        .then((user: User) => {
-          appModule.setUser(user);
-        })
-        .catch(() => {
-          this.logout();
-        });
+      try {
+        appModule.setToken(token);
+        const user = await UserService.getUser(token);
+        appModule.setUser(user);
+      } catch (er) {
+        this.logout();
+      }
     }
     this.removeTokenFromUrl();
+    this.isLoading = false;
   }
 
   logout() {

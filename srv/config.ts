@@ -11,6 +11,10 @@ const config = convict({
       env: 'PORT'
     }
   },
+  site: {
+    default: 'http://localhost:3000',
+    env: 'SITE'
+  },
   auth: {
     google: {
       clientId: {

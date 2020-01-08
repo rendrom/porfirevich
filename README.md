@@ -18,6 +18,7 @@ vim ./.env
 and paste
 
 ```text
+SITE=http://localhost:3000
 JWT_SIGNING_KEY=
 
 GOOGLE_CLIENTID=

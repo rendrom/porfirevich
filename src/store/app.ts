@@ -19,6 +19,7 @@ class AppStore extends VuexModule {
   hasMore = false;
   user: User | false = false;
   token: string | false = false;
+  liked: string[] = [];
 
   @MutationAction({ mutate: ['stories', 'hasMore'] })
   async getStories(opt?: GetStoriesOptions) {
@@ -71,6 +72,30 @@ class AppStore extends VuexModule {
     return false;
   }
 
+  @Action({ commit: 'SET_LIKED' })
+  addLike(like: string) {
+    const liked = [...this.liked];
+    if (!liked.includes(like)) {
+      liked.push(like);
+    }
+    return liked;
+  }
+
+  @Action({ commit: 'SET_LIKED' })
+  setLikes(likes: string[]) {
+    return likes;
+  }
+
+  @Action({ commit: 'SET_LIKED' })
+  removeLike(like: string) {
+    const liked = [...this.liked];
+    const index = liked.indexOf(like);
+    if (index !== -1) {
+      liked.splice(index, 1);
+    }
+    return liked;
+  }
+
   @Mutation
   protected SET_STORY(story: StoryResponse | false) {
     this.story = story;
@@ -84,6 +109,11 @@ class AppStore extends VuexModule {
   @Mutation
   protected SET_TOKEN(token: string | false) {
     this.token = token;
+  }
+
+  @Mutation
+  protected SET_LIKED(liked: string[]) {
+    this.liked = liked;
   }
 }
 

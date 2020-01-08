@@ -9,12 +9,13 @@
       <span>
         <b-button
             icon-left="thumb-up-outline"
+            :type="(alreadySet && !disabled) ? 'is-primary' : 'is-light'"
             :loading="isLoading"
-            :disabled="alreadySet"
-            @click="like"
+            :disabled="disabled"
+            @click="onLikeBtnClick"
           >
           {{likesCount}}
-          </b-button>
+        </b-button>
       </span>
     </div>
   </div>

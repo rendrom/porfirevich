@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 import { validate } from 'class-validator';
 
 import { User } from '../entity/User';
+import { Like } from '../entity/Like';
 
 class UserController {
   static listAll = async (req: Request, res: Response) => {
@@ -23,9 +24,28 @@ class UserController {
     //Get the user from database
     const userRepository = getRepository(User);
     try {
-      const user = await userRepository.findOneOrFail(id, {
+      await userRepository.findOneOrFail(id, {
         select: ['uid', 'username'] //We dont want to send the password on response
       });
+    } catch (error) {
+      res.status(404).send('User not found');
+    }
+  };
+
+  static likes = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+
+    //Get the user from database
+    const likeRepository = getRepository(Like);
+    try {
+      const likes = await likeRepository
+        .createQueryBuilder()
+        .where({
+          userId
+        })
+        .getMany();
+      res.status(200).send(likes);
     } catch (error) {
       res.status(404).send('User not found');
     }

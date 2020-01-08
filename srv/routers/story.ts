@@ -26,6 +26,12 @@ router.post(
   StoryController.like
 );
 
+router.post(
+  idDef + '/dislike',
+  [passport.authenticate(['jwt'], { session: false })],
+  StoryController.dislike
+);
+
 router.patch(
   idDef,
   [passport.authenticate(['jwt', 'anonymous'], { session: false })],

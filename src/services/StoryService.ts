@@ -24,13 +24,25 @@ export default {
   async like(story: Story) {
     const token = appModule.token;
     if (token) {
-      const resp = await fetch('/api/story/' + story.id + '/like', {
+      await fetch('/api/story/' + story.id + '/like', {
         method: 'POST',
         ...getAuthHeaders(token)
       });
-      const json = await resp.json();
-      return json;
+      return true;
     }
+    throw new Error('No user set');
+  },
+
+  async dislike(story: Story) {
+    const token = appModule.token;
+    if (token) {
+      await fetch('/api/story/' + story.id + '/dislike', {
+        method: 'POST',
+        ...getAuthHeaders(token)
+      });
+      return true;
+    }
+    throw new Error('No user set');
   },
 
   async create(

@@ -19,6 +19,12 @@ router.get(
 );
 
 router.get(
+  '/likes',
+  passport.authenticate(['jwt'], { session: false }),
+  UserController.likes
+);
+
+router.get(
   '/secure',
   passport.authenticate(['jwt'], { session: false }),
   (req, res) => {

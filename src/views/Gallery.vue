@@ -27,6 +27,7 @@ import { appModule } from '../store/app';
 import { schemeToHtml } from '../utils/schemeUtils';
 // @ts-ignore
 import StoryItem from '../components/StoryItem/StoryItem.vue';
+import UserService from '../services/UserService';
 
 @Component({components: {StoryItem}})
 export default class Gallery extends Vue {
@@ -40,8 +41,12 @@ export default class Gallery extends Vue {
     return appModule.stories
   }
 
+  get liked() {
+    return appModule.liked;
+  }
+
   mounted () {
-    this.loadMore();
+    this.onMount();
   }
 
   async loadMore () {
@@ -57,6 +62,20 @@ export default class Gallery extends Vue {
       this.isLoading = false;
     }
   }
+
+  private async onMount() {
+    if (appModule.token) {
+      try {
+      const likes = await UserService.getLikes(appModule.token);
+      const likedStories = likes.map(x => x.storyId) as string[];
+      appModule.setLikes(likedStories);
+      } catch(er) {
+        console.log(er);
+      }
+    }
+    this.loadMore();
+  }
+
 }
 </script>
 <style scoped>
