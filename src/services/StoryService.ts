@@ -6,6 +6,7 @@ import {
 import { getQueryString } from '../utils/getQueryString';
 import { Story } from '../../srv/entity/Story';
 import { getAuthHeaders } from '@/utils/getAuthHeaders';
+import { appModule } from '../store/app';
 
 export default {
   async one(id: string) {
@@ -18,6 +19,18 @@ export default {
     const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''));
     const json = (await resp.json()) as StoriesResponse;
     return json;
+  },
+
+  async like(story: Story) {
+    const token = appModule.token;
+    if (token) {
+      const resp = await fetch('/api/story/' + story.id + '/like', {
+        method: 'POST',
+        ...getAuthHeaders(token)
+      });
+      const json = await resp.json();
+      return json;
+    }
   },
 
   async create(

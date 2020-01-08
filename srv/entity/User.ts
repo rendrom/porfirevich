@@ -10,6 +10,7 @@ import {
 import { Length, IsEmail } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
 import { Story } from './Story';
+import { Like } from './Like';
 
 @Entity()
 @Index(['email'], { unique: true, where: 'email IS NOT NULL' })
@@ -25,6 +26,12 @@ export class User {
     (story: Story) => story.user
   )
   stories!: Story[];
+
+  @OneToMany(
+    () => Like,
+    (like: Like) => like.user
+  )
+  likes!: Like[];
 
   @Column()
   username!: string;

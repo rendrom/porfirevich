@@ -1,7 +1,9 @@
 <template>
   <div>
-    <div v-for="(i, j) in items" :key="j" class="columns">
-      <div class="column story-item" v-html="i" />
+    <div v-for="(i, j) in stories" :key="j" class="columns">
+      <div class="column">
+        <story-item :story="i"></story-item>
+      </div>
     </div>
     <div class="columns">
       <div class="column has-text-centered">
@@ -23,8 +25,10 @@ import { Component, Vue } from 'vue-property-decorator';
 
 import { appModule } from '../store/app';
 import { schemeToHtml } from '../utils/schemeUtils';
+// @ts-ignore
+import StoryItem from '../components/StoryItem/StoryItem.vue';
 
-@Component
+@Component({components: {StoryItem}})
 export default class Gallery extends Vue {
   isLoading = true;
 
@@ -32,10 +36,8 @@ export default class Gallery extends Vue {
     return appModule.hasMore;
   }
 
-  get items () {
-    return appModule.stories.map(x => {
-      return schemeToHtml(JSON.parse(x.content));
-    });
+  get stories () {
+    return appModule.stories
   }
 
   mounted () {
@@ -58,8 +60,5 @@ export default class Gallery extends Vue {
 }
 </script>
 <style scoped>
-.story-item {
-  margin: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-}
+
 </style>

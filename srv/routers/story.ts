@@ -20,6 +20,12 @@ router.post(
   StoryController.create
 );
 
+router.post(
+  idDef + '/like',
+  [passport.authenticate(['jwt'], { session: false })],
+  StoryController.like
+);
+
 router.patch(
   idDef,
   [passport.authenticate(['jwt', 'anonymous'], { session: false })],

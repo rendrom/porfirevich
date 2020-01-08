@@ -6,6 +6,7 @@ import { StoriesResponse } from '../../src/interfaces';
 import { Story } from '../entity/Story';
 import { postcard } from '../utils/postcard';
 import { User } from '../entity/User';
+import { Like } from '../entity/Like';
 
 const select: (keyof Story)[] = [
   'id',
@@ -13,7 +14,8 @@ const select: (keyof Story)[] = [
   'createdAt',
   'viewsCount',
   'postcard',
-  'userId'
+  'userId',
+  'likesCount'
 ];
 
 const query = (rep: Repository<Story>, beforeDate: Date) => {
@@ -123,6 +125,39 @@ export default class StoryController {
       res.send(newStory);
     } else {
       res.status(500).send("can't save story");
+    }
+  };
+
+  static like = async (req: Request, res: Response) => {
+    const storyId = req.params.id;
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+    const storyRepository = getRepository(Story);
+    const likeReposytory = getRepository(Like);
+    const userReposytory = getRepository(User);
+    try {
+      const existLike = await likeReposytory.findOne({ userId, storyId });
+      if (existLike) {
+        res.status(409).send('Like from this user already exists');
+        return;
+      }
+      const story = await storyRepository.findOneOrFail(storyId);
+      const user = await userReposytory.findOneOrFail(userId);
+
+      const like = new Like();
+      like.user = user;
+      like.story = story;
+
+      await likeReposytory.save(like);
+
+      story.likesCount = story.likesCount + 1;
+      const newStory = await storyRepository.save(story);
+
+      const { id, likesCount } = newStory;
+
+      res.send({ id, likesCount });
+    } catch (error) {
+      res.status(500).send(error);
     }
   };
 

@@ -7,12 +7,14 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   Generated,
-  ManyToOne
+  ManyToOne,
+  OneToMany
 } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 import shortid from 'shortid';
-import { ModelWithUser } from '../interfaces';
+// import { ModelWithUser } from '../interfaces';
 import { User } from './User';
+import { Like } from './Like';
 
 @Entity()
 @Unique(['id', 'editId'])
@@ -27,8 +29,17 @@ export class Story {
   )
   user?: User;
 
+  @OneToMany(
+    () => Like,
+    (like: Like) => like.user
+  )
+  likes!: Like[];
+
   @Column({ type: 'int', nullable: true })
   userId?: number | null;
+
+  @Column({ default: 0, type: 'int' })
+  likesCount!: number;
 
   @Column()
   @Generated('uuid')
