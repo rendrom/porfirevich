@@ -3,7 +3,7 @@ import { OAuth2Strategy, IOAuth2StrategyOption } from 'passport-google-oauth';
 import { getRepository } from 'typeorm';
 import { validate } from 'class-validator';
 import config from '../config';
-import { User } from '../entity/user';
+import { User } from '../entity/User';
 import shortid from 'shortid';
 
 const clientID = config.get('auth.google.clientId');
