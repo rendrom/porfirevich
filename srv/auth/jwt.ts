@@ -1,7 +1,7 @@
 import passport from 'passport';
 import passportJwt from 'passport-jwt';
 import { getRepository } from 'typeorm';
-import { User } from '../entity/user';
+import { User } from '../entity/User';
 import config from '../config';
 
 const audience = config.get('auth.token.audience');
