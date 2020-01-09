@@ -1,4 +1,4 @@
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 import { Story } from '../../../srv/entity/Story';
 import config from '../../../config';
 import StoryService from '@/services/StoryService';
@@ -30,6 +30,11 @@ export default class extends Vue {
 
   mounted() {
     this.likesCount = this.story.likesCount;
+  }
+
+  @Emit()
+  show() {
+    return this.story;
   }
 
   async onLikeBtnClick() {

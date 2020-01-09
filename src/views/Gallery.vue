@@ -2,7 +2,7 @@
   <div>
     <div v-for="(i, j) in stories" :key="j" class="columns">
       <div class="column">
-        <story-item :story="i"></story-item>
+        <story-item :story="i" @show="showStory"></story-item>
       </div>
     </div>
     <div class="columns">
@@ -12,44 +12,55 @@
           :loading="isLoading"
           :disabled="!hasMore"
           @click="loadMore"
-        >
-          Загрузить ещё
-        </b-button>
+        >Загрузить ещё</b-button>
       </div>
     </div>
+    <b-modal :active.sync="isShareModalActive" :width="620">
+      <Share v-if="isShareModalActive" v-model="story" />
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from "vue-property-decorator";
 
-import { appModule } from '../store/app';
-import { schemeToHtml } from '../utils/schemeUtils';
+import { appModule } from "../store/app";
+import { schemeToHtml } from "../utils/schemeUtils";
 // @ts-ignore
-import StoryItem from '../components/StoryItem/StoryItem.vue';
-import UserService from '../services/UserService';
+import StoryItem from "../components/StoryItem/StoryItem.vue";
+import UserService from "../services/UserService";
+import { Story } from "../../srv/entity/Story";
 
-@Component({components: {StoryItem}})
+@Component({
+  components: {
+    StoryItem,
+    Share: () =>
+      // @ts-ignore
+      import(/* webpackChunkName: "share" */ "../components/Share/Share.vue")
+  }
+})
 export default class Gallery extends Vue {
   isLoading = true;
+  isShareModalActive = false;
+  story: Story | false = false;
 
-  get hasMore () {
+  get hasMore() {
     return appModule.hasMore;
   }
 
-  get stories () {
-    return appModule.stories
+  get stories() {
+    return appModule.stories;
   }
 
   get liked() {
     return appModule.liked;
   }
 
-  mounted () {
+  mounted() {
     this.onMount();
   }
 
-  async loadMore () {
+  async loadMore() {
     this.isLoading = true;
     try {
       await appModule.getStories({
@@ -63,21 +74,24 @@ export default class Gallery extends Vue {
     }
   }
 
+  showStory(story: Story) {
+    this.isShareModalActive = true;
+    this.story = story;
+  }
+
   private async onMount() {
     if (appModule.token) {
       try {
-      const likes = await UserService.getLikes(appModule.token);
-      const likedStories = likes.map(x => x.storyId) as string[];
-      appModule.setLikes(likedStories);
-      } catch(er) {
+        const likes = await UserService.getLikes(appModule.token);
+        const likedStories = likes.map(x => x.storyId) as string[];
+        appModule.setLikes(likedStories);
+      } catch (er) {
         console.log(er);
       }
     }
     this.loadMore();
   }
-
 }
 </script>
 <style scoped>
-
 </style>

@@ -9,10 +9,16 @@ import shortid from 'shortid';
 const clientID = config.get('auth.google.clientId');
 const clientSecret = config.get('auth.google.clientSecret');
 
+const callbackURL = config.get('site');
+// const callbackURL =
+//   process.env.NODE_ENV === 'development'
+//     ? `http://localhost:${config.get('http.port')}`
+//     : config.get('site');
+
 const passportConfig: IOAuth2StrategyOption = {
   clientID,
   clientSecret,
-  callbackURL: config.get('site') + '/auth/google/redirect'
+  callbackURL: callbackURL + '/auth/google/redirect'
 };
 
 if (passportConfig.clientID) {
