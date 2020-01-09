@@ -7,6 +7,7 @@ import { Story } from '../entity/Story';
 import { postcard } from '../utils/postcard';
 import { User } from '../entity/User';
 import { Like } from '../entity/Like';
+import { Violation } from '../entity/Violation';
 
 const select: (keyof Story)[] = [
   'id',
@@ -150,6 +151,30 @@ export default class StoryController {
 
       await likeReposytory.save(like);
 
+      res.status(200).send();
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  };
+
+  static violation = async (req: Request, res: Response) => {
+    const storyId = req.params.id;
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+    const storyRepository = getRepository(Story);
+    const violationReposytory = getRepository(Violation);
+    const userReposytory = getRepository(User);
+    try {
+      const story = await storyRepository.findOneOrFail(storyId);
+
+      const violation = new Violation();
+      violation.story = story;
+
+      if (userId) {
+        const user = await userReposytory.findOne(userId);
+        violation.user = user;
+      }
+      await violationReposytory.save(violation);
       res.status(200).send();
     } catch (error) {
       res.status(500).send(error);

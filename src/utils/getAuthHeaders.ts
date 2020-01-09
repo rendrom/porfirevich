@@ -1,4 +1,4 @@
-export function getAuthHeaders(token?: string) {
+export function getAuthHeaders(token?: string | false) {
   const headers: { headers: Record<string, string> } = {
     headers: {
       'Content-Type': 'application/json'

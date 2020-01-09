@@ -1,4 +1,5 @@
 import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
+import { ToastProgrammatic as Toast } from 'buefy';
 import { Story } from '../../../srv/entity/Story';
 import config from '../../../config';
 import StoryService from '@/services/StoryService';
@@ -9,6 +10,7 @@ export default class extends Vue {
   @Prop({ type: Object }) readonly story!: Story;
 
   isLoading = false;
+  violationLoading = false;
 
   likesCount = 0;
 
@@ -68,6 +70,22 @@ export default class extends Vue {
       console.log(er);
     } finally {
       this.isLoading = false;
+    }
+  }
+  async violation() {
+    this.violationLoading = true;
+    try {
+      await StoryService.violation(this.story);
+      Toast.open({
+        message: 'Спасибо, сообщение о нарушение отправлено на рассмотрение',
+        type: 'is-success',
+        position: 'is-bottom',
+        duration: 6000
+      });
+    } catch (er) {
+      console.log(er);
+    } finally {
+      this.violationLoading = false;
     }
   }
 }

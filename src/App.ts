@@ -19,6 +19,7 @@ export default class App extends Vue {
   async mounted() {
     let token: string | null = this.urlParams.get('token') as string;
     if (token) {
+      token = token.replace(/#$/, '');
       localStorage.setItem('token', token);
     } else {
       token = localStorage.getItem('token');
@@ -44,6 +45,10 @@ export default class App extends Vue {
 
   private removeTokenFromUrl() {
     this.urlParams.remove('token');
+    // const query = this.urlParams.params();
+    // if (Object.keys(query).length < 1) {
+    //   this.$router.push(this.$route.path);
+    // }
     // const query = { ...this.$route.query };
     // delete query.token;
     // this.$router.replace({ query });

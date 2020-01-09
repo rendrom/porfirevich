@@ -27,6 +27,12 @@ router.post(
 );
 
 router.post(
+  idDef + '/violation',
+  [passport.authenticate(['jwt', 'anonymous'], { session: false })],
+  StoryController.violation
+);
+
+router.post(
   idDef + '/dislike',
   [passport.authenticate(['jwt'], { session: false })],
   StoryController.dislike

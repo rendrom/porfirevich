@@ -31,7 +31,7 @@
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <b-tooltip type="is-dark" label="Сообщить о нарушении">
-            <b-button size="is-small" icon-right="alert-circle-outline"></b-button>
+            <b-button size="is-small" icon-right="alert-circle-outline" @click="violation" :loading="violationLoading"></b-button>
             </b-tooltip>
           </div>
         </div>

@@ -45,6 +45,16 @@ export default {
     throw new Error('No user set');
   },
 
+  async violation(story: Story) {
+    const token = appModule.token;
+
+    await fetch('/api/story/' + story.id + '/violation', {
+      method: 'POST',
+      ...getAuthHeaders(token)
+    });
+    return true;
+  },
+
   async create(
     data: {
       content: string;
