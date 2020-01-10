@@ -21,17 +21,19 @@
         </div>
 
         <div class="column has-text-centered">
-          <b-button
-            size="is-small"
-            icon-left="camera"
-            @click="show"
-          >Получить картинку</b-button>
+          <b-button size="is-small" icon-left="camera" @click="show">Получить картинку</b-button>
         </div>
 
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <b-tooltip type="is-dark" label="Сообщить о нарушении">
-            <b-button size="is-small" icon-right="alert-circle-outline" @click="violation" :loading="violationLoading"></b-button>
+              <b-button
+                size="is-small"
+                icon-right="alert-circle-outline"
+                position="is-left"
+                @click="violation"
+                :loading="violationLoading"
+              ></b-button>
             </b-tooltip>
           </div>
         </div>

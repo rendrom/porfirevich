@@ -2,29 +2,19 @@
   <div>
     <div v-show="!isLoading" class="box">
       <div>
-        <p v-if="isError" class="subtitle">
-          Произошла ошибка!
-        </p>
-        <p v-else class="subtitle">
-          Сохраните изображение ниже, чтобы поделиться историей
-        </p>
+        <p v-if="isError" class="subtitle">Произошла ошибка!</p>
+        <p v-else class="subtitle">Сохраните изображение ниже, чтобы поделиться историей</p>
       </div>
       <div class="output-block">
         <div v-if="isError">
           <p>Не удалось сгенерировать "открытку" из вашей истории.</p>
         </div>
         <div v-else class="image-share-container">
-          <img :src="output"
-class="image-share"
-/>
+          <img :src="output" class="image-share" />
         </div>
         <div>
-          <p v-if="isError">
-            Копировать:
-          </p>
-          <p v-else>
-            или скопируйте:
-          </p>
+          <p v-if="isError">Копировать:</p>
+          <p v-else>или скопируйте:</p>
 
           <div>
             <b-button
@@ -32,43 +22,42 @@ class="image-share"
               type="is-text"
               icon-left="link"
               @click="copyToClipboard('test', shareUrl)"
-            >
-              {{ shareUrl }}
-            </b-button>
+            >{{ shareUrl }}</b-button>
           </div>
           <div>
-            <b-button
-              type="is-text"
-              icon-left="content-copy"
-              @click="copyToClipboard"
-            >
-              текст
-            </b-button>
+            <b-button type="is-text" icon-left="content-copy" @click="copyToClipboard">текст</b-button>
             <b-button
               type="is-text"
               icon-left="xml"
               @click="copyToClipboard('html')"
-            >
-              текст c разметкой
-            </b-button>
+            >текст c разметкой</b-button>
             <b-button
               type="is-text"
               icon-left="format-quote-close"
               @click="copyToClipboard('quote')"
-            >
-              цитату
-            </b-button>
+            >цитату</b-button>
           </div>
         </div>
-        <div>
-          <b-checkbox v-if="story.editId" v-model="story.isPublic">
-            Публиковать в галереи
-          </b-checkbox>
+        <div class="pt10">
+          <b-checkbox v-if="story.editId" v-model="story.isPublic">Публиковать в галереи</b-checkbox>
         </div>
         <!-- <div class="has-text-grey-light is-size-6 has-text-right">
           Используйте тег <code>#порфирьевич</code> для социальных сетей
         </div>-->
       </div>
+      <b-notification
+        class="pt10"
+        v-if="story.editId && !user"
+        type="is-info"
+        aria-close-label="Close notification"
+        role="alert"
+      >
+        Теперь Порфирьевич позволяет заводить
+        <strong>учётные записи пользователей</strong> и публиковать истории в галереи.
+        <br/><br/>Чтобы добавить в свой аккаунт эту историю, сохраните номер
+        <code>{{story.editId}}</code>.
+        Позже появится функция привязки историй по номеру к аккаунту пользователя.
+      </b-notification>
     </div>
     <b-loading :active.sync="isLoading" />
   </div>

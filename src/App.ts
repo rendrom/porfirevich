@@ -8,6 +8,7 @@ import { appModule } from './store/app';
 @Component
 export default class App extends Vue {
   isLoading = true;
+  rememberMe = true;
   get urlParams() {
     return new UrlParams();
   }
@@ -20,7 +21,9 @@ export default class App extends Vue {
     let token: string | null = this.urlParams.get('token') as string;
     if (token) {
       token = token.replace(/#$/, '');
-      localStorage.setItem('token', token);
+      if (this.rememberMe) {
+        localStorage.setItem('token', token);
+      }
     } else {
       token = localStorage.getItem('token');
     }
@@ -35,6 +38,10 @@ export default class App extends Vue {
     }
     this.removeTokenFromUrl();
     this.isLoading = false;
+  }
+
+  login() {
+    window.open('/auth/google/start', '_self');
   }
 
   logout() {

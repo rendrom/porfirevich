@@ -17,7 +17,27 @@
           <b-navbar-item tag="router-link" to="/gallery">Галерея</b-navbar-item>
           <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
           <b-navbar-item v-if="user" @click="logout">Выход</b-navbar-item>
-          <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item>
+          <!-- <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item> -->
+          <b-dropdown v-else position="is-bottom-left" aria-role="menu" trap-focus>
+            <a class="navbar-item" slot="trigger" role="button">
+              <span>Вход</span>
+              <b-icon icon="menu-down"></b-icon>
+            </a>
+
+            <b-dropdown-item aria-role="menu-item" :focusable="false" custom paddingless>
+              <div class="custom-menu-content">
+                <div class="custom-menu-item">
+                  <p>Войти через:</p>
+                </div>
+                <div class="custom-menu-item">
+                  <b-button icon-left="google" @click="login">Google</b-button>
+                </div>
+                <!-- <div class="custom-menu-item">
+                  <b-checkbox v-model="rememberMe">Запомнить меня</b-checkbox>
+                </div> -->
+              </div>
+            </b-dropdown-item>
+          </b-dropdown>
         </template>
       </b-navbar>
 
@@ -26,8 +46,7 @@
           <div class="column is-full" v-if="!isLoading">
             <router-view />
           </div>
-          <b-loading  v-else :is-full-page="false">
-          </b-loading>
+          <b-loading v-else :is-full-page="false"></b-loading>
         </div>
       </section>
 
@@ -61,6 +80,13 @@
 .section {
   flex: 1;
   /* background: #f5f5f5; */
+}
+
+.custom-menu-content {
+  padding: 0 20px;
+}
+.custom-menu-item {
+  padding: 10px 0;
 }
 
 @media screen and (min-width: 768px) {
