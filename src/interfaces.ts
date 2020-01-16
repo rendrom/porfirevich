@@ -22,6 +22,7 @@ export type StoryResponse = Story;
 export interface GetStoriesOptions {
   limit?: number;
   offset?: number;
+  orderBy?: string[];
 }
 
 export interface StoriesResponse {

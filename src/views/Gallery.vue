@@ -1,5 +1,14 @@
 <template>
   <div>
+    <div class="columns">
+      <div class="column">
+         <div class="field">
+            <b-switch v-model="popularFirst">
+                Сначала популярные
+            </b-switch>
+        </div>
+      </div>
+    </div>
     <div v-for="(i, j) in stories" :key="j" class="columns">
       <div class="column">
         <story-item :story="i" @show="showStory"></story-item>
@@ -22,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 
 import { appModule } from "../store/app";
 import { schemeToHtml } from "../utils/schemeUtils";
@@ -43,6 +52,7 @@ export default class Gallery extends Vue {
   isLoading = true;
   isShareModalActive = false;
   story: Story | false = false;
+  popularFirst = false;
 
   get hasMore() {
     return appModule.hasMore;
@@ -56,6 +66,12 @@ export default class Gallery extends Vue {
     return appModule.liked;
   }
 
+  @Watch('popularFirst')
+  async onPopularOrderingChange(val: boolean) {
+    await appModule.setStories([]);
+    this.loadMore();
+  }
+
   mounted() {
     this.onMount();
   }
@@ -63,9 +79,14 @@ export default class Gallery extends Vue {
   async loadMore() {
     this.isLoading = true;
     try {
+      const orderBy = [];
+      if (this.popularFirst) {
+        orderBy.push('likesCount');
+      }
       await appModule.getStories({
         limit: 50,
-        offset: appModule.stories.length
+        offset: appModule.stories.length,
+        orderBy
       });
     } catch (er) {
       //

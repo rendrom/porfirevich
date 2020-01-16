@@ -35,15 +35,21 @@ export default class StoryController {
     const beforeDate = req.query.beforeDate
       ? new Date(req.query.beforeDate)
       : new Date();
+    const orderBy = req.query.orderBy as string;
     // // Get stories from database
     try {
       const repository = getRepository(Story);
+      const list = query(repository, beforeDate)
+        .take(req.query.limit)
+        .skip(req.query.offset)
+        .orderBy('createdAt', 'DESC');
+      if (orderBy) {
+        orderBy.split(',').forEach(x => {
+          list.orderBy(x, 'DESC');
+        });
+      }
       const [results, itemCount] = await Promise.all([
-        query(repository, beforeDate)
-          .take(req.query.limit)
-          .skip(req.query.offset)
-          .orderBy('createdAt', 'DESC')
-          .getMany(),
+        list.getMany(),
         query(repository, beforeDate).getCount()
       ]);
 
