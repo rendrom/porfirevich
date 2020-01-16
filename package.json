@@ -27,7 +27,7 @@
     "@types/events": "^3.0.0",
     "@types/helmet": "0.0.45",
     "@types/jsonwebtoken": "^8.3.6",
-    "@types/node": "^13.1.7",
+    "@types/node": "^12.12.22",
     "@types/puppeteer": "^2.0.0",
     "@types/quill": "^2.0.3",
     "abortcontroller-polyfill": "^1.4.0",
