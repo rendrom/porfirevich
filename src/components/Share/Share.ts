@@ -6,6 +6,7 @@ import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import { SITE } from '../../config';
 import StoryService from '../../services/StoryService';
 import { appModule } from '../..//store/app';
+import e = require('express');
 
 @Component
 export default class extends Vue {
@@ -44,10 +45,18 @@ export default class extends Vue {
   @Watch('story.isPublic')
   async onPublicChange(isPublic: boolean) {
     if (this.story.editId) {
-      await StoryService.edit(this.story.id, {
+      const edited = await StoryService.edit(this.story.id, {
         editId: this.story.editId,
         isPublic
       });
+      console.log(edited);
+      if (edited) {
+        if (edited.isPublic) {
+          appModule.appendStories(this.story);
+        } else {
+          appModule.removeFromStories(this.story);
+        }
+      }
     }
   }
 

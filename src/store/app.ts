@@ -36,6 +36,30 @@ class AppStore extends VuexModule {
     return { stories, hasMore: resp.hasMore };
   }
 
+  @MutationAction({ mutate: ['stories', 'hasMore'] })
+  async setStories(stories: StoryResponse[]) {
+    return { stories, hasMore: true };
+  }
+
+  @Action({ commit: 'SET_STORIES' })
+  async appendStories(story: StoryResponse) {
+    const stories = [...this.stories];
+    if (!stories.find(x => x.id === story.id)) {
+      stories.push(story);
+    }
+    return stories;
+  }
+
+  @Action({ commit: 'SET_STORIES' })
+  async removeFromStories(story: StoryResponse) {
+    const stories = [...this.stories];
+    const index = stories.findIndex(x => x.id === story.id);
+    if (index !== -1) {
+      stories.splice(index, 1);
+    }
+    return stories;
+  }
+
   @Action({ commit: 'SET_USER' })
   async setUser(user: User | false) {
     return user;
@@ -99,6 +123,11 @@ class AppStore extends VuexModule {
   @Mutation
   protected SET_STORY(story: StoryResponse | false) {
     this.story = story;
+  }
+
+  @Mutation
+  protected SET_STORIES(stories: StoryResponse[]) {
+    this.stories = stories;
   }
 
   @Mutation
