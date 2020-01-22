@@ -39,7 +39,14 @@
           </div>
         </div>
         <div class="pt10">
-          <b-checkbox v-if="story.editId" v-model="story.isPublic">Публиковать в галереи</b-checkbox>
+          <b-tooltip
+            v-if="story.editId"
+            type="is-dark"
+            label="Сначала войдите"
+            :active="!user"
+          >
+            <b-checkbox v-model="story.isPublic" :disabled="!user">Публиковать в галереи</b-checkbox>
+          </b-tooltip>
         </div>
         <!-- <div class="has-text-grey-light is-size-6 has-text-right">
           Используйте тег <code>#порфирьевич</code> для социальных сетей
@@ -54,7 +61,8 @@
       >
         Теперь Порфирьевич позволяет заводить
         <strong>учётные записи пользователей</strong> и публиковать истории в галереи.
-        <br/><br/>Чтобы добавить в свой аккаунт эту историю, сохраните номер
+        <br />
+        <br />Чтобы добавить в свой аккаунт эту историю, сохраните номер
         <code>{{story.editId}}</code>.
         Позже появится функция привязки историй по номеру к аккаунту пользователя.
       </b-notification>

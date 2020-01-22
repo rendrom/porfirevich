@@ -30,7 +30,7 @@
               <b-tooltip
                 v-if="isSuperuser"
                 type="is-dark"
-                :label="story.isDeleted ? 'Удалить' : 'Восстановить'"
+                :label="story.isDeleted ? 'Восстановить' : 'Удалить'"
                 class="right-control-btn"
               >
                 <b-button
