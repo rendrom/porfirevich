@@ -49,7 +49,6 @@ export default class extends Vue {
         editId: this.story.editId,
         isPublic
       });
-      console.log(edited);
       if (edited) {
         if (edited.isPublic) {
           appModule.appendStories(this.story);

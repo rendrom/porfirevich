@@ -60,6 +60,24 @@ class AppStore extends VuexModule {
     return stories;
   }
 
+  @Action({ commit: 'SET_STORIES' })
+  async updateStory(opt: {
+    id: number | string;
+    params: Partial<StoryResponse>;
+  }) {
+    const stories = [...this.stories];
+    const storyIndex = stories.findIndex(x => x.id === opt.id);
+    if (storyIndex !== -1) {
+      const story = stories[storyIndex];
+      const newStory: StoryResponse = {
+        ...story,
+        ...opt.params
+      } as StoryResponse;
+      stories[storyIndex] = newStory;
+    }
+    return stories;
+  }
+
   @Action({ commit: 'SET_USER' })
   async setUser(user: User | false) {
     return user;

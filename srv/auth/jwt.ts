@@ -21,7 +21,7 @@ passport.use(
     try {
       const user = await userRepository.findOneOrFail({
         where: { uid: payload.sub },
-        select: ['id', 'uid', 'username', 'photoUrl']
+        select: ['id', 'uid', 'username', 'photoUrl', 'isSuperuser']
       });
       return done(null, user, payload);
     } catch (error) {

@@ -72,12 +72,11 @@ export default {
   },
 
   async edit(id: string, data: Partial<Story>) {
+    const token = appModule.token;
     const resp = await fetch('/api/story/' + id, {
       method: 'PATCH',
       body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      ...getAuthHeaders(token)
     });
     const json = (await resp.json()) as StoryResponse;
     return json;

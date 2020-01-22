@@ -1,5 +1,5 @@
 <template>
-  <div class="story-item">
+  <div class="story-item" v-bind:class="{ isdeleted: story.isDeleted }">
     <span v-for="(c, i) in content" :key="i">
       <strong v-if="c[1]" :style="{color: color}">{{c[0]}}</strong>
       <span v-else>{{c[0]}}</span>
@@ -26,15 +26,32 @@
 
         <div class="column is-1">
           <div class="tools is-pulled-right">
-            <b-tooltip type="is-dark" label="Сообщить о нарушении">
-              <b-button
-                size="is-small"
-                icon-right="alert-circle-outline"
-                position="is-left"
-                @click="violation"
-                :loading="violationLoading"
-              ></b-button>
-            </b-tooltip>
+            <section>
+              <b-tooltip
+                v-if="isSuperuser"
+                type="is-dark"
+                :label="story.isDeleted ? 'Удалить' : 'Восстановить'"
+                class="right-control-btn"
+              >
+                <b-button
+                  size="is-small"
+                  :icon-right="story.isDeleted ? 'restore' : 'delete'"
+                  type="is-danger"
+                  position="is-left"
+                  @click="remove"
+                  :loading="deleteLoading"
+                ></b-button>
+              </b-tooltip>
+              <b-tooltip type="is-dark" label="Сообщить о нарушении" class="right-control-btn">
+                <b-button
+                  size="is-small"
+                  icon-right="alert-circle-outline"
+                  position="is-left"
+                  @click="violation"
+                  :loading="violationLoading"
+                ></b-button>
+              </b-tooltip>
+            </section>
           </div>
         </div>
       </div>
@@ -45,6 +62,13 @@
 <script lang="ts" src="./StoryItem.ts"></script>
 
 <style scoped>
+.isdeleted {
+  opacity: 0.3;
+}
+
+.right-control-btn {
+  padding-left: 3px;
+}
 .story-item {
   padding: 10px;
   border: 1px solid rgba(0, 0, 0, 0.3);

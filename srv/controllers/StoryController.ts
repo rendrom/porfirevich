@@ -203,8 +203,11 @@ export default class StoryController {
 
   static edit = async (req: Request, res: Response) => {
     const id = req.params.id;
-    const { editId, isPublic } = req.body;
-    // Try to find story on database
+    const { editId, ...params } = req.body;
+    // @ts-ignore
+    const userId = req.user && req.user.id;
+    let user: User | undefined;
+
     const repository = getRepository(Story);
     let story: Story;
     try {
@@ -213,12 +216,26 @@ export default class StoryController {
       res.status(404).send('Story not found');
       return;
     }
-    if (story.editId !== editId) {
-      res.status(404).send('No edit URL');
+    if (userId) {
+      const userReposytory = getRepository(User);
+      user = await userReposytory.findOne(userId);
+    }
+    if (user) {
+      if (!user.isSuperuser && story.userId !== user.id) {
+        res.status(403).send('Not permitted');
+        return;
+      }
+    } else if (story.editId !== editId) {
+      res.status(404).send('No `editId`');
       return;
     }
     // Validate the new values on model
-    story.isPublic = isPublic;
+    for (const p in params) {
+      if (p in story) {
+        // @ts-ignore
+        story[p] = params[p];
+      }
+    }
     const errors = await validate(story);
     if (errors.length > 0) {
       res.status(400).send(errors);

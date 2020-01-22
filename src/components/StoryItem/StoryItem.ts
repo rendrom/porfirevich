@@ -11,6 +11,7 @@ export default class extends Vue {
 
   isLoading = false;
   violationLoading = false;
+  deleteLoading = false;
 
   likesCount = 0;
 
@@ -20,6 +21,14 @@ export default class extends Vue {
 
   get color() {
     return config.primaryColor;
+  }
+
+  get user() {
+    return appModule.user;
+  }
+
+  get isSuperuser() {
+    return this.user && this.user.isSuperuser;
   }
 
   get alreadySet(): boolean {
@@ -45,6 +54,24 @@ export default class extends Vue {
     } else {
       this.like();
     }
+  }
+
+  async remove() {
+    this.deleteLoading = true;
+    try {
+      const deleted = await StoryService.edit(this.story.id, {
+        isDeleted: !this.story.isDeleted
+      });
+      if (deleted) {
+        appModule.updateStory({
+          id: this.story.id,
+          params: { isDeleted: deleted.isDeleted }
+        });
+      }
+    } catch {
+      //
+    }
+    this.deleteLoading = false;
   }
 
   async like() {
