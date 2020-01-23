@@ -220,15 +220,16 @@ export default class StoryController {
       const userReposytory = getRepository(User);
       user = await userReposytory.findOne(userId);
     }
-    if (user) {
-      if (!user.isSuperuser && story.userId !== user.id) {
-        res.status(403).send('Not permitted');
-        return;
-      }
-    } else if (story.editId !== editId) {
-      res.status(404).send('No `editId`');
+    const isSuperuser = user && user.isSuperuser;
+    const isOwner = user && story.userId !== user.id;
+    if (!user && !isSuperuser && !isOwner) {
+      res.status(403).send('Not permitted');
       return;
     }
+    // } else if (story.editId !== editId) {
+    //   res.status(404).send('No `editId`');
+    //   return;
+    // }
     // Validate the new values on model
     for (const p in params) {
       if (p in story) {
