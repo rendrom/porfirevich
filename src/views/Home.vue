@@ -2,7 +2,10 @@
   <div>
     <Transformer v-if="!isLoading" v-model="scheme" @loading="checkTransformLoading" />
     <div class="save-control columns">
-      <div class="column has-text-centered">
+      <div class="column is-1">
+        <LikeButton v-if="story" :story="story"></LikeButton>
+      </div>
+      <div class="column buttons has-text-centered">
         <b-button
           type
           icon-left="content-copy"
@@ -16,7 +19,13 @@
           @click="saveStory"
         >Получить картинку</b-button>
       </div>
+      <div class="column is-1">
+        <div class="tools is-pulled-right">
+
+        </div>
+      </div>
     </div>
+
 
     <b-modal :active.sync="isShareModalActive" :width="620">
       <Share v-if="isShareModalActive" v-model="story" />

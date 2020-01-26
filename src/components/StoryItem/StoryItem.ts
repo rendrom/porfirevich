@@ -2,18 +2,16 @@ import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 import { ToastProgrammatic as Toast } from 'buefy';
 import { Story } from '../../../srv/entity/Story';
 import config from '../../../config';
-import StoryService from '@/services/StoryService';
-import { appModule } from '@/store/app';
+import LikeButton from '../LikeButton';
+import StoryService from '../../services/StoryService';
+import { appModule } from '../../store/app';
 
-@Component
+@Component({ components: { LikeButton } })
 export default class extends Vue {
   @Prop({ type: Object }) readonly story!: Story;
 
-  isLoading = false;
   violationLoading = false;
   deleteLoading = false;
-
-  likesCount = 0;
 
   get content() {
     return JSON.parse(this.story.content);
@@ -39,21 +37,13 @@ export default class extends Vue {
     return !appModule.user;
   }
 
-  mounted() {
-    this.likesCount = this.story.likesCount;
-  }
-
   @Emit()
   show() {
     return this.story;
   }
 
-  async onLikeBtnClick() {
-    if (this.alreadySet) {
-      this.dislike();
-    } else {
-      this.like();
-    }
+  go() {
+    this.$router.push('/' + this.story.id);
   }
 
   async remove() {
@@ -74,31 +64,6 @@ export default class extends Vue {
     this.deleteLoading = false;
   }
 
-  async like() {
-    this.isLoading = true;
-    try {
-      await StoryService.like(this.story);
-      this.likesCount = this.likesCount + 1;
-      appModule.addLike(this.story.id);
-    } catch (er) {
-      console.log(er);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  async dislike() {
-    this.isLoading = true;
-    try {
-      await StoryService.dislike(this.story);
-      this.likesCount = this.likesCount - 1;
-      appModule.removeLike(this.story.id);
-    } catch (er) {
-      console.log(er);
-    } finally {
-      this.isLoading = false;
-    }
-  }
   async violation() {
     this.violationLoading = true;
     try {

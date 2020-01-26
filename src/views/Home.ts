@@ -1,10 +1,10 @@
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { Story } from '../../srv/entity/Story';
 
 import { copyStory } from '../utils/copyToClipboard';
 
-// @ts-ignore
 import Transformer from '../components/Transformer/Transformer.vue';
+import LikeButton from '../components/LikeButton';
 import { appModule } from '../store/app';
 import { Scheme } from '../interfaces';
 import { schemeToHtml } from '../utils/schemeUtils';
@@ -12,9 +12,8 @@ import { schemeToHtml } from '../utils/schemeUtils';
 @Component({
   components: {
     Transformer,
-    // @ts-ignore
+    LikeButton,
     Share: () =>
-      // @ts-ignore
       import(/* webpackChunkName: "share" */ '../components/Share/Share.vue')
   }
 })
@@ -33,6 +32,11 @@ export default class Home extends Vue {
 
   get story(): Story | false {
     return appModule.story;
+  }
+
+  @Watch('story')
+  onStoryChange() {
+    appModule.getLikes();
   }
 
   async beforeMount() {

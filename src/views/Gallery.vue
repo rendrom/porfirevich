@@ -103,9 +103,7 @@ export default class Gallery extends Vue {
   private async onMount() {
     if (appModule.token) {
       try {
-        const likes = await UserService.getLikes(appModule.token);
-        const likedStories = likes.map(x => x.storyId) as string[];
-        appModule.setLikes(likedStories);
+        appModule.getLikes();
       } catch (er) {
         console.log(er);
       }

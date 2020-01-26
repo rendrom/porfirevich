@@ -11,6 +11,7 @@ import { StoryResponse, Scheme, GetStoriesOptions } from '../interfaces';
 
 import StoryService from '../services/StoryService';
 import { User } from '../../srv/entity/User';
+import UserService from '@/services/UserService';
 
 @Module({ dynamic: true, store: store, name: 'catalog' })
 class AppStore extends VuexModule {
@@ -126,6 +127,16 @@ class AppStore extends VuexModule {
   @Action({ commit: 'SET_LIKED' })
   setLikes(likes: string[]) {
     return likes;
+  }
+
+  @Action({ commit: 'SET_LIKED' })
+  async getLikes() {
+    if (this.token) {
+      const likes = await UserService.getLikes(this.token);
+      const likedStories = likes.map(x => x.storyId) as string[];
+      return likedStories;
+    }
+    return [];
   }
 
   @Action({ commit: 'SET_LIKED' })

@@ -8,20 +8,12 @@
     <div class="item-controls">
       <div class="columns is-mobile controls-pane">
         <div class="column is-1">
-          <b-tooltip type="is-dark" :label="disabled ? 'Сначала войдите' : ''">
-            <b-button
-              icon-left="thumb-up-outline"
-              size="is-small"
-              :type="(alreadySet && !disabled) ? 'is-primary' : 'is-light'"
-              :loading="isLoading"
-              :disabled="disabled"
-              @click="onLikeBtnClick"
-            >{{likesCount}}</b-button>
-          </b-tooltip>
+          <LikeButton :story="story"></LikeButton>
         </div>
 
-        <div class="column has-text-centered">
+        <div class="main-actions column buttons has-text-centered">
           <b-button size="is-small" icon-left="camera" @click="show">Получить картинку</b-button>
+          <b-button size="is-small" icon-left="border-color" @click="go"></b-button>
         </div>
 
         <div class="column is-1">
@@ -42,6 +34,12 @@
                   :loading="deleteLoading"
                 ></b-button>
               </b-tooltip>
+            </section>
+          </div>
+        </div>
+        <div class="column is-1">
+          <div class="tools is-pulled-right">
+            <section>
               <b-tooltip type="is-dark" label="Сообщить о нарушении" class="right-control-btn">
                 <b-button
                   size="is-small"
@@ -62,6 +60,11 @@
 <script lang="ts" src="./StoryItem.ts"></script>
 
 <style scoped>
+
+.main-actions {
+  margin-bottom: 0;
+}
+
 .isdeleted {
   opacity: 0.3;
 }
