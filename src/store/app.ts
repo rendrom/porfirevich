@@ -21,6 +21,7 @@ class AppStore extends VuexModule {
   user: User | false = false;
   token: string | false = false;
   liked: string[] = [];
+  replies: string[] = [];
 
   @MutationAction({ mutate: ['stories', 'hasMore'] })
   async getStories(opt?: GetStoriesOptions) {
@@ -49,6 +50,13 @@ class AppStore extends VuexModule {
       stories.push(story);
     }
     return stories;
+  }
+
+  @Action({ commit: 'SET_REPLIES' })
+  async appendReplies(replies: string[]) {
+    const currentReplies = [...this.replies];
+    replies.forEach(x => currentReplies.push(x));
+    return currentReplies;
   }
 
   @Action({ commit: 'SET_STORIES' })
@@ -152,6 +160,11 @@ class AppStore extends VuexModule {
   @Mutation
   protected SET_STORY(story: StoryResponse | false) {
     this.story = story;
+  }
+
+  @Mutation
+  protected SET_REPLIES(replies: string[]) {
+    this.replies = replies;
   }
 
   @Mutation

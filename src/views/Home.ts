@@ -1,4 +1,5 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { ToastProgrammatic as Toast } from 'buefy';
 import { Story } from '../../srv/entity/Story';
 
 import { copyStory } from '../utils/copyToClipboard';
@@ -8,6 +9,7 @@ import LikeButton from '../components/LikeButton';
 import { appModule } from '../store/app';
 import { Scheme } from '../interfaces';
 import { schemeToHtml } from '../utils/schemeUtils';
+import { checkCorrupted } from '@/utils/checkCorrupted';
 
 @Component({
   components: {
@@ -46,6 +48,8 @@ export default class Home extends Vue {
         const story = await appModule.getStory(this.id);
         if (story) {
           this.scheme = JSON.parse(story.content) as Scheme;
+          const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
+          appModule.appendReplies(replies);
         }
       } catch (er) {
         //
@@ -58,12 +62,22 @@ export default class Home extends Vue {
   }
 
   async saveStory() {
-    this.isShareModalActive = true;
     if (!appModule.story) {
-      const story = await appModule.createStory(this.scheme);
-      const path = '/' + (story ? story.id : '');
-      if (this.$route.path !== path) {
-        this.$router.push(path);
+      const isCorrupted = checkCorrupted(this.scheme);
+      if (isCorrupted) {
+        Toast.open({
+          message:
+            'Обнаружены недопустимые модификации дополнений Порфирьевича. Публикация истории отменена.',
+          type: 'is-danger',
+          position: 'is-bottom'
+        });
+      } else {
+        this.isShareModalActive = true;
+        const story = await appModule.createStory(this.scheme);
+        const path = '/' + (story ? story.id : '');
+        if (this.$route.path !== path) {
+          this.$router.push(path);
+        }
       }
     }
   }
