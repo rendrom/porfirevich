@@ -72,18 +72,35 @@ export default class StoryController {
   };
 
   static one = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const isSuperuser = req.user && req.user.isSuperuser;
     //Get the ID from the url
     const id: string = req.params.id;
     const repository = getRepository(Story);
     try {
-      const story = await repository.findOneOrFail(id, {
-        select: select
-      });
-      story.viewsCount = story.viewsCount + 1;
-      repository.save(story);
-      res.send(story);
+      const storyRep = repository
+        .createQueryBuilder('story')
+        .where({
+          id
+        })
+        .select(select.map(x => `story.${x}`));
+
+      if (isSuperuser) {
+        storyRep
+          .leftJoin('story.user', 'u')
+          .addSelect(['u.id', 'u.username', 'u.email', 'u.photoUrl']);
+      }
+
+      const story = await storyRep.getOne();
+      if (story) {
+        story.viewsCount = story.viewsCount + 1;
+        repository.save(story);
+        res.send(story);
+      } else {
+        res.status(404).send('Story not found');
+      }
     } catch (error) {
-      res.status(404).send('Story not found');
+      res.status(500).send(error);
     }
   };
 

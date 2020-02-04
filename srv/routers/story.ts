@@ -11,7 +11,11 @@ router.get(
   [passport.authenticate(['jwt', 'anonymous'], { session: false })],
   StoryController.all
 );
-router.get(idDef, [], StoryController.one);
+router.get(
+  idDef,
+  [passport.authenticate(['jwt', 'anonymous'], { session: false })],
+  StoryController.one
+);
 router.get(idDef + '/postcard', [], StoryController.postcard);
 
 router.post(

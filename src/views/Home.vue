@@ -25,7 +25,7 @@
         </div>
       </div>
     </div>
-
+    <UserItem v-if="story && story.user" :user="story.user"></UserItem>
 
     <b-modal :active.sync="isShareModalActive" :width="620">
       <Share v-if="isShareModalActive" v-model="story" />

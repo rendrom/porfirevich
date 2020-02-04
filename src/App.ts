@@ -29,9 +29,9 @@ export default class App extends Vue {
     }
     if (token) {
       try {
-        appModule.setToken(token);
+        await appModule.setToken(token);
         const user = await UserService.getUser(token);
-        appModule.setUser(user);
+        await appModule.setUser(user);
       } catch (er) {
         this.logout();
       }

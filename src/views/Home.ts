@@ -5,6 +5,7 @@ import { Story } from '../../srv/entity/Story';
 import { copyStory } from '../utils/copyToClipboard';
 
 import Transformer from '../components/Transformer/Transformer.vue';
+import UserItem from '../components/UserItem/UserItem.vue';
 import LikeButton from '../components/LikeButton';
 import { appModule } from '../store/app';
 import { Scheme } from '../interfaces';
@@ -15,6 +16,7 @@ import { checkCorrupted } from '@/utils/checkCorrupted';
   components: {
     Transformer,
     LikeButton,
+    UserItem,
     Share: () =>
       import(/* webpackChunkName: "share" */ '../components/Share/Share.vue')
   }
@@ -41,24 +43,8 @@ export default class Home extends Vue {
     appModule.getLikes();
   }
 
-  async beforeMount() {
-    if (this.id) {
-      this.isLoading = true;
-      try {
-        const story = await appModule.getStory(this.id);
-        if (story) {
-          this.scheme = JSON.parse(story.content) as Scheme;
-          const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
-          appModule.appendReplies(replies);
-        }
-      } catch (er) {
-        //
-      } finally {
-        this.isLoading = false;
-      }
-    }
-
-    setTimeout(() => this.$watch('scheme', () => this.clean()));
+  mounted() {
+    this._mounted();
   }
 
   async saveStory() {
@@ -96,5 +82,25 @@ export default class Home extends Vue {
 
   copyToClipboard() {
     copyStory(schemeToHtml(this.scheme), 'text');
+  }
+
+  private async _mounted() {
+    if (this.id) {
+      this.isLoading = true;
+      try {
+        const story = await appModule.getStory(this.id);
+        if (story) {
+          this.scheme = JSON.parse(story.content) as Scheme;
+          const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
+          appModule.appendReplies(replies);
+        }
+      } catch (er) {
+        //
+      } finally {
+        this.isLoading = false;
+      }
+    }
+
+    setTimeout(() => this.$watch('scheme', () => this.clean()));
   }
 }

@@ -10,7 +10,8 @@ import { appModule } from '../store/app';
 
 export default {
   async one(id: string) {
-    const resp = await fetch('/api/story/' + id);
+    const token = appModule.token;
+    const resp = await fetch('/api/story/' + id, { ...getAuthHeaders(token) });
     const json = (await resp.json()) as StoryResponse;
     return json;
   },
