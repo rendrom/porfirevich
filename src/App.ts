@@ -41,7 +41,8 @@ export default class App extends Vue {
   }
 
   login() {
-    window.open('/auth/google/start', '_self');
+    const next = this.$route.path !== '/' ? `?next=${this.$route.path}` : '';
+    window.open('/auth/google/start' + next, '_self');
   }
 
   logout() {

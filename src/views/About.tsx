@@ -23,6 +23,12 @@ export default class About extends Vue {
                 Обязательно найдите нас. Это ваш единственный шанс. Иначе все
                 пропало. Здесь нет нужных людей, нет документов...
               </p>
+              <p>
+                Вопросы, жалобы и предложения принимаются тут:&nbsp;
+                <a href="https://twitter.com/mgrankin" target="_blank">
+                  mgrankin
+                </a>
+              </p>
             </div>
           </div>
         </article>
