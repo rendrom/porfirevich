@@ -107,6 +107,6 @@
 }
 
 .transform-btn {
-  width: 115px;
+  width: 120px;
 }
 </style>

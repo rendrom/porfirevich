@@ -4,6 +4,7 @@ import { validate } from 'class-validator';
 
 import { User } from '../entity/User';
 import { Like } from '../entity/Like';
+// import { Story } from '../entity/Story';
 
 class UserController {
   static listAll = async (req: Request, res: Response) => {
@@ -82,11 +83,13 @@ class UserController {
   };
 
   static editUser = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const isSuperuser = req.user && req.user.isSuperuser;
     //Get the ID from the url
     const id = req.params.id;
 
     //Get values from the body
-    const { username, isSuperuser } = req.body;
+    const { username, isBanned } = req.body;
 
     //Try to find user on database
     const userRepository = getRepository(User);
@@ -97,6 +100,19 @@ class UserController {
       //If not found, send a 404 response
       res.status(404).send('User not found');
       return;
+    }
+
+    if (isSuperuser && isBanned !== user.isBanned) {
+      user.isBanned = isBanned;
+
+      // if (isBanned) {
+      //   await getRepository(Story)
+      //     .createQueryBuilder('story')
+      //     .where({
+      //       userId: user.id
+      //     })
+      //     .update({ isDeleted: isBanned });
+      // }
     }
 
     //Validate the new values on model

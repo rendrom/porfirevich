@@ -61,6 +61,9 @@ export class User {
   @Column({ nullable: true })
   photoUrl?: string;
 
+  @Column({ default: false })
+  isBanned!: boolean;
+
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 8);
   }

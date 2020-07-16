@@ -2,6 +2,7 @@ import { Router } from 'express';
 import UserController from '../controllers/UserController';
 import passport from 'passport';
 import { isSelf } from '../middlewares/isSelf';
+import { isSuperuser } from '../middlewares/isSuperuser';
 // import { isSuperuser } from '../middlewares/isSuperuser';
 
 const router = Router();
@@ -36,7 +37,11 @@ router.get(
 router.post('/', UserController.newUser);
 
 //Edit one user
-router.patch('/:id([0-9]+)', [isSelf()], UserController.editUser);
+router.patch(
+  '/:id([0-9]+)',
+  [isSelf(), isSuperuser()],
+  UserController.editUser
+);
 
 //Delete one user
 router.delete('/:id([0-9]+)', [isSelf()], UserController.deleteUser);

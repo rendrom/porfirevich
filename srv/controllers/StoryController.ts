@@ -27,7 +27,10 @@ const query = (rep: Repository<Story>, beforeDate: Date) => {
       isDeleted: false,
       createdAt: LessThan(beforeDate.toISOString())
     })
-    .select(select.map(x => `story.${x}`));
+    .select(select.map(x => `story.${x}`))
+    .innerJoin('story.user', 'u')
+    .andWhere('u.isBanned = :isBanned', { isBanned: false })
+    .addSelect(['u.isBanned']);
 };
 
 export default class StoryController {
@@ -42,10 +45,10 @@ export default class StoryController {
       const list = query(repository, beforeDate)
         .take(req.query.limit)
         .skip(req.query.offset)
-        .orderBy('createdAt', 'DESC');
+        .orderBy('story.createdAt', 'DESC');
       if (orderBy) {
         orderBy.split(',').forEach(x => {
-          list.orderBy(x, 'DESC');
+          list.orderBy(`story.${x}`, 'DESC');
         });
       }
       const [results, itemCount] = await Promise.all([
@@ -88,7 +91,13 @@ export default class StoryController {
       if (isSuperuser) {
         storyRep
           .leftJoin('story.user', 'u')
-          .addSelect(['u.id', 'u.username', 'u.email', 'u.photoUrl']);
+          .addSelect([
+            'u.id',
+            'u.username',
+            'u.email',
+            'u.photoUrl',
+            'u.isBanned'
+          ]);
       }
 
       const story = await storyRep.getOne();
@@ -110,17 +119,23 @@ export default class StoryController {
     let newStory: Story | undefined;
     story.content = content;
     story.description = description;
-
     // @ts-ignore
     const userId = req.user && req.user.id;
     if (userId) {
       try {
         const userRepository = getRepository(User);
-        const user = await userRepository.findOne(userId);
+        const user = await userRepository.findOneOrFail(userId);
+        if (user.isBanned) {
+          res.status(400).send();
+          return;
+        }
         story.user = user;
       } catch (er) {
         // ignore
       }
+    } else {
+      res.status(400).send();
+      return;
     }
 
     // Validate if the parameters are ok
