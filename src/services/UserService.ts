@@ -5,7 +5,7 @@ import { appModule } from '../store/app';
 
 export default {
   async getUser(token: string): Promise<User> {
-    const resp = await fetch('/user', {
+    const resp = await fetch('/api/user', {
       ...getAuthHeaders(token)
     });
     const json = (await resp.json()) as User;
@@ -24,7 +24,7 @@ export default {
   },
 
   async getLikes(token: string): Promise<Like[]> {
-    const resp = await fetch('/user/likes', {
+    const resp = await fetch('/api/user/likes', {
       ...getAuthHeaders(token)
     });
     const json = (await resp.json()) as Like[];
