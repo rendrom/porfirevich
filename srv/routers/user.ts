@@ -39,7 +39,8 @@ router.post('/', UserController.newUser);
 //Edit one user
 router.patch(
   '/:id([0-9]+)',
-  [isSelf(), isSuperuser()],
+  passport.authenticate(['jwt'], { session: false }),
+  // [isSelf(), isSuperuser()],
   UserController.editUser
 );
 

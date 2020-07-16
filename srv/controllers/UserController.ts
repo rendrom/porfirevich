@@ -83,11 +83,11 @@ class UserController {
   };
 
   static editUser = async (req: Request, res: Response) => {
-    // @ts-ignore
-    const isSuperuser = req.user && req.user.isSuperuser;
     //Get the ID from the url
     const id = req.params.id;
 
+    // @ts-ignore
+    const userId = req.user && req.user.id;
     //Get values from the body
     const { username, isBanned } = req.body;
 
@@ -99,6 +99,13 @@ class UserController {
     } catch (error) {
       //If not found, send a 404 response
       res.status(404).send('User not found');
+      return;
+    }
+
+    const isSuperuser = user && user.isSuperuser;
+    const isOwner = user && userId === user.id;
+    if (!user && !isSuperuser && !isOwner) {
+      res.status(403).send('Not permitted');
       return;
     }
 
