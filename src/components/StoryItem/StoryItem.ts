@@ -1,6 +1,6 @@
 import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 import { ToastProgrammatic as Toast } from 'buefy';
-import { Story } from '../../../srv/entity/Story';
+import { Story } from '../../../classes/Story';
 import config from '../../../config';
 import LikeButton from '../LikeButton';
 import StoryService from '../../services/StoryService';

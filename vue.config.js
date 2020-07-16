@@ -6,6 +6,9 @@ module.exports = {
       shouldServeApp: true,
       serverDir: './srv'
     }
+    // webpackBundleAnalyzer: {
+    //   openAnalyzer: true
+    // }
   },
 
   configureWebpack: config => {

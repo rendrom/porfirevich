@@ -1,5 +1,5 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { User } from '../../../srv/entity/User';
+import { User } from '../../../classes/User';
 import UserService from '@/services/UserService';
 
 @Component

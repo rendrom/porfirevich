@@ -1,6 +1,6 @@
 import { getAuthHeaders } from '../utils/getAuthHeaders';
-import { User } from '../../srv/entity/User';
-import { Like } from '../../srv/entity/Like';
+import { User } from '../../classes/User';
+import { Like } from '../../classes/Like';
 import { appModule } from '../store/app';
 
 export default {

@@ -7,11 +7,11 @@ import {
   Mutation
 } from 'vuex-module-decorators';
 import store from '.';
+import { User } from '../../classes/User';
 import { StoryResponse, Scheme, GetStoriesOptions } from '../interfaces';
 
 import StoryService from '../services/StoryService';
-import { User } from '../../srv/entity/User';
-import UserService from '@/services/UserService';
+import UserService from '../services/UserService';
 
 @Module({ dynamic: true, store: store, name: 'catalog' })
 class AppStore extends VuexModule {

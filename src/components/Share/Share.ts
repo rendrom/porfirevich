@@ -1,6 +1,6 @@
 import { Vue, Component, Watch, Model } from 'vue-property-decorator';
 
-import { Story } from '../../../srv/entity/Story';
+import { Story } from '../../../classes/Story';
 import { schemeToHtml } from '../../utils/schemeUtils';
 import { copyStory, CopyType } from '../../utils/copyToClipboard';
 import { SITE } from '../../config';

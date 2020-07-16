@@ -38,7 +38,7 @@ import { schemeToHtml } from "../utils/schemeUtils";
 // @ts-ignore
 import StoryItem from "../components/StoryItem/StoryItem.vue";
 import UserService from "../services/UserService";
-import { Story } from "../../srv/entity/Story";
+import { Story } from "../../classes/Story";
 
 @Component({
   components: {

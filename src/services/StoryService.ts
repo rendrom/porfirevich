@@ -4,7 +4,7 @@ import {
   GetStoriesOptions
 } from '../interfaces';
 import { getQueryString } from '../utils/getQueryString';
-import { Story } from '../../srv/entity/Story';
+import { Story } from '../../classes/Story';
 import { getAuthHeaders } from '@/utils/getAuthHeaders';
 import { appModule } from '../store/app';
 

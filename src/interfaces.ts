@@ -1,5 +1,5 @@
 import { DeltaOperation } from 'quill';
-import { Story } from '../srv/entity/Story';
+import { Story } from '../classes/Story';
 
 export interface Delta {
   ops: DeltaOperation[];

@@ -1,6 +1,6 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { ToastProgrammatic as Toast } from 'buefy';
-import { Story } from '../../srv/entity/Story';
+import { Story } from '../../classes/Story';
 
 import { copyStory } from '../utils/copyToClipboard';
 
