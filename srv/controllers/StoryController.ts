@@ -121,20 +121,23 @@ export default class StoryController {
     story.description = description;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    if (userId) {
-      try {
-        const userRepository = getRepository(User);
-        const user = await userRepository.findOneOrFail(userId);
-        if (user.isBanned) {
-          res.status(400).send();
-          return;
-        }
-        story.user = user;
-      } catch (er) {
-        // ignore
-      }
-    } else {
+    if (!userId) {
       res.status(400).send();
+      return;
+    }
+
+    const userRepository = getRepository(User);
+    const user = await userRepository.findOne(userId);
+
+    if (!user) {
+      res.status(400).send();
+      return;
+    }
+    story.user = user;
+
+    if (user.isBanned) {
+      // need for that banned user does not immediately guess that something is wrong
+      res.send(story);
       return;
     }
 
@@ -146,6 +149,28 @@ export default class StoryController {
     }
 
     const repository = getRepository(Story);
+
+    const exist = await repository
+      .createQueryBuilder('story')
+      .where({
+        content
+      })
+      .getCount();
+
+    if (exist) {
+      if (exist < 13) {
+        story.isDeleted = true;
+      } else {
+        // automatically ban users who save the same thing many times
+        user.isBanned = true;
+        await userRepository.save(user);
+
+        // need for that banned user does not immediately guess that something is wrong
+        res.send(story);
+        return;
+      }
+    }
+
     try {
       newStory = await repository.save(story);
     } catch (e) {
