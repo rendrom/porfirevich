@@ -38,6 +38,10 @@ export default class Home extends Vue {
     return appModule.story;
   }
 
+  get user() {
+    return appModule.user;
+  }
+
   @Watch('story')
   onStoryChange() {
     appModule.getLikes();

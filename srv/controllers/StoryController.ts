@@ -153,12 +153,14 @@ export default class StoryController {
     const exist = await repository
       .createQueryBuilder('story')
       .where({
-        content
+        userId,
+        content,
+        isPublic: true
       })
       .getCount();
 
     if (exist) {
-      if (exist < 13) {
+      if (exist < 20) {
         story.isDeleted = true;
       } else {
         // automatically ban users who save the same thing many times
