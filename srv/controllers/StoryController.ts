@@ -121,58 +121,53 @@ export default class StoryController {
     story.description = description;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    if (!userId) {
-      res.status(400).send();
-      return;
-    }
-
-    const userRepository = getRepository(User);
-    const user = await userRepository.findOne(userId);
-
-    if (!user) {
-      res.status(400).send();
-      return;
-    }
-    story.user = user;
-
-    if (user.isBanned) {
-      // need for that banned user does not immediately guess that something is wrong
-      res.send(story);
-      return;
-    }
-
-    // Validate if the parameters are ok
-    const errors = await validate(story);
-    if (errors.length > 0) {
-      res.status(400).send(errors);
-      return;
-    }
-
     const repository = getRepository(Story);
+    if (userId) {
+      const userRepository = getRepository(User);
+      const user = await userRepository.findOne(userId);
 
-    const exist = await repository
-      .createQueryBuilder('story')
-      .where({
-        userId,
-        content,
-        isPublic: true
-      })
-      .getCount();
+      if (!user) {
+        res.status(400).send();
+        return;
+      }
+      story.user = user;
 
-    if (exist) {
-      if (exist < 20) {
-        story.isDeleted = true;
-      } else {
-        // automatically ban users who save the same thing many times
-        user.isBanned = true;
-        await userRepository.save(user);
-
+      if (user.isBanned) {
         // need for that banned user does not immediately guess that something is wrong
         res.send(story);
         return;
       }
-    }
 
+      // Validate if the parameters are ok
+      const errors = await validate(story);
+      if (errors.length > 0) {
+        res.status(400).send(errors);
+        return;
+      }
+
+      const exist = await repository
+        .createQueryBuilder('story')
+        .where({
+          userId,
+          content,
+          isPublic: true
+        })
+        .getCount();
+
+      if (exist) {
+        if (exist < 20) {
+          story.isDeleted = true;
+        } else {
+          // automatically ban users who save the same thing many times
+          user.isBanned = true;
+          await userRepository.save(user);
+
+          // need for that banned user does not immediately guess that something is wrong
+          res.send(story);
+          return;
+        }
+      }
+    }
     try {
       newStory = await repository.save(story);
     } catch (e) {
