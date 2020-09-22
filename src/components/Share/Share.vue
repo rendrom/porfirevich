@@ -59,8 +59,7 @@
         aria-close-label="Close notification"
         role="alert"
       >
-        Порфирьевич позволяет заводить
-        <strong>учётные записи пользователей</strong> и публиковать истории в галереи.
+        Заведите <strong>аккаунт</strong> и публикуйте истории в галереи.
         <br />
       </b-notification>
     </div>

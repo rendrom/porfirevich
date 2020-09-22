@@ -176,22 +176,24 @@ export default class StoryController {
     }
     try {
       newStory = await repository.save(story);
-    } catch (e) {
-      res.status(500).send(e);
+    } catch (error) {
+      res.status(500).send({ message: "can't save story", error });
       return;
     }
     try {
+      // story after first save to get `id` for name
       const postcardPath = await postcard(newStory);
       story.postcard = postcardPath;
       newStory = await repository.save(story);
-    } catch (e) {
-      res.status(500).send(e);
-      return;
+    } catch (error) {
+      // res.status(500).send({ message: 'postcard create error', error });
+      // return;
     }
-    if (newStory) {
+    try {
+      newStory = await repository.save(story);
       res.send(newStory);
-    } else {
-      res.status(500).send("can't save story");
+    } catch (error) {
+      res.status(500).send({ message: "can't save story", error });
     }
   };
 

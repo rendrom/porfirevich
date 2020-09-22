@@ -42,7 +42,7 @@
             <b-button
               size="is-small"
               type
-              icon-left="settings"
+              icon-left="cog"
               @click="isSettings = !isSettings"
             />
           </div>
