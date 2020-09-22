@@ -81,7 +81,7 @@ export default class Gallery extends Vue {
         orderBy.push("RAND()");
       }
       await appModule.getStories({
-        limit: 50,
+        limit: 20,
         offset: appModule.stories.length,
         orderBy,
       });
