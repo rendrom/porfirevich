@@ -35,10 +35,10 @@ const query = (rep: Repository<Story>, beforeDate: Date) => {
 
 export default class StoryController {
   static all = async (req: Request, res: Response, next: NextFunction) => {
-    const offset = req.query.offset as number;
-    let beforeDate = req.query.beforeDate as Date;
-    beforeDate = beforeDate ? new Date(beforeDate) : new Date();
-    let limit = req.query.limit as number;
+    const offset = Number(req.query.offset as string);
+    const beforeDateParam = req.query.beforeDate as string;
+    const beforeDate = beforeDateParam ? new Date(beforeDateParam) : new Date();
+    let limit = Number(req.query.limit as string);
     limit = limit && limit < 21 ? limit : 20;
     const orderBy = req.query.orderBy as string;
     // // Get stories from database
