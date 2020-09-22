@@ -38,17 +38,23 @@ export default class StoryController {
     const beforeDate = req.query.beforeDate
       ? new Date(req.query.beforeDate)
       : new Date();
+    const limit =
+      req.query.limit && req.query.limit < 51 ? req.query.limit : 10;
     const orderBy = req.query.orderBy as string;
     // // Get stories from database
     try {
       const repository = getRepository(Story);
       const list = query(repository, beforeDate)
-        .take(req.query.limit)
+        .take(limit)
         .skip(req.query.offset)
         .orderBy('story.createdAt', 'DESC');
       if (orderBy) {
         orderBy.split(',').forEach(x => {
-          list.orderBy(`story.${x}`, 'DESC');
+          if (x === 'RAND()') {
+            list.orderBy('random()');
+          } else {
+            list.orderBy(`story.${x}`, 'DESC');
+          }
         });
       }
       const [results, itemCount] = await Promise.all([

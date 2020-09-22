@@ -2,10 +2,10 @@
   <div>
     <div class="columns">
       <div class="column">
-         <div class="field">
-            <b-switch v-model="popularFirst">
-                Сначала популярные
-            </b-switch>
+        <div class="block">
+          <b-radio v-model="sort" name="sort" native-value="random">Случайный порядок</b-radio>
+          <b-radio v-model="sort" name="sort" native-value="popular">Популярные</b-radio>
+          <b-radio v-model="sort" name="sort" native-value="new">Новые</b-radio>
         </div>
       </div>
     </div>
@@ -16,12 +16,7 @@
     </div>
     <div class="columns">
       <div class="column has-text-centered">
-        <b-button
-          type
-          :loading="isLoading"
-          :disabled="!hasMore"
-          @click="loadMore"
-        >Загрузить ещё</b-button>
+        <b-button type :loading="isLoading" :disabled="!hasMore" @click="loadMore">Загрузить ещё</b-button>
       </div>
     </div>
     <b-modal :active.sync="isShareModalActive" :width="620">
@@ -45,14 +40,14 @@ import { Story } from "../../classes/Story";
     StoryItem,
     Share: () =>
       // @ts-ignore
-      import(/* webpackChunkName: "share" */ "../components/Share/Share.vue")
-  }
+      import(/* webpackChunkName: "share" */ "../components/Share/Share.vue"),
+  },
 })
 export default class Gallery extends Vue {
   isLoading = true;
   isShareModalActive = false;
   story: Story | false = false;
-  popularFirst = false;
+  sort: "random" | "new" | "popular" = "random";
 
   get hasMore() {
     return appModule.hasMore;
@@ -66,7 +61,7 @@ export default class Gallery extends Vue {
     return appModule.liked;
   }
 
-  @Watch('popularFirst')
+  @Watch("sort")
   async onPopularOrderingChange(val: boolean) {
     await appModule.setStories([]);
     this.loadMore();
@@ -80,13 +75,15 @@ export default class Gallery extends Vue {
     this.isLoading = true;
     try {
       const orderBy = [];
-      if (this.popularFirst) {
-        orderBy.push('likesCount');
+      if (this.sort === "popular") {
+        orderBy.push("likesCount");
+      } else if (this.sort === "random") {
+        orderBy.push("RAND()");
       }
       await appModule.getStories({
         limit: 50,
         offset: appModule.stories.length,
-        orderBy
+        orderBy,
       });
     } catch (er) {
       //

@@ -35,13 +35,13 @@ if (passportConfig.clientID) {
         if (email) {
           user = await userRepository.findOne({
             where: { email: email },
-            select: ['id', 'uid', 'username'] //We dont want to send the password on response
+            select: ['id', 'uid', 'username'] // We don't want to send the password on response
           });
         }
         if (!user) {
           user = await userRepository.findOne({
             where: { uid: profile.id },
-            select: ['id', 'uid', 'username'] //We dont want to send the password on response
+            select: ['id', 'uid', 'username'] // We don't want to send the password on response
           });
         }
         if (!user) {
@@ -60,12 +60,12 @@ if (passportConfig.clientID) {
               user.email = email;
             }
 
-            //Validade if the parameters are ok
+            // Validate if the parameters are ok
             const errors = await validate(user);
             if (errors.length > 0) {
               return done(errors);
             }
-            //Hash the password, to securely store on DB
+            // Hash the password, to securely store on DB
             user.hashPassword();
             user = await userRepository.save(user);
           } catch (error) {

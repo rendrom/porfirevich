@@ -5,10 +5,10 @@ module.exports = {
     express: {
       shouldServeApp: true,
       serverDir: './srv'
+    },
+    webpackBundleAnalyzer: {
+      openAnalyzer: true
     }
-    // webpackBundleAnalyzer: {
-    //   openAnalyzer: true
-    // }
   },
 
   configureWebpack: config => {
