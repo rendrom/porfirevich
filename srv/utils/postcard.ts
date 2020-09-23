@@ -14,7 +14,7 @@ interface DomScreenshotOptions {
 
 export async function postcard(story: Story) {
   const browser = await puppeteer.launch({
-    // ignoreDefaultArgs: ['--disable-extensions']
+    ignoreDefaultArgs: ['--disable-extensions']
   });
   const page = await browser.newPage();
   await page.setViewport({

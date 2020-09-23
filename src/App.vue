@@ -54,7 +54,7 @@
         <div class="content has-text-centered">
           <p>
             <a href="https://github.com/mgrankin/ru_transformers" target="_blank">
-              <b-icon size="is-large" icon="github-circle" />
+              <b-icon size="is-large" icon="github" />
             </a>
           </p>
         </div>

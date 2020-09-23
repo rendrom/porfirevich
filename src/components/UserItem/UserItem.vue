@@ -11,7 +11,7 @@
         <p class="title is-4">{{user.username}}</p>
         <p class="subtitle is-6">{{user.email}}</p>
       </div>
-      <div>
+      <div v-if="user.isSuperuser">
         <b-tooltip type="is-dark" :label="user.isBanned ? 'Разблокировать пользователя' : 'Заблокировать пользователя'">
           <b-button
             :icon-left="user.isBanned ? 'restore' : 'delete'"
