@@ -17,14 +17,14 @@ import UserService from '../services/UserService';
 class AppStore extends VuexModule {
   stories: StoryResponse[] = [];
   story: StoryResponse | false = false;
-  hasMore = false;
+  // hasMore = false;
   user: User | false = false;
   token: string | false = false;
   liked: string[] = [];
   replies: string[] = [];
 
-  @MutationAction({ mutate: ['stories', 'hasMore'] })
-  async getStories(opt?: GetStoriesOptions) {
+  @Action({ commit: 'SET_STORIES' })
+  async fetchStories(opt?: GetStoriesOptions) {
     const resp = await StoryService.all(opt);
     // @ts-ignore
     let stories: StoryResponse[] = (this.state && this.state.stories) || [];
@@ -35,12 +35,12 @@ class AppStore extends VuexModule {
       }
     }
 
-    return { stories, hasMore: resp.hasMore };
+    return stories;
   }
 
-  @MutationAction({ mutate: ['stories', 'hasMore'] })
+  @MutationAction({ mutate: ['stories'] })
   async setStories(stories: StoryResponse[]) {
-    return { stories, hasMore: true };
+    return { stories };
   }
 
   @Action({ commit: 'SET_STORIES' })

@@ -23,13 +23,14 @@ export interface GetStoriesOptions {
   limit?: number;
   offset?: number;
   orderBy?: string[];
+  afterDate?: number;
 }
 
 export interface StoriesResponse {
   object: 'list';
   hasMore: boolean;
   data: StoryResponse[];
-  count: number;
+  count?: number;
   beforeDate?: number;
 }
 

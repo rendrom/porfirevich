@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getRepository, Repository, LessThan } from 'typeorm';
+import { getRepository, Repository, LessThan, MoreThan } from 'typeorm';
 import { validate } from 'class-validator';
 
 import { StoriesResponse } from '../../src/interfaces';
@@ -19,32 +19,47 @@ const select: (keyof Story)[] = [
   'likesCount'
 ];
 
-const query = (rep: Repository<Story>, beforeDate: Date) => {
-  return rep
+const query = (
+  rep: Repository<Story>,
+  opt: { beforeDate?: Date; afterDate?: string } = {}
+) => {
+  const where: Record<string, any> = {};
+  if (opt.beforeDate) {
+    where.createdAt = LessThan(opt.beforeDate.toISOString());
+  }
+  if (opt.afterDate) {
+    where.createdAt = MoreThan(new Date(Number(opt.afterDate)).toISOString());
+  }
+  const queryBuilder = rep
     .createQueryBuilder('story')
     .where({
       isPublic: true,
       isDeleted: false,
-      createdAt: LessThan(beforeDate.toISOString())
+      ...where
     })
     .select(select.map(x => `story.${x}`))
     .innerJoin('story.user', 'u')
     .andWhere('u.isBanned = :isBanned', { isBanned: false })
     .addSelect(['u.isBanned']);
+
+  return queryBuilder;
 };
 
 export default class StoryController {
   static all = async (req: Request, res: Response, next: NextFunction) => {
     const offset = Number(req.query.offset as string);
     const beforeDateParam = req.query.beforeDate as string;
-    const beforeDate = beforeDateParam ? new Date(beforeDateParam) : new Date();
+    const beforeDate = beforeDateParam
+      ? new Date(Number(beforeDateParam))
+      : new Date();
+    const afterDate = req.query.afterDate as string;
     let limit = Number(req.query.limit as string);
     limit = limit && limit < 21 ? limit : 20;
     const orderBy = req.query.orderBy as string;
     // // Get stories from database
     try {
       const repository = getRepository(Story);
-      const list = query(repository, beforeDate)
+      const list = query(repository, { beforeDate, afterDate })
         .take(limit)
         .orderBy('story.createdAt', 'DESC');
       if (offset) {
@@ -59,21 +74,21 @@ export default class StoryController {
           }
         });
       }
-      const [results, itemCount] = await Promise.all([
-        list.getMany(),
-        query(repository, beforeDate).getCount()
+      const [results] = await Promise.all([
+        list.getMany()
+        // query(repository, { beforeDate, afterDate }).getCount()
       ]);
 
       // const pageCount = Math.ceil(itemCount / req.query.limit);
-      const loaded = Number(req.query.offset) + Number(req.query.limit);
+      // const loaded = Number(req.query.offset) + Number(req.query.limit);
       if (req.accepts('json')) {
         // inspired by Stripe's API response for list objects
         const resp: StoriesResponse = {
           object: 'list',
-          hasMore: itemCount > loaded,
-          count: itemCount,
+          hasMore: true,
+          // count: 0,
           data: results,
-          beforeDate: beforeDate.getTime()
+          beforeDate: new Date(beforeDate).getTime()
         };
         res.json(resp);
       }
