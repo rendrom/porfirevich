@@ -16,12 +16,18 @@ const select: (keyof Story)[] = [
   'viewsCount',
   'postcard',
   'userId',
-  'likesCount'
+  'likesCount',
+  'isPublic'
 ];
 
 const query = (
   rep: Repository<Story>,
-  opt: { beforeDate?: Date; afterDate?: string } = {}
+  opt: {
+    beforeDate?: Date;
+    afterDate?: string;
+    isPublic?: boolean;
+    isDeleted?: boolean;
+  } = {}
 ) => {
   const where: Record<string, any> = {};
   if (opt.beforeDate) {
@@ -30,10 +36,13 @@ const query = (
   if (opt.afterDate) {
     where.createdAt = MoreThan(new Date(Number(opt.afterDate)).toISOString());
   }
+  where.isPublic = true;
+  if (opt.isPublic !== undefined && !opt.isPublic) {
+    delete where.isPublic;
+  }
   const queryBuilder = rep
     .createQueryBuilder('story')
     .where({
-      isPublic: true,
       isDeleted: false,
       ...where
     })
@@ -47,8 +56,12 @@ const query = (
 
 export default class StoryController {
   static all = async (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const userId = req.user && req.user.id;
     const offset = Number(req.query.offset as string);
     const beforeDateParam = req.query.beforeDate as string;
+    const filter: 'my' | 'favorite' = req.query.filter;
+    const my = filter === 'my';
     const beforeDate = beforeDateParam
       ? new Date(Number(beforeDateParam))
       : new Date();
@@ -59,7 +72,11 @@ export default class StoryController {
     // // Get stories from database
     try {
       const repository = getRepository(Story);
-      const list = query(repository, { beforeDate, afterDate })
+      const list = query(repository, {
+        beforeDate,
+        afterDate,
+        isPublic: !my
+      })
         .take(limit)
         .orderBy('story.createdAt', 'DESC');
       if (offset) {
@@ -74,19 +91,16 @@ export default class StoryController {
           }
         });
       }
-      const [results] = await Promise.all([
-        list.getMany()
-        // query(repository, { beforeDate, afterDate }).getCount()
-      ]);
+      if (filter === 'my' && userId !== undefined) {
+        list.andWhere('userId = :userId', { userId });
+      }
 
-      // const pageCount = Math.ceil(itemCount / req.query.limit);
-      // const loaded = Number(req.query.offset) + Number(req.query.limit);
+      const results = await list.getMany();
+
       if (req.accepts('json')) {
-        // inspired by Stripe's API response for list objects
         const resp: StoriesResponse = {
           object: 'list',
           hasMore: true,
-          // count: 0,
           data: results,
           beforeDate: new Date(beforeDate).getTime()
         };

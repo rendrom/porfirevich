@@ -24,7 +24,16 @@ export default class LikeButton extends Vue {
 
   render(): Vue.VNode {
     return (
-      <b-tooltip type="is-dark" label={this.disabled ? 'Сначала войдите' : ''}>
+      <b-tooltip
+        type="is-dark"
+        label={
+          this.disabled
+            ? 'Сначала войдите'
+            : this.alreadySet
+            ? 'Больше не нравится'
+            : 'Мне нравится'
+        }
+      >
         <b-button
           icon-left="thumb-up-outline"
           size="is-small"

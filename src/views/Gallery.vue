@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="columns">
+    <div class="columns is-mobile">
       <div class="column">
         <div class="block">
           <b-radio
@@ -14,17 +14,40 @@
           >
         </div>
       </div>
-
-      <b-select
-        v-if="usePeriods"
-        v-model="period"
-        size="is-small"
-        :disabled="isLoading"
-      >
-        <option v-for="p in periods" :value="p.value" :key="p.text">
-          {{ p.text }}
-        </option>
-      </b-select>
+      <div class="field is-horizontal">
+        <div class="field-label is-small mr-1" v-if="usePeriods || user">
+          <label class="label">Показать</label>
+        </div>
+        <div class="field mr-1">
+          <b-select
+            v-if="user"
+            v-model="filter"
+            size="is-small"
+            :disabled="isLoading"
+          >
+            <option v-for="f in filterItems" :value="f.value" :key="f.text">
+              {{ f.text }}
+            </option>
+          </b-select>
+        </div>
+        <div class="field-label is-small mr-1" v-if="usePeriods">
+          <label class="label">за:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <b-select
+              v-if="usePeriods"
+              v-model="period"
+              size="is-small"
+              :disabled="isLoading"
+            >
+              <option v-for="p in periods" :value="p.value" :key="p.text">
+                {{ p.text }}
+              </option>
+            </b-select>
+          </div>
+        </div>
+      </div>
     </div>
     <div v-for="i in stories" :key="i.id" class="columns">
       <div class="column">
@@ -63,7 +86,7 @@ const today = new Date();
 const PERIODS: Record<string, Date | null> = {
   all: null,
   week: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
-  month: new Date(today.getFullYear(), today.getMonth() - 1 , 1),
+  month: new Date(today.getFullYear(), today.getMonth() - 1, 1),
   "6-months": new Date(today.getFullYear(), today.getMonth() - 6, 1),
 };
 
@@ -87,6 +110,13 @@ export default class Gallery extends Vue {
     { text: "Новые", value: "new" },
   ];
 
+  filter: "all" | "my" | "favorite" = "all";
+  filterItems = [
+    { text: "все", value: "all" },
+    { text: "только мои", value: "my" },
+    // { text: "понравившиеся", value: "favorite" },
+  ];
+
   period = "month";
   periods = [
     { text: "всё время", value: "all" },
@@ -104,9 +134,9 @@ export default class Gallery extends Vue {
     return this.sort !== "new";
   }
 
-  // get hasMore() {
-  //   return appModule.hasMore;
-  // }
+  get user() {
+    return appModule.user;
+  }
 
   get stories() {
     return appModule.stories;
@@ -118,6 +148,7 @@ export default class Gallery extends Vue {
 
   @Watch("sort")
   @Watch("period")
+  @Watch("filter")
   async onPopularOrderingChange(val: boolean) {
     await appModule.setStories([]);
     this.loadMore();
@@ -146,6 +177,9 @@ export default class Gallery extends Vue {
         if (period) {
           opt.afterDate = period.getTime();
         }
+      }
+      if (this.user && this.filter !== 'all') {
+        opt.filter = this.filter;
       }
       // Hard fix to disable scroll bottom on add new items
       const scrollPosition = document.documentElement.scrollTop;

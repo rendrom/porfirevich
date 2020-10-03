@@ -1,8 +1,8 @@
 <template>
   <div class="story-item" v-bind:class="{ isdeleted: story.isDeleted }">
     <span v-for="(c, i) in content" :key="i">
-      <strong v-if="c[1]" :style="{color: color}">{{c[0]}}</strong>
-      <span v-else>{{c[0]}}</span>
+      <strong v-if="c[1]" :style="{ color: color }">{{ c[0] }}</strong>
+      <span v-else>{{ c[0] }}</span>
     </span>
 
     <div class="item-controls">
@@ -12,15 +12,21 @@
         </div>
 
         <div class="main-actions column buttons has-text-centered">
-          <b-button size="is-small" icon-left="camera" @click="show">Получить картинку</b-button>
-          <b-button size="is-small" icon-left="border-color" @click="go"></b-button>
+          <b-button size="is-small" icon-left="camera" @click="show"
+            >Получить картинку</b-button
+          >
+          <b-button
+            size="is-small"
+            icon-left="border-color"
+            @click="go"
+          ></b-button>
         </div>
 
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <section>
               <b-tooltip
-                v-if="isSuperuser"
+                v-if="userCanEdit"
                 type="is-dark"
                 :label="story.isDeleted ? 'Восстановить' : 'Удалить'"
                 class="right-control-btn"
@@ -40,7 +46,31 @@
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <section>
-              <b-tooltip type="is-dark" label="Сообщить о нарушении" class="right-control-btn">
+              <b-tooltip
+                v-if="userCanEdit"
+                type="is-dark"
+                :label="story.isPublic ? 'Не публиковать' : 'Публиковать'"
+                class="right-control-btn"
+              >
+                <b-button
+                  size="is-small"
+                  :icon-right="story.isPublic ? 'eye-off' : 'eye'"
+                  position="is-left"
+                  @click="publish"
+                  :loading="publishLoading"
+                ></b-button>
+              </b-tooltip>
+            </section>
+          </div>
+        </div>
+        <div class="column is-1">
+          <div class="tools is-pulled-right">
+            <section>
+              <b-tooltip
+                type="is-dark"
+                label="Сообщить о нарушении"
+                class="right-control-btn"
+              >
                 <b-button
                   size="is-small"
                   icon-right="alert-circle-outline"
@@ -60,7 +90,6 @@
 <script lang="ts" src="./StoryItem.ts"></script>
 
 <style scoped>
-
 .main-actions {
   margin-bottom: 0;
 }

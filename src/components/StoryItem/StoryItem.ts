@@ -12,6 +12,7 @@ export default class extends Vue {
 
   violationLoading = false;
   deleteLoading = false;
+  publishLoading = false;
 
   get content() {
     return JSON.parse(this.story.content);
@@ -23,6 +24,14 @@ export default class extends Vue {
 
   get user() {
     return appModule.user;
+  }
+
+  get userCanEdit() {
+    return this.isSuperuser || this.isOwner;
+  }
+
+  get isOwner() {
+    return this.user && this.user.id === this.story.user?.id;
   }
 
   get isSuperuser() {
@@ -62,6 +71,24 @@ export default class extends Vue {
       //
     }
     this.deleteLoading = false;
+  }
+
+  async publish() {
+    this.publishLoading = true;
+    try {
+      const resp = await StoryService.edit(this.story.id, {
+        isPublic: !this.story.isPublic
+      });
+      if (resp) {
+        appModule.updateStory({
+          id: this.story.id,
+          params: { isPublic: resp.isPublic }
+        });
+      }
+    } catch {
+      //
+    }
+    this.publishLoading = false;
   }
 
   async violation() {

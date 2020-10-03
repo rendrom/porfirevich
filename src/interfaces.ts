@@ -24,6 +24,7 @@ export interface GetStoriesOptions {
   offset?: number;
   orderBy?: string[];
   afterDate?: number;
+  filter?: string;
 }
 
 export interface StoriesResponse {

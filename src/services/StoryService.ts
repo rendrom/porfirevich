@@ -17,7 +17,9 @@ export default {
   },
 
   async all(opt?: GetStoriesOptions) {
-    const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''));
+    const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''), {
+      ...getAuthHeaders(appModule.token)
+    });
     const json = (await resp.json()) as StoriesResponse;
     return json;
   },
