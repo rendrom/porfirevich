@@ -26,7 +26,7 @@
         </option>
       </b-select>
     </div>
-    <div v-for="(i, j) in stories" :key="j" class="columns">
+    <div v-for="i in stories" :key="i.id" class="columns">
       <div class="column">
         <story-item :story="i" @show="showStory"></story-item>
       </div>
@@ -147,7 +147,10 @@ export default class Gallery extends Vue {
           opt.afterDate = period.getTime();
         }
       }
+      // Hard fix to disable scroll bottom on add new items
+      const scrollPosition = document.documentElement.scrollTop;
       const resp = await appModule.fetchStories(opt);
+      document.documentElement.scrollTop = scrollPosition;
       this.hasMore = resp.length >= (opt.limit || 20);
     } catch (er) {
       //

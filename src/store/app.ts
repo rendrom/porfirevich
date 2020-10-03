@@ -27,12 +27,14 @@ class AppStore extends VuexModule {
   async fetchStories(opt?: GetStoriesOptions) {
     const resp = await StoryService.all(opt);
     // @ts-ignore
-    let stories: StoryResponse[] = (this.state && this.state.stories) || [];
-    if (stories) {
-      stories = [...stories];
-      if (resp.data) {
-        stories = stories.concat(resp.data);
-      }
+    const stories: StoryResponse[] = [...this.stories];
+    if (resp.data) {
+      resp.data.forEach(x => {
+        const exist = stories.find(y => y.id === x.id);
+        if (!exist) {
+          stories.push(x);
+        }
+      });
     }
 
     return stories;

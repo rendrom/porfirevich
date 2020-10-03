@@ -1,5 +1,4 @@
 <template>
-  <div>
     <div class="main">
       <b-navbar type fixed-top>
         <template slot="brand">
@@ -32,9 +31,6 @@
                 <div class="custom-menu-item">
                   <b-button icon-left="google" @click="login">Google</b-button>
                 </div>
-                <!-- <div class="custom-menu-item">
-                  <b-checkbox v-model="rememberMe">Запомнить меня</b-checkbox>
-                </div> -->
               </div>
             </b-dropdown-item>
           </b-dropdown>
@@ -60,7 +56,7 @@
         </div>
       </footer>
     </div>
-  </div>
+
 </template>
 
 <script lang="ts" src="./App.ts">
@@ -79,7 +75,6 @@
 
 .section {
   flex: 1;
-  /* background: #f5f5f5; */
 }
 
 .custom-menu-content {
