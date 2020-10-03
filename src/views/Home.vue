@@ -14,10 +14,10 @@
         />
         <b-button
           type
-          icon-left="camera"
+          icon-left="share-variant"
           :disabled="isShareDisabled"
           @click="saveStory"
-        >Получить картинку</b-button>
+        >Поделиться</b-button>
       </div>
       <div class="column is-1">
         <div class="tools is-pulled-right">

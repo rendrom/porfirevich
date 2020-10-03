@@ -54,6 +54,7 @@ export default class Home extends Vue {
   async saveStory() {
     if (!appModule.story) {
       const isCorrupted = checkCorrupted(this.scheme);
+      console.log(isCorrupted);
       if (isCorrupted) {
         Toast.open({
           message:
@@ -69,6 +70,8 @@ export default class Home extends Vue {
           this.$router.push(path);
         }
       }
+    } else {
+      this.isShareModalActive = true;
     }
   }
 

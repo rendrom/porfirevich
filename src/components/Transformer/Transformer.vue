@@ -106,7 +106,7 @@
   padding-top: 10px;
 }
 
-.transform-btn {
+/* .transform-btn {
   width: 120px;
-}
+} */
 </style>
