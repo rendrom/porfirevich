@@ -12,8 +12,8 @@
         </div>
 
         <div class="main-actions column buttons has-text-centered">
-          <b-button size="is-small" icon-left="camera" @click="show"
-            >Получить картинку</b-button
+          <b-button size="is-small" icon-left="share-variant" @click="show"
+            >Поделиться</b-button
           >
           <b-button
             size="is-small"
