@@ -8,7 +8,8 @@ import {
   BeforeInsert,
   Generated,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinTable
 } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 import shortid from 'shortid';
@@ -31,7 +32,7 @@ export class Story {
 
   @OneToMany(
     () => Like,
-    (like: Like) => like.user
+    (like: Like) => like.story
   )
   likes!: Like[];
 

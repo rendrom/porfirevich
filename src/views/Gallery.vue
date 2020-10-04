@@ -114,7 +114,7 @@ export default class Gallery extends Vue {
   filterItems = [
     { text: "все", value: "all" },
     { text: "только мои", value: "my" },
-    // { text: "понравившиеся", value: "favorite" },
+    { text: "понравившиеся", value: "favorite" },
   ];
 
   period = "month";

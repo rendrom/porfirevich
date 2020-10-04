@@ -91,8 +91,14 @@ export default class StoryController {
           }
         });
       }
-      if (filter === 'my' && userId !== undefined) {
-        list.andWhere('userId = :userId', { userId });
+      if (userId !== undefined) {
+        if (filter === 'my') {
+          list.andWhere('userId = :userId', { userId });
+        } else if (filter === 'favorite') {
+          list
+            .leftJoinAndSelect('story.likes', 'like')
+            .andWhere('like.userId = :userId', { userId });
+        }
       }
 
       const results = await list.getMany();
