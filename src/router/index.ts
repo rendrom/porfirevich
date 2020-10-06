@@ -14,7 +14,7 @@ export default new Router({
     {
       path: '/gallery',
       name: 'gallery',
-      component: () => import('../views/Gallery.vue')
+      component: () => import('../views/Gallery/Gallery.vue')
     },
     {
       path: '/login',
