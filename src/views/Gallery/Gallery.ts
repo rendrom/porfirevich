@@ -39,6 +39,13 @@ export default class Gallery extends Vue {
     appModule.setQuery(val);
   }
 
+  get tags(): string[] {
+    return appModule.tags;
+  }
+  set tags(val: string[]) {
+    appModule.setTags(val);
+  }
+
   get sort(): SortType {
     return appModule.sort;
   }
@@ -103,19 +110,16 @@ export default class Gallery extends Vue {
   @Watch('sort')
   @Watch('period')
   @Watch('filter')
-  async onPopularOrderingChange(val: boolean) {
+  @Watch('tags')
+  async onQueryChange() {
     await appModule.setStories([]);
     this.loadMore();
-    Nav.gallery({
-      // filter: this.filter,
-      period: this.period,
-      sort: this.sort
-    });
+    this.setQueryParams();
   }
 
   mounted() {
     const query = this.$route.query;
-    const { filter, sort, period } = query;
+    const { filter, sort, period, tags } = query;
     if (filter) {
       this.filter = filter as FilterType;
     }
@@ -125,7 +129,11 @@ export default class Gallery extends Vue {
     if (period) {
       this.period = period as Period;
     }
-
+    if (tags) {
+      this.tags = Array.isArray(tags)
+        ? (tags.filter(x => x) as string[])
+        : tags.split(',');
+    }
     if (appModule.token) {
       try {
         appModule.getLikes();
@@ -133,14 +141,25 @@ export default class Gallery extends Vue {
         console.log(er);
       }
     }
-    Nav.gallery({
-      // filter: this.filter,
-      period: this.period,
-      sort: this.sort
-    });
+    this.setQueryParams();
     if (!this.stories.length) {
       this.loadMore();
     }
+  }
+
+  setQueryParams() {
+    Nav.gallery({
+      // filter: this.filter,
+      period: this.period,
+      sort: this.sort,
+      query: this.query,
+      tags: this.tags.join(',')
+    });
+  }
+
+  beforeTagAdding(tag: string) {
+    return tag.indexOf(',') === -1;
+    // return tag.length === 20;
   }
 
   async loadMore() {
@@ -163,6 +182,12 @@ export default class Gallery extends Vue {
           opt.afterDate = period.getTime();
         }
       }
+      if (this.query) {
+        opt.query = this.query;
+      }
+      if (this.tags) {
+        opt.tags = this.tags.join(',');
+      }
       if (this.user && this.filter !== 'all') {
         opt.filter = this.filter;
       }
@@ -171,6 +196,7 @@ export default class Gallery extends Vue {
       const scrollPosition = document.documentElement.scrollTop;
       const resp = await appModule.fetchStories(opt);
       document.documentElement.scrollTop = scrollPosition;
+
       this.hasMore = resp.length >= (opt.limit || 20);
     } catch (er) {
       //

@@ -34,10 +34,16 @@ class AppStore extends VuexModule {
   filter: FilterType = 'all';
   period: Period = 'month';
   query = '';
+  tags: string[] = [];
 
   @MutationAction({ mutate: ['sort'] })
   async setSort(sort: SortType) {
     return { sort };
+  }
+
+  @MutationAction({ mutate: ['tags'] })
+  async setTags(tags: string[]) {
+    return { tags };
   }
 
   @MutationAction({ mutate: ['filter'] })

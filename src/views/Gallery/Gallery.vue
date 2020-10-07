@@ -33,10 +33,10 @@
         <div class="field-label is-small mr-1" v-if="usePeriods">
           <label class="label">за:</label>
         </div>
-        <div class="field-body">
+        <div class="field-body" v-if="usePeriods">
           <div class="field">
             <b-select
-              v-if="usePeriods"
+
               v-model="period"
               size="is-small"
               :disabled="isLoading"
@@ -45,6 +45,33 @@
                 {{ p.text }}
               </option>
             </b-select>
+          </div>
+        </div>
+        <div class="field-label is-small mr-1">
+          <label class="label">содержит</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <b-taginput
+                maxlength="20"
+                maxtags="5"
+                size="is-small"
+                :disabled="isLoading"
+                :has-counter="false"
+                v-model="tags"
+                :before-adding="beforeTagAdding">
+            </b-taginput>
+            <!-- <b-input
+              v-model="query"
+              maxlength="20"
+              placeholder="текст"
+              size="is-small"
+              :disabled="isLoading"
+              icon-right="magnify"
+              icon-right-clickable
+              @icon-right-click="onQueryChange"
+            >
+            </b-input> -->
           </div>
         </div>
       </div>

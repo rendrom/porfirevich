@@ -25,6 +25,8 @@ export interface GetStoriesOptions {
   orderBy?: string[];
   afterDate?: number;
   filter?: string;
+  query?: string;
+  tags?: string;
 }
 
 export interface StoriesResponse {
@@ -49,5 +51,5 @@ export interface StoriesQueryParams {
   filter?: FilterType;
   sort?: SortType;
   period?: Period;
-  q?: string;
+  query?: string;
 }

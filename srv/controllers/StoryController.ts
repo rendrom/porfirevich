@@ -59,6 +59,8 @@ export default class StoryController {
     // @ts-ignore
     const userId = req.user && req.user.id;
     const offset = Number(req.query.offset as string);
+    const queryParam = req.query.query as string;
+    const tagsParam = req.query.tags as string;
     const beforeDateParam = req.query.beforeDate as string;
     const filter: 'my' | 'favorite' = req.query.filter;
     const my = filter === 'my';
@@ -99,6 +101,16 @@ export default class StoryController {
             .leftJoinAndSelect('story.likes', 'like')
             .andWhere('like.userId = :userId', { userId });
         }
+      }
+      if (queryParam) {
+        list.andWhere('story.content like :query', {
+          query: `%${queryParam}%`
+        });
+      }
+      if (tagsParam) {
+        tagsParam.split(',').forEach(x => {
+          list.andWhere(`story.content LIKE '%${x}%'`);
+        });
       }
 
       const results = await list.getMany();
