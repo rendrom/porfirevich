@@ -40,3 +40,14 @@ export interface StoriesResponse {
  * 1 - AI
  */
 export type Scheme = [string, 0 | 1][];
+
+export type FilterType = 'all' | 'my' | 'favorite';
+export type SortType = 'random' | 'new' | 'popular';
+export type Period = 'all' | 'week' | 'month' | '6-months';
+
+export interface StoriesQueryParams {
+  filter?: FilterType;
+  sort?: SortType;
+  period?: Period;
+  q?: string;
+}

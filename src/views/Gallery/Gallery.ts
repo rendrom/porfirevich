@@ -3,15 +3,17 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Story } from '../../../classes/Story';
 import { appModule } from '../../store/app';
 import StoryItem from '../../components/StoryItem/StoryItem.vue';
-import { GetStoriesOptions } from '../../interfaces';
+import {
+  FilterType,
+  GetStoriesOptions,
+  Period,
+  SortType
+} from '../../interfaces';
 import { Nav } from '../../services/Nav';
 
 const today = new Date();
 
-type FilterType = 'all' | 'my' | 'favorite';
-type SortType = 'random' | 'new' | 'popular';
-
-const PERIODS: Record<string, Date | null> = {
+const PERIODS: Record<Period, Date | null> = {
   all: null,
   week: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
   month: new Date(today.getFullYear(), today.getMonth() - 1, 1),
@@ -26,10 +28,23 @@ const PERIODS: Record<string, Date | null> = {
   }
 })
 export default class Gallery extends Vue {
-  isLoading = true;
+  isLoading = false;
   isShareModalActive = false;
   story: Story | false = false;
-  sort: SortType = 'random';
+
+  get query(): string {
+    return appModule.query;
+  }
+  set query(val: string) {
+    appModule.setQuery(val);
+  }
+
+  get sort(): SortType {
+    return appModule.sort;
+  }
+  set sort(val: SortType) {
+    appModule.setSort(val);
+  }
 
   sortItems = [
     { text: 'Случайный порядок', value: 'random' },
@@ -37,14 +52,26 @@ export default class Gallery extends Vue {
     { text: 'Новые', value: 'new' }
   ];
 
-  filter: FilterType = 'all';
+  get filter(): FilterType {
+    return appModule.filter;
+  }
+  set filter(val: FilterType) {
+    appModule.setFilter(val);
+  }
+
   filterItems = [
     { text: 'все', value: 'all' },
     { text: 'только мои', value: 'my' },
     { text: 'понравившиеся', value: 'favorite' }
   ];
 
-  period = 'month';
+  get period(): Period {
+    return appModule.period;
+  }
+  set period(val: Period) {
+    appModule.setPeriod(val);
+  }
+
   periods = [
     { text: 'всё время', value: 'all' },
     {
@@ -87,7 +114,33 @@ export default class Gallery extends Vue {
   }
 
   mounted() {
-    this.onMount();
+    const query = this.$route.query;
+    const { filter, sort, period } = query;
+    if (filter) {
+      this.filter = filter as FilterType;
+    }
+    if (sort) {
+      this.sort = sort as SortType;
+    }
+    if (period) {
+      this.period = period as Period;
+    }
+
+    if (appModule.token) {
+      try {
+        appModule.getLikes();
+      } catch (er) {
+        console.log(er);
+      }
+    }
+    Nav.gallery({
+      // filter: this.filter,
+      period: this.period,
+      sort: this.sort
+    });
+    if (!this.stories.length) {
+      this.loadMore();
+    }
   }
 
   async loadMore() {
@@ -129,28 +182,5 @@ export default class Gallery extends Vue {
   showStory(story: Story) {
     this.isShareModalActive = true;
     this.story = story;
-  }
-
-  private onMount() {
-    const query = this.$route.query;
-    const { filter, sort, period } = query;
-    if (filter) {
-      this.filter = filter as FilterType;
-    }
-    if (sort) {
-      this.sort = sort as SortType;
-    }
-    if (period) {
-      this.period = period as string;
-    }
-
-    if (appModule.token) {
-      try {
-        appModule.getLikes();
-      } catch (er) {
-        console.log(er);
-      }
-    }
-    this.loadMore();
   }
 }

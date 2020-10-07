@@ -8,7 +8,14 @@ import {
 } from 'vuex-module-decorators';
 import store from '.';
 import { User } from '../../classes/User';
-import { StoryResponse, Scheme, GetStoriesOptions } from '../interfaces';
+import {
+  StoryResponse,
+  Scheme,
+  GetStoriesOptions,
+  Period,
+  FilterType,
+  SortType
+} from '../interfaces';
 
 import StoryService from '../services/StoryService';
 import UserService from '../services/UserService';
@@ -22,6 +29,31 @@ class AppStore extends VuexModule {
   token: string | false = false;
   liked: string[] = [];
   replies: string[] = [];
+
+  sort: SortType = 'random';
+  filter: FilterType = 'all';
+  period: Period = 'month';
+  query = '';
+
+  @MutationAction({ mutate: ['sort'] })
+  async setSort(sort: SortType) {
+    return { sort };
+  }
+
+  @MutationAction({ mutate: ['filter'] })
+  async setFilter(filter: FilterType) {
+    return { filter };
+  }
+
+  @MutationAction({ mutate: ['period'] })
+  async setPeriod(period: Period) {
+    return { period };
+  }
+
+  @MutationAction({ mutate: ['query'] })
+  async setQuery(query: string) {
+    return { query };
+  }
 
   @Action({ commit: 'SET_STORIES' })
   async fetchStories(opt?: GetStoriesOptions) {
