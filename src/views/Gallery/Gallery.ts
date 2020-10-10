@@ -117,22 +117,24 @@ export default class Gallery extends Vue {
     this.setQueryParams();
   }
 
-  mounted() {
+  async mounted() {
     const query = this.$route.query;
     const { filter, sort, period, tags } = query;
     if (filter) {
-      this.filter = filter as FilterType;
+      await appModule.setFilter(filter as FilterType);
     }
     if (sort) {
-      this.sort = sort as SortType;
+      await appModule.setSort(sort as SortType);
     }
     if (period) {
-      this.period = period as Period;
+      await appModule.setPeriod(period as Period);
     }
     if (tags) {
-      this.tags = Array.isArray(tags)
-        ? (tags.filter(x => x) as string[])
-        : tags.split(',');
+      await appModule.setTags(
+        Array.isArray(tags)
+          ? (tags.filter(x => x) as string[])
+          : tags.split(',')
+      );
     }
     if (appModule.token) {
       try {
@@ -163,6 +165,9 @@ export default class Gallery extends Vue {
   }
 
   async loadMore() {
+    if (this.isLoading) {
+      return;
+    }
     this.isLoading = true;
     try {
       const orderBy = [];
