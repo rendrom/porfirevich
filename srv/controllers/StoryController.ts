@@ -44,6 +44,7 @@ const updateQuery = (
   }
   where.isPublic = true;
   where.isDeleted = false;
+  where.isBanned = false;
   if (opt.isPublic !== undefined && !opt.isPublic) {
     delete where.isPublic;
   }
@@ -53,11 +54,10 @@ const updateQuery = (
 
   queryBuilder
     .where(whereString, where)
-    .addSelect(select.map(x => `story.${x}`))
-    .innerJoin('story.user', 'u')
-    .andWhere('u.isBanned = :isBanned', { isBanned: false })
-    .addSelect(['u.isBanned']);
-
+    .addSelect(select.map(x => `story.${x}`));
+  // .innerJoin('story.user', 'u');
+  // .andWhere('u.isBanned = :isBanned', { isBanned: false })
+  // .addSelect(['u.isBanned']);
   return queryBuilder;
 };
 

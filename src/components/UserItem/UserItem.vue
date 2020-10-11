@@ -15,7 +15,7 @@
         <b-tooltip type="is-dark" :label="user.isBanned ? 'Разблокировать пользователя' : 'Заблокировать пользователя'">
           <b-button
             :icon-left="user.isBanned ? 'restore' : 'delete'"
-            :type="user.isBanned ? 'is-danger' : 'is-light'"
+            :type="user.isBanned ? 'is-light' : 'is-danger'"
             :loading="isBanLoading"
             @click="onBanBtnClick"
           >

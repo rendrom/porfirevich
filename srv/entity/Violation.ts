@@ -1,6 +1,14 @@
 import { User } from './User';
 import { Story } from './Story';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  AfterInsert,
+  BeforeRemove,
+  Column,
+  Entity,
+  getRepository,
+  ManyToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 @Entity()
 export class Violation {
@@ -22,4 +30,28 @@ export class Violation {
   storyId?: string | null;
   @Column({ nullable: true })
   comment?: string;
+
+  @AfterInsert()
+  protected async afterInsert() {
+    const storyRepository = getRepository(Story);
+    if (this.storyId) {
+      const story = await storyRepository.findOne(this.storyId);
+      if (story) {
+        story.likesCount = story.violationsCount + 1;
+        await storyRepository.save(story);
+      }
+    }
+  }
+
+  @BeforeRemove()
+  protected async beforeRemove() {
+    const storyRepository = getRepository(Story);
+    if (this.storyId) {
+      const story = await storyRepository.findOne(this.storyId);
+      if (story && story.likesCount) {
+        story.likesCount = story.violationsCount - 1;
+        await storyRepository.save(story);
+      }
+    }
+  }
 }

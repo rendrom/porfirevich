@@ -5,7 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  Index
+  Index,
+  AfterUpdate,
+  BeforeUpdate,
+  getRepository
 } from 'typeorm';
 import { Length, IsEmail } from 'class-validator';
 import * as bcrypt from 'bcryptjs';
@@ -47,11 +50,9 @@ export class User {
   @Column({ default: false })
   isSuperuser!: boolean;
 
-  @Column()
   @CreateDateColumn()
   createdAt!: Date;
 
-  @Column()
   @UpdateDateColumn()
   updatedAt!: Date;
 
@@ -70,5 +71,14 @@ export class User {
 
   checkIfUnencryptedPasswordIsValid(unencryptedPassword: string) {
     return bcrypt.compareSync(unencryptedPassword, this.password);
+  }
+
+  @BeforeUpdate()
+  beforeUpdate() {
+    getRepository(Story)
+      .createQueryBuilder('story')
+      .where('story.userId = :userId', { userId: this.id })
+      .update({ isBanned: this.isBanned })
+      .execute();
   }
 }

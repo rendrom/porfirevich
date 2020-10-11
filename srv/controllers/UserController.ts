@@ -138,8 +138,7 @@ class UserController {
       res.status(409).send('username already in use');
       return;
     }
-    //After all send a 204 (no content, but accepted) response
-    res.status(204).send();
+    res.status(200).send(user);
   };
 
   static deleteUser = async (req: Request, res: Response) => {

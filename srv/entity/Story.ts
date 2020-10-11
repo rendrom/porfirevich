@@ -71,11 +71,9 @@ export class Story {
   @Column({ default: false, type: 'boolean' })
   isDeleted!: boolean;
 
-  @Column()
   @CreateDateColumn()
   createdAt!: Date;
 
-  @Column()
   @UpdateDateColumn()
   updatedAt!: Date;
 

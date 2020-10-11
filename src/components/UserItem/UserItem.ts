@@ -16,7 +16,7 @@ export default class extends Vue {
       });
       this.user.isBanned = !this.user.isBanned;
     } catch (er) {
-      //
+      console.log(er);
     }
 
     this.isBanLoading = false;
