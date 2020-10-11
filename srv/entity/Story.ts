@@ -8,14 +8,14 @@ import {
   BeforeInsert,
   Generated,
   ManyToOne,
-  OneToMany,
-  JoinTable
+  OneToMany
 } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 import shortid from 'shortid';
 // import { ModelWithUser } from '../interfaces';
 import { User } from './User';
 import { Like } from './Like';
+import { Violation } from './Violation';
 
 @Entity()
 @Unique(['id', 'editId'])
@@ -35,6 +35,12 @@ export class Story {
     (like: Like) => like.story
   )
   likes!: Like[];
+
+  @OneToMany(
+    () => Violation,
+    (violation: Violation) => violation.story
+  )
+  violations!: Violation[];
 
   @Column({ type: 'int', nullable: true })
   userId?: number | null;

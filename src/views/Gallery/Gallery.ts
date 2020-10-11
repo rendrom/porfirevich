@@ -66,11 +66,21 @@ export default class Gallery extends Vue {
     appModule.setFilter(val);
   }
 
-  filterItems = [
+  filterItemsForUser = [
     { text: 'все', value: 'all' },
     { text: 'только мои', value: 'my' },
     { text: 'понравившиеся', value: 'favorite' }
   ];
+
+  get filterItems() {
+    if (this.user && this.user.isSuperuser) {
+      return [
+        ...this.filterItemsForUser,
+        { text: 'жалобы', value: 'violations' }
+      ];
+    }
+    return this.filterItemsForUser;
+  }
 
   get period(): Period {
     return appModule.period;

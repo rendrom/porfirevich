@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { getRepository, Repository, LessThan, MoreThan } from 'typeorm';
+import {
+  getRepository,
+  Repository,
+  LessThan,
+  MoreThan,
+  SelectQueryBuilder
+} from 'typeorm';
 import { validate } from 'class-validator';
 
 import { StoriesResponse } from '../../src/interfaces';
@@ -20,8 +26,8 @@ const select: (keyof Story)[] = [
   'isPublic'
 ];
 
-const query = (
-  rep: Repository<Story>,
+const updateQuery = (
+  queryBuilder: SelectQueryBuilder<Story | Violation>,
   opt: {
     beforeDate?: Date;
     afterDate?: string;
@@ -30,23 +36,24 @@ const query = (
   } = {}
 ) => {
   const where: Record<string, any> = {};
-  if (opt.beforeDate) {
-    where.createdAt = LessThan(opt.beforeDate.toISOString());
-  }
+  // if (opt.beforeDate) {
+  //   where.createdAt = LessThan(opt.beforeDate.toISOString());
+  // }
   if (opt.afterDate) {
     where.createdAt = MoreThan(new Date(Number(opt.afterDate)).toISOString());
   }
   where.isPublic = true;
+  where.isDeleted = false;
   if (opt.isPublic !== undefined && !opt.isPublic) {
     delete where.isPublic;
   }
-  const queryBuilder = rep
-    .createQueryBuilder('story')
-    .where({
-      isDeleted: false,
-      ...where
-    })
-    .select(select.map(x => `story.${x}`))
+  const whereString = Object.keys(where)
+    .map(x => `story.${x} = :${x}`)
+    .join(' AND ');
+
+  queryBuilder
+    .where(whereString, where)
+    .addSelect(select.map(x => `story.${x}`))
     .innerJoin('story.user', 'u')
     .andWhere('u.isBanned = :isBanned', { isBanned: false })
     .addSelect(['u.isBanned']);
@@ -74,13 +81,14 @@ export default class StoryController {
     // // Get stories from database
     try {
       const repository = getRepository(Story);
-      const list = query(repository, {
+      const list = repository.createQueryBuilder('story');
+      updateQuery(list, {
         beforeDate,
         afterDate,
         isPublic: !my
-      })
-        .take(limit)
-        .orderBy('story.createdAt', 'DESC');
+      });
+      list.take(limit);
+      list.orderBy('story.createdAt', 'DESC');
       if (offset) {
         list.skip(offset);
       }
