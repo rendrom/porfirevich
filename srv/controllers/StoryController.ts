@@ -23,22 +23,20 @@ const select: (keyof Story)[] = [
   'postcard',
   'userId',
   'likesCount',
-  'isPublic'
+  'isPublic',
+  'violationsCount'
 ];
 
 const updateQuery = (
   queryBuilder: SelectQueryBuilder<Story | Violation>,
   opt: {
-    beforeDate?: Date;
     afterDate?: string;
     isPublic?: boolean;
     isDeleted?: boolean;
   } = {}
 ) => {
   const where: Record<string, any> = {};
-  // if (opt.beforeDate) {
-  //   where.createdAt = LessThan(opt.beforeDate.toISOString());
-  // }
+
   if (opt.afterDate) {
     where.createdAt = MoreThan(new Date(Number(opt.afterDate)).toISOString());
   }
@@ -48,13 +46,11 @@ const updateQuery = (
   if (opt.isPublic !== undefined && !opt.isPublic) {
     delete where.isPublic;
   }
-  const whereString = Object.keys(where)
-    .map(x => `story.${x} = :${x}`)
-    .join(' AND ');
+  // const whereString = Object.keys(where)
+  //   .map(x => `story.${x} = :${x}`)
+  //   .join(' AND ');
 
-  queryBuilder
-    .where(whereString, where)
-    .addSelect(select.map(x => `story.${x}`));
+  queryBuilder.where(where).addSelect(select.map(x => `story.${x}`));
   // .innerJoin('story.user', 'u');
   // .andWhere('u.isBanned = :isBanned', { isBanned: false })
   // .addSelect(['u.isBanned']);
@@ -68,12 +64,10 @@ export default class StoryController {
     const offset = Number(req.query.offset as string);
     const queryParam = req.query.query as string;
     const tagsParam = req.query.tags as string;
-    const beforeDateParam = req.query.beforeDate as string;
+
     const filter: 'my' | 'favorite' = req.query.filter;
     const my = filter === 'my';
-    const beforeDate = beforeDateParam
-      ? new Date(Number(beforeDateParam))
-      : new Date();
+
     const afterDate = req.query.afterDate as string;
     let limit = Number(req.query.limit as string);
     limit = limit && limit < 21 ? limit : 20;
@@ -83,12 +77,10 @@ export default class StoryController {
       const repository = getRepository(Story);
       const list = repository.createQueryBuilder('story');
       updateQuery(list, {
-        beforeDate,
         afterDate,
         isPublic: !my
       });
       list.take(limit);
-      list.orderBy('story.createdAt', 'DESC');
       if (offset) {
         list.skip(offset);
       }
@@ -101,6 +93,7 @@ export default class StoryController {
           }
         });
       }
+      list.addOrderBy('story.createdAt', 'DESC');
       if (userId !== undefined) {
         if (filter === 'my') {
           list.andWhere('userId = :userId', { userId });
@@ -126,9 +119,7 @@ export default class StoryController {
       if (req.accepts('json')) {
         const resp: StoriesResponse = {
           object: 'list',
-          hasMore: true,
-          data: results,
-          beforeDate: new Date(beforeDate).getTime()
+          data: results
         };
         res.json(resp);
       }
@@ -196,8 +187,7 @@ export default class StoryController {
       story.user = user;
 
       if (user.isBanned) {
-        // need for that banned user does not immediately guess that something is wrong
-        res.send(story);
+        res.status(403).send();
         return;
       }
 
@@ -285,12 +275,19 @@ export default class StoryController {
   static violation = async (req: Request, res: Response) => {
     const storyId = req.params.id;
     // @ts-ignore
+    const isSuperuser = req.user && req.user.isSuperuser;
+    // @ts-ignore
     const userId = req.user && req.user.id;
     const storyRepository = getRepository(Story);
     const violationReposytory = getRepository(Violation);
     const userReposytory = getRepository(User);
     try {
       const story = await storyRepository.findOneOrFail(storyId);
+
+      if (isSuperuser) {
+        story.isBanned = true;
+        await storyRepository.save(story);
+      }
 
       const violation = new Violation();
       violation.story = story;

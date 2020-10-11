@@ -68,7 +68,9 @@
             <section>
               <b-tooltip
                 type="is-dark"
-                label="Сообщить о нарушении"
+                :label="`Сообщить о нарушении${
+                  user.isSuperuser ? ' (' + story.violationsCount + ')' : ''
+                }`"
                 class="right-control-btn"
               >
                 <b-button

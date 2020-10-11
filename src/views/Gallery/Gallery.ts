@@ -53,11 +53,21 @@ export default class Gallery extends Vue {
     appModule.setSort(val);
   }
 
-  sortItems = [
+  sortItemsForUser = [
     { text: 'Случайный порядок', value: 'random' },
-    { text: 'Популярные', value: 'popular' },
+    { text: 'Популярные', value: 'likesCount' },
     { text: 'Новые', value: 'new' }
   ];
+
+  get sortItems() {
+    if (this.user && this.user.isSuperuser) {
+      return [
+        ...this.sortItemsForUser,
+        { text: 'Жалобы', value: 'violationsCount' }
+      ];
+    }
+    return this.sortItemsForUser;
+  }
 
   get filter(): FilterType {
     return appModule.filter;
@@ -75,8 +85,8 @@ export default class Gallery extends Vue {
   get filterItems() {
     if (this.user && this.user.isSuperuser) {
       return [
-        ...this.filterItemsForUser,
-        { text: 'жалобы', value: 'violations' }
+        ...this.filterItemsForUser
+        // { text: 'жалобы', value: 'violations' }
       ];
     }
     return this.filterItemsForUser;
@@ -181,10 +191,12 @@ export default class Gallery extends Vue {
     this.isLoading = true;
     try {
       const orderBy = [];
-      if (this.sort === 'popular') {
-        orderBy.push('likesCount');
-      } else if (this.sort === 'random') {
-        orderBy.push('RAND()');
+      if (this.sort) {
+        if (this.sort === 'random') {
+          orderBy.push('RAND()');
+        } else if (this.sort !== 'new') {
+          orderBy.push(this.sort);
+        }
       }
       const opt: GetStoriesOptions = {
         limit: 20,

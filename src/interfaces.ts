@@ -31,10 +31,7 @@ export interface GetStoriesOptions {
 
 export interface StoriesResponse {
   object: 'list';
-  hasMore: boolean;
   data: StoryResponse[];
-  count?: number;
-  beforeDate?: number;
 }
 
 /**
