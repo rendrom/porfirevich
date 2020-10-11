@@ -79,6 +79,12 @@ export class Story {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Column({ default: 0, type: 'int' })
+  violationsCount!: number;
+
+  @Column({ default: false })
+  isBanned!: boolean;
+
   @BeforeInsert()
   protected beforeInsert() {
     this.id = shortid.generate();
