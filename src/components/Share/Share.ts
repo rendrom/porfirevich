@@ -61,7 +61,7 @@ export default class extends Vue {
   copyToClipboard(type?: CopyType, text?: string | false) {
     text = text !== undefined ? text : this.html;
     if (text) {
-      copyStory(text, type);
+      copyStory(text, type, this.story);
     }
   }
 }

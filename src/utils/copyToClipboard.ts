@@ -1,6 +1,7 @@
 import { ToastProgrammatic as Toast } from 'buefy';
 import { stripHtml } from './stripHtml';
 import { SITE } from '../config';
+import { Story } from '../../classes/Story';
 
 export type CopyType = 'html' | 'text' | 'quote';
 
@@ -40,12 +41,17 @@ export function copyToClipboard(str: string) {
   }
 }
 
-export function copyStory(content: string, type: CopyType = 'text') {
+export function copyStory(
+  content: string,
+  type: CopyType = 'text',
+  story?: Story
+) {
   if (type === 'text' || type === 'quote') {
     content = stripHtml(content);
   }
   if (type === 'quote') {
-    content = `«${content}»\r\nнаписано с помощью нейронной сети\r\n#порфирьевич\r\n${SITE}`;
+    const link = SITE + (story && story.id ? '/' + story.id : '');
+    content = `«${content}»\r\nнаписано с помощью нейронной сети\r\n#порфирьевич\r\n${link}`;
   }
   copyToClipboard(content);
 }
