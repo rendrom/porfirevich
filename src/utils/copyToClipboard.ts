@@ -44,7 +44,7 @@ export function copyToClipboard(str: string) {
 export function copyStory(
   content: string,
   type: CopyType = 'text',
-  story?: Story
+  story?: Story | false
 ) {
   if (type === 'text' || type === 'quote') {
     content = stripHtml(content);
