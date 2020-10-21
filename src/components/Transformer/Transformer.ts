@@ -253,13 +253,13 @@ export default class extends Vue {
     prompt = prompt.slice(-this.promptMaxLength);
     prompt = prompt.trim();
 
-    const resp = await fetch(`${config.endpoint}/gpt2/medium/`, {
+    const resp = await fetch(`${config.endpoint}/generate/`, {
       method: 'POST',
       signal: controller.signal,
       body: JSON.stringify({
         prompt,
-        length: this.length,
-        num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
+        length: this.length
+        // num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
       })
     });
     const data: TransformResp = await resp.json();
