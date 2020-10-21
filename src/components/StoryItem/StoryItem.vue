@@ -1,8 +1,6 @@
 <template>
   <div class="story-item" v-bind:class="{ isdeleted: story.isDeleted }">
-    <span v-for="(c, i) in content" :key="i">
-      <strong v-if="c[1]" :style="{ color: color }">{{ c[0] }}</strong>
-      <span v-else>{{ c[0] }}</span>
+    <span v-html="content">
     </span>
 
     <div class="item-controls">

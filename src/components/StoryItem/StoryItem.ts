@@ -15,7 +15,21 @@ export default class extends Vue {
   publishLoading = false;
 
   get content() {
-    return JSON.parse(this.story.content);
+    const c = JSON.parse(this.story.content) as [string, number][];
+    let html = '';
+    c.forEach(x => {
+      const text = x[0];
+      const lineBreaks = text.match(/\n/g) || [];
+      if (x[1]) {
+        html += `<strong style="color:${this.color}">${text}</strong>`;
+      } else {
+        html += `<span>${text}</span>`;
+      }
+      lineBreaks.forEach(() => {
+        html += '<br>';
+      });
+    });
+    return html;
   }
 
   get color() {
