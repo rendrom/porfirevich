@@ -65,7 +65,7 @@ export default class StoryController {
     const queryParam = req.query.query as string;
     const tagsParam = req.query.tags as string;
 
-    const filter: 'my' | 'favorite' = req.query.filter;
+    const filter = req.query.filter;
     const my = filter === 'my';
 
     const afterDate = req.query.afterDate as string;

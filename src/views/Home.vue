@@ -1,6 +1,10 @@
 <template>
   <div>
-    <Transformer v-if="!isLoading" v-model="scheme" @loading="checkTransformLoading" />
+    <Transformer
+      v-if="!isLoading"
+      v-model="scheme"
+      @loading="checkTransformLoading"
+    />
     <div class="save-control columns">
       <div class="column is-1">
         <LikeButton v-if="story" :story="story"></LikeButton>
@@ -17,15 +21,17 @@
           icon-left="share-variant"
           :disabled="isShareDisabled"
           @click="saveStory"
-        >Поделиться</b-button>
+          >Поделиться</b-button
+        >
       </div>
       <div class="column is-1">
-        <div class="tools is-pulled-right">
-
-        </div>
+        <div class="tools is-pulled-right"></div>
       </div>
     </div>
-    <UserItem v-if="story && story.user && user.isSuperuser" :user="story.user"></UserItem>
+    <UserItem
+      v-if="story && story.user && user.isSuperuser"
+      :user="story.user"
+    ></UserItem>
 
     <b-modal :active.sync="isShareModalActive" :width="620">
       <Share v-if="isShareModalActive" v-model="story" />
