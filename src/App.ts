@@ -4,6 +4,7 @@ import UrlParams from '@nextgis/url-runtime-params';
 import { Component, Vue } from 'vue-property-decorator';
 import UserService from './services/UserService';
 import { appModule } from './store/app';
+import config from '../config';
 
 @Component
 export default class App extends Vue {
@@ -15,6 +16,10 @@ export default class App extends Vue {
 
   get user() {
     return appModule.user;
+  }
+
+  get color() {
+    return config.primaryColor;
   }
 
   async mounted() {

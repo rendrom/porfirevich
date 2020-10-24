@@ -7,7 +7,7 @@ module.exports = {
       serverDir: './srv'
     },
     webpackBundleAnalyzer: {
-      openAnalyzer: true
+      openAnalyzer: false
     }
   },
 

@@ -10,7 +10,6 @@
 
       </template> -->
 
-
       <template slot="end">
         <b-navbar-item tag="router-link" to="/gallery">Галерея</b-navbar-item>
         <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
@@ -64,39 +63,18 @@
         </p>
       </div>
       <div class="content has-text-centered footer-support">
-        <h4 class="footer-title">
-          <strong>Поддержите</strong> Порфирьевича
-        </h4>
+        <h4 class="footer-title">Поддержите <strong :style="{color: color}">Порфирьевича</strong> </h4>
 
         <div class="footer-donations columns">
-
           <div class="footer-donation column">
             <div class="footer-donation-action">
-              <!-- <a
-                class="button bd-github-button"
-                href="https://github.com/users/jgthms/sponsorship"
+              <a
+                class="button boosty-button"
+                href="https://boosty.to/porfirevich"
                 target="_blank"
               >
-                <span class="icon">
-                  <svg
-                    class="svg-inline--fa fa-heart fa-w-16"
-                    aria-hidden="true"
-                    focusable="false"
-                    data-prefix="fas"
-                    data-icon="heart"
-                    role="img"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512"
-                    data-fa-i2svg=""
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"
-                    ></path></svg
-                  >
-                </span>
-                <strong>Sponsor</strong>
-              </a> -->
+                <img src="/images/boosty_white.svg" alt="Boosty" />
+              </a>
 
               <a
                 class="patreon-button"
@@ -131,6 +109,23 @@
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+}
+
+.boosty-button {
+  background-color: #f15f2c;
+  border-color: #f15f2c !important;
+  color: #fff;
+  font-size: 0.875rem;
+  height: 36px;
+  width: 146px;
+  padding: calc(0.5em - 1px) 1em;
+  position: relative;
+  border-radius: 0;
+  margin-right: 0.5rem;
+}
+
+.boosty-button img {
+  height: 36px;
 }
 
 .neuro-logo {
