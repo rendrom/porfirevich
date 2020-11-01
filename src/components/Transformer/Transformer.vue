@@ -64,7 +64,6 @@
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <b-button size="is-small" type icon-right="close" @click="escape">
-              Esc
             </b-button>
           </div>
         </div>

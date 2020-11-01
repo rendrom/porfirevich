@@ -11,7 +11,7 @@
       </template> -->
 
       <template slot="end">
-        <b-navbar-item tag="router-link" to="/gallery">Галерея</b-navbar-item>
+        <b-navbar-item tag="router-link" to="/gallery"><strong>Галерея</strong></b-navbar-item>
         <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
         <b-navbar-item v-if="user" @click="logout">Выход</b-navbar-item>
         <!-- <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item> -->

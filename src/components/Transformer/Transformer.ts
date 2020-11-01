@@ -9,10 +9,10 @@ import { PRIMARY_COLOR } from '../../config';
 import { schemeToDelta, deltaToScheme } from '../../utils/schemeUtils';
 import { appModule } from '@/store/app';
 
-const ESC = 27;
-const TAB = 9;
+// const ESC = 27;
+// const TAB = 9;
 // const CTRL = 17;
-const ALT = 18;
+// const ALT = 18;
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 
@@ -43,6 +43,8 @@ export default class extends Vue {
   promptMaxLength = 1000;
   debouncedTransform!: () => void;
 
+  private keysPressed: Record<string, boolean> = {};
+
   get prompt() {
     return this._stripHtml(this.text)
       .replace(this.lastReply, '')
@@ -70,20 +72,23 @@ export default class extends Vue {
     return val;
   }
 
-  mounted() {
-    this.bindDebounceTransform();
-    this._createQuill();
-    window.addEventListener('keyup', event => {
-      this.onKeydown(event);
-    });
-  }
-
   @Emit('change')
   setContent() {
     const content = this.quill.getContents();
     this.html = this.quill.root.innerHTML;
     this.localScheme = deltaToScheme(content);
     return this.localScheme;
+  }
+
+  mounted() {
+    this.bindDebounceTransform();
+    this._createQuill();
+    window.addEventListener('keydown', event => {
+      this.onKeydown(event);
+    });
+    window.addEventListener('keyup', event => {
+      this.onKeyup(event);
+    });
   }
 
   clean() {
@@ -151,17 +156,27 @@ export default class extends Vue {
   }
 
   onKeydown(e: KeyboardEvent) {
-    if (e.keyCode === ALT) {
+    this.keysPressed[e.key] = false;
+    if (e.key === 'Alt') {
       // this.isAutocomplete = !this.isAutocomplete;
-    } else if (e.keyCode === TAB) {
+    } else if (e.key === 'Tab') {
       if (this.isLoading) {
         this.abort();
       } else {
         this.transform();
       }
-    } else if (e.keyCode === ESC) {
-      this.escape();
+    } else if (e.key === 'Escape') {
+      // this.escape();
+    } else if (
+      (e.key === 'Control' || e.key === 'Meta') &&
+      this.keysPressed['z']
+    ) {
+      // TODO: return last reply
     }
+  }
+
+  onKeyup(e: KeyboardEvent) {
+    this.keysPressed[e.key] = false;
   }
 
   async transform() {
@@ -278,12 +293,23 @@ export default class extends Vue {
     };
     this.quill = new Quill('#editorjs', {
       formats: ['bold', 'color'],
-      modules: { keyboard: { bindings } },
+      modules: {
+        keyboard: { bindings },
+        history: {
+          delay: Infinity,
+          maxStack: 0,
+          userOnly: true
+        }
+      },
       placeholder: 'Придумайте начало вашей истории'
       // clipboard: {
       //   matchVisual: false
       // }
     });
+    const keyboard = this.quill.getModule('keyboard');
+    for (const key in keyboard.hotkeys) {
+      delete keyboard.hotkeys[key];
+    }
     this.setPlaceholder();
     this.quill.focus();
     this.quill.on(
