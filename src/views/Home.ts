@@ -10,7 +10,7 @@ import LikeButton from '../components/LikeButton';
 import { appModule } from '../store/app';
 import { Scheme } from '../interfaces';
 import { schemeToHtml } from '../utils/schemeUtils';
-import { checkCorrupted } from '@/utils/checkCorrupted';
+// import { checkCorrupted } from '../utils/checkCorrupted';
 
 @Component({
   components: {
@@ -53,7 +53,7 @@ export default class Home extends Vue {
 
   async saveStory() {
     if (!appModule.story) {
-      const isCorrupted = checkCorrupted(this.scheme);
+      const isCorrupted = false; // checkCorrupted(this.scheme);
       if (isCorrupted) {
         Toast.open({
           message:
