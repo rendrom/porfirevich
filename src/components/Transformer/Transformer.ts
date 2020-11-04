@@ -42,8 +42,11 @@ export default class extends Vue {
   abortControllers: AbortController[] = [];
   promptMaxLength = 1000;
   debouncedTransform!: () => void;
+  debouncedHistory!: () => void;
 
-  private keysPressed: Record<string, boolean> = {};
+  historyInterval = 300;
+  historyLength = 100;
+  history: Scheme[] = [];
 
   get prompt() {
     return this._stripHtml(this.text)
@@ -74,21 +77,55 @@ export default class extends Vue {
 
   @Emit('change')
   setContent() {
-    const content = this.quill.getContents();
     this.html = this.quill.root.innerHTML;
-    this.localScheme = deltaToScheme(content);
+    this.localScheme = this._getScheme();
     return this.localScheme;
+  }
+
+  bindDebounceHistory() {
+    this.debouncedHistory = debounce(
+      () => this.updateHistory(),
+      this.historyInterval
+    );
   }
 
   mounted() {
     this.bindDebounceTransform();
+    this.bindDebounceHistory();
     this._createQuill();
     window.addEventListener('keydown', event => {
       this.onKeydown(event);
     });
-    window.addEventListener('keyup', event => {
-      this.onKeyup(event);
-    });
+  }
+
+  appendHistory(scheme: Scheme) {
+    const history = [...this.history];
+    if (history.length > this.historyLength) {
+      history.splice(0, history.length - this.historyLength, scheme);
+    } else {
+      history.push(scheme);
+    }
+    this.history = history;
+    console.log(this.history);
+  }
+
+  historyBack() {
+    this.abort();
+    this.cleanLastReply();
+    const history = [...this.history];
+    history.pop(); // last changes
+    const prev = history.pop();
+    if (prev) {
+      this._setScheme(prev);
+    } else {
+      this.clean();
+    }
+    this.history = history;
+  }
+
+  updateHistory() {
+    const scheme = this._getScheme();
+    this.appendHistory(scheme);
   }
 
   clean() {
@@ -153,10 +190,10 @@ export default class extends Vue {
         this.debouncedTransform();
       }
     }
+    this.debouncedHistory();
   }
 
   onKeydown(e: KeyboardEvent) {
-    this.keysPressed[e.key] = false;
     if (e.key === 'Alt') {
       // this.isAutocomplete = !this.isAutocomplete;
     } else if (e.key === 'Tab') {
@@ -167,16 +204,11 @@ export default class extends Vue {
       }
     } else if (e.key === 'Escape') {
       // this.escape();
-    } else if (
-      (e.key === 'Control' || e.key === 'Meta') &&
-      this.keysPressed['z']
-    ) {
+    } else if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
+      console.log('ctrl-z');
+      this.historyBack();
       // TODO: return last reply
     }
-  }
-
-  onKeyup(e: KeyboardEvent) {
-    this.keysPressed[e.key] = false;
   }
 
   async transform() {
@@ -262,9 +294,6 @@ export default class extends Vue {
     const controller = new AbortController();
     this.abortControllers.push(controller);
 
-    // return new Promise((resolve, reject) => {
-    //   setTimeout(reject, 1000);
-    // });
     prompt = prompt.slice(-this.promptMaxLength);
     prompt = prompt.trim();
 
@@ -318,12 +347,21 @@ export default class extends Vue {
         this.onTextChange(delta, oldDelta, source)
     );
     if (this.scheme && this.scheme.length) {
-      const delta = schemeToDelta(this.scheme);
-      const ops = delta.ops;
-      // @ts-ignore
-      this.quill.setContents(ops, 'api');
-      this.setCursor();
+      this._setScheme(this.scheme);
     }
+  }
+
+  private _setScheme(scheme: Scheme) {
+    const delta = schemeToDelta(scheme);
+    const ops = delta.ops;
+    // @ts-ignore
+    this.quill.setContents(ops, 'api');
+    this.setCursor();
+  }
+
+  private _getScheme(): Scheme {
+    const content = this.quill.getContents();
+    return deltaToScheme(content);
   }
 
   private _stripHtml(html: string) {
