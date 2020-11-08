@@ -1,6 +1,7 @@
 <template>
   <div>
     <Transformer
+      ref="Transformer"
       v-if="!isLoading"
       v-model="scheme"
       @loading="checkTransformLoading"

@@ -1,9 +1,10 @@
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch, Ref } from 'vue-property-decorator';
 import { ToastProgrammatic as Toast } from 'buefy';
 import { Story } from '../../classes/Story';
 
 import { copyStory } from '../utils/copyToClipboard';
 
+import TransformerKlass from '../components/Transformer/Transformer';
 import Transformer from '../components/Transformer/Transformer.vue';
 import UserItem from '../components/UserItem/UserItem.vue';
 import LikeButton from '../components/LikeButton';
@@ -23,6 +24,8 @@ import { schemeToHtml } from '../utils/schemeUtils';
 })
 export default class Home extends Vue {
   @Prop({ type: String, default: '' }) id!: string;
+  @Ref('Transformer') readonly transformer!: TransformerKlass;
+
   scheme: Scheme = [];
   isShareModalActive = false;
   isLoading = false;
@@ -68,6 +71,7 @@ export default class Home extends Vue {
         if (this.$route.path !== path) {
           this.$router.push(path);
         }
+        this.transformer.removeWindowUnloadListener();
       }
     } else {
       this.isShareModalActive = true;
@@ -99,6 +103,7 @@ export default class Home extends Vue {
           this.scheme = JSON.parse(story.content) as Scheme;
           const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
           appModule.appendReplies(replies);
+          this.transformer.removeWindowUnloadListener();
         }
       } catch (er) {
         //

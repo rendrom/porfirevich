@@ -22,7 +22,7 @@ interface TransformResp {
 }
 
 @Component
-export default class extends Vue {
+export default class Transformer extends Vue {
   @Model('change', { type: Array, default: () => [] }) readonly scheme!: Scheme;
   text = '';
   html = '';
@@ -47,6 +47,9 @@ export default class extends Vue {
   historyInterval = 300;
   historyLength = 100;
   history: Scheme[] = [];
+
+  __onKeydown!: (e: KeyboardEvent) => void;
+  __windowUnload?: (e: BeforeUnloadEvent) => void;
 
   get prompt() {
     return this._stripHtml(this.text)
@@ -93,9 +96,15 @@ export default class extends Vue {
     this.bindDebounceTransform();
     this.bindDebounceHistory();
     this._createQuill();
-    window.addEventListener('keydown', event => {
+    this.__onKeydown = event => {
       this.onKeydown(event);
-    });
+    };
+    window.addEventListener('keydown', this.__onKeydown);
+  }
+
+  destroyed() {
+    window.removeEventListener('keydown', this.__onKeydown);
+    this.removeWindowUnloadListener();
   }
 
   appendHistory(scheme: Scheme) {
@@ -132,6 +141,7 @@ export default class extends Vue {
     this.abort();
     this.text = '';
     this.html = '';
+    this.removeWindowUnloadListener();
     this.quill.setText('', 'api');
   }
 
@@ -191,6 +201,11 @@ export default class extends Vue {
       }
     }
     this.debouncedHistory();
+    if (this.text.trim().length) {
+      this._addWindowUnloadListener();
+    } else {
+      this.removeWindowUnloadListener();
+    }
   }
 
   onKeydown(e: KeyboardEvent) {
@@ -274,6 +289,24 @@ export default class extends Vue {
     const text = q.getText();
     // TODO: remove always first '/n' to set init length 0
     q.root.dataset.placeholder = text.length > 1 ? '' : this.placeholder;
+  }
+
+  removeWindowUnloadListener() {
+    if (this.__windowUnload) {
+      window.removeEventListener('beforeunload', this.__windowUnload);
+      this.__windowUnload = undefined;
+    }
+  }
+
+  private _addWindowUnloadListener() {
+    if (!this.__windowUnload) {
+      this.__windowUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue =
+          'Вы действительно хотите покинуть страницу? История будет утеряна.';
+      };
+      window.addEventListener('beforeunload', this.__windowUnload);
+    }
   }
 
   private _handleRequestError() {
