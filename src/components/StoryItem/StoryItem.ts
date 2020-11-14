@@ -19,16 +19,16 @@ export default class extends Vue {
     const c = JSON.parse(this.story.content) as [string, number][];
     let html = '';
     c.forEach(x => {
-      const text = escapeHtml(x[0]);
-      const lineBreaks = text.match(/\n/g) || [];
+      let text = escapeHtml(x[0]);
+      text = text.replace(/\n/g, '<br>');
       if (x[1]) {
         html += `<strong style="color:${this.color}">${text}</strong>`;
       } else {
         html += `<span>${text}</span>`;
       }
-      lineBreaks.forEach(() => {
-        html += '<br>';
-      });
+      // lineBreaks.forEach(() => {
+      //   html += '<br>';
+      // });
     });
     return html;
   }

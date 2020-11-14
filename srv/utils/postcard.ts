@@ -71,7 +71,8 @@ function getHtml(story: Story) {
   const content = JSON.parse(story.content) as Scheme;
   let length = 0;
   const text = content.reduce((a, b) => {
-    const str = escapeHtml(b[0]);
+    let str = escapeHtml(b[0]);
+    str = str.replace(/\n/g, '<br>');
     length += str.length;
     a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
     return a;
