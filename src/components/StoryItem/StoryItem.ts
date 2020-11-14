@@ -5,6 +5,7 @@ import config from '../../../config';
 import LikeButton from '../LikeButton';
 import StoryService from '../../services/StoryService';
 import { appModule } from '../../store/app';
+import { escapeHtml } from '../../utils/escapeHtml';
 
 @Component({ components: { LikeButton } })
 export default class extends Vue {
@@ -18,7 +19,7 @@ export default class extends Vue {
     const c = JSON.parse(this.story.content) as [string, number][];
     let html = '';
     c.forEach(x => {
-      const text = x[0];
+      const text = escapeHtml(x[0]);
       const lineBreaks = text.match(/\n/g) || [];
       if (x[1]) {
         html += `<strong style="color:${this.color}">${text}</strong>`;

@@ -3,6 +3,7 @@ import path from 'path';
 import puppeteer, { Page } from 'puppeteer';
 import config from '../../config';
 import { Scheme } from '../../src/interfaces';
+import { escapeHtml } from '../../src/utils/escapeHtml';
 import { Story } from '../entity/Story';
 
 interface DomScreenshotOptions {
@@ -73,7 +74,7 @@ function getHtml(story: Story) {
     const str = b[0];
     length += str.length;
     a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
-    return a;
+    return escapeHtml(a);
   }, '');
 
   const textSizeFromLength: [number, number][] = [
