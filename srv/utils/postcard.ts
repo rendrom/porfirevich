@@ -71,10 +71,10 @@ function getHtml(story: Story) {
   const content = JSON.parse(story.content) as Scheme;
   let length = 0;
   const text = content.reduce((a, b) => {
-    const str = b[0];
+    const str = escapeHtml(b[0]);
     length += str.length;
     a += b[1] ? `<strong style="color:${color};">${str}</strong>` : str;
-    return escapeHtml(a);
+    return a;
   }, '');
 
   const textSizeFromLength: [number, number][] = [
