@@ -3,7 +3,9 @@
     <div v-show="!isLoading" class="box">
       <div>
         <p v-if="isError" class="subtitle">Произошла ошибка!</p>
-        <p v-else class="subtitle">Сохраните изображение ниже, чтобы поделиться историей</p>
+        <p v-else class="subtitle">
+          Сохраните изображение ниже, чтобы поделиться историей
+        </p>
       </div>
       <div class="output-block">
         <div v-if="isError">
@@ -22,20 +24,28 @@
               type="is-text"
               icon-left="link"
               @click="copyToClipboard('test', shareUrl)"
-            >{{ shareUrl }}</b-button>
+              >{{ shareUrl }}</b-button
+            >
           </div>
           <div>
-            <b-button type="is-text" icon-left="content-copy" @click="copyToClipboard">текст</b-button>
+            <b-button
+              type="is-text"
+              icon-left="content-copy"
+              @click="copyToClipboard"
+              >текст</b-button
+            >
             <b-button
               type="is-text"
               icon-left="xml"
               @click="copyToClipboard('html')"
-            >текст c разметкой</b-button>
+              >текст c разметкой</b-button
+            >
             <b-button
               type="is-text"
               icon-left="format-quote-close"
               @click="copyToClipboard('quote')"
-            >цитату</b-button>
+              >цитату</b-button
+            >
           </div>
         </div>
         <div class="pt10">
@@ -45,7 +55,11 @@
             label="Сначала войдите"
             :active="!user"
           >
-            <b-checkbox v-model="story.isPublic" :disabled="!user">Публиковать в галереи</b-checkbox>
+            <b-field>
+              <b-checkbox v-model="story.isPublic" :disabled="!user || changePublicStatusLoading"
+                >Публиковать в галерее</b-checkbox
+              >
+            </b-field>
           </b-tooltip>
         </div>
         <!-- <div class="has-text-grey-light is-size-6 has-text-right">
@@ -59,7 +73,7 @@
         aria-close-label="Close notification"
         role="alert"
       >
-        Заведите <strong>аккаунт</strong> и публикуйте истории в галереи.
+        Заведите <strong>аккаунт</strong> и публикуйте истории в галерее.
         <br />
       </b-notification>
     </div>
