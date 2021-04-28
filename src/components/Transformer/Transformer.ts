@@ -115,7 +115,6 @@ export default class Transformer extends Vue {
       history.push(scheme);
     }
     this.history = history;
-    console.log(this.history);
   }
 
   historyBack() {
@@ -148,6 +147,8 @@ export default class Transformer extends Vue {
   escape() {
     if (this.isLoading) {
       this.abort();
+    } else if (this.history.length) {
+      this.historyBack();
     } else if (this.lastReply) {
       this.cleanLastReply();
     } else {
@@ -219,10 +220,8 @@ export default class Transformer extends Vue {
       }
     } else if (e.key === 'Escape') {
       // this.escape();
-    } else if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
-      console.log('ctrl-z');
+    } else if (e.code === 'KeyZ') {
       this.historyBack();
-      // TODO: return last reply
     }
   }
 

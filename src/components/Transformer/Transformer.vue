@@ -5,13 +5,13 @@
         <b-field label="Автодополнение">
           <div class="autocomplate-control">
             <b-switch v-model="isAutocomplete" size="is-small">
-              {{ isAutocomplete ? 'вкл' : 'выкл' }}
+              {{ isAutocomplete ? "вкл" : "выкл" }}
             </b-switch>
           </div>
         </b-field>
       </div>
       <div class="column">
-        <b-field label="Задержка автодополнения" style="max-width: 250px;">
+        <b-field label="Задержка автодополнения" style="max-width: 250px">
           <b-numberinput
             v-model="interval"
             size="is-small"
@@ -57,13 +57,18 @@
             class="transform-btn"
             @click="transform"
           >
-            {{ (lastReply ? 'Варианты' : 'Дополнить') + ' (Tab)' }}
+            {{ (lastReply ? "Варианты" : "Дополнить") + " (Tab)" }}
           </b-button>
         </div>
 
         <div class="column is-1">
           <div class="tools is-pulled-right">
-            <b-button size="is-small" type icon-right="close" @click="escape">
+            <b-button
+              size="is-small"
+              type
+              :icon-right="isLoading || !history.length ? 'close' : 'arrow-left'"
+              @click="escape"
+            >
             </b-button>
           </div>
         </div>
