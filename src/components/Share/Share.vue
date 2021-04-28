@@ -49,8 +49,9 @@
           </div>
         </div>
         <div class="pt10">
+
           <b-tooltip
-            v-if="story.editId"
+            v-if="isUserAuthor"
             type="is-dark"
             label="Сначала войдите"
             :active="!user"

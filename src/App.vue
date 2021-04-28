@@ -11,7 +11,9 @@
       </template> -->
 
       <template slot="end">
-        <b-navbar-item tag="router-link" to="/gallery"><strong>Галерея</strong></b-navbar-item>
+        <b-navbar-item tag="router-link" to="/gallery"
+          ><strong>Галерея</strong></b-navbar-item
+        >
         <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
         <b-navbar-item v-if="user" @click="logout">Выход</b-navbar-item>
         <!-- <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item> -->
@@ -48,7 +50,9 @@
     <section class="section">
       <div class="columns is-mobile">
         <div class="column is-full" v-if="!isLoading">
-          <router-view />
+          <router-view v-slot="{ Component }" :key="'page-' + $route.fullPath">
+            <component :is="Component" />
+          </router-view>
         </div>
         <b-loading v-else :is-full-page="false"></b-loading>
       </div>
@@ -63,7 +67,9 @@
         </p>
       </div>
       <div class="content has-text-centered footer-support">
-        <h4 class="footer-title">Поддержите <strong :style="{color: color}">Порфирьевича</strong> </h4>
+        <h4 class="footer-title">
+          Поддержите <strong :style="{ color: color }">Порфирьевича</strong>
+        </h4>
 
         <div class="footer-donations columns">
           <div class="footer-donation column">

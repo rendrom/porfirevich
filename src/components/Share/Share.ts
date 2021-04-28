@@ -43,9 +43,18 @@ export default class extends Vue {
     return this.story && this.story.postcard;
   }
 
+  get isUserAuthor() {
+    return (
+      this.user &&
+      this.story &&
+      this.story.user &&
+      this.user.id === this.story.user.id
+    );
+  }
+
   @Watch('story.isPublic')
   async onPublicChange(isPublic: boolean, oldVal: boolean) {
-    if (oldVal !== undefined && this.user && this.story.editId) {
+    if (oldVal !== undefined && this.user) {
       try {
         this.changePublicStatusLoading = true;
         const edited = await StoryService.edit(this.story.id, {
