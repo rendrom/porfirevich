@@ -1,7 +1,6 @@
 <template>
   <div>
     <Transformer
-      :key="id"
       ref="Transformer"
       v-if="!isLoading"
       v-model="scheme"
@@ -31,7 +30,6 @@
       </div>
     </div>
     <UserItem
-      :key="id"
       v-if="story && story.user && user.isSuperuser"
       :user="story.user"
     ></UserItem>
