@@ -45,7 +45,7 @@ export default class Transformer extends Vue {
   debouncedHistory!: () => void;
 
   historyInterval = 300;
-  historyLength = 100;
+  historyLength = 2000;
   history: Scheme[] = [];
 
   __onKeydown!: (e: KeyboardEvent) => void;
@@ -110,10 +110,10 @@ export default class Transformer extends Vue {
   appendHistory(scheme: Scheme) {
     const history = [...this.history];
     if (history.length > this.historyLength) {
-      history.splice(0, history.length - this.historyLength, scheme);
-    } else {
-      history.push(scheme);
+      history.splice(0, history.length - this.historyLength);
     }
+    history.push(scheme);
+
     this.history = history;
   }
 
@@ -220,7 +220,7 @@ export default class Transformer extends Vue {
       }
     } else if (e.key === 'Escape') {
       // this.escape();
-    } else if (e.code === 'KeyZ') {
+    } else if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ') {
       this.historyBack();
     }
   }

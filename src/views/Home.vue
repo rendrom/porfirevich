@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="id">
     <Transformer
       ref="Transformer"
       v-if="!isLoading"
