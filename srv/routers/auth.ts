@@ -16,6 +16,7 @@ function generateUserToken(req: Request, res: Response) {
   if (userId) {
     const accessToken = generateAccessToken(userId);
     res.redirect('/auth-redirect?token=' + accessToken);
+    // res.redirect('http://localhost:3001/auth-redirect?token=' + accessToken);
   }
 }
 

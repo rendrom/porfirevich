@@ -49,7 +49,13 @@ export default class App extends Vue {
   login() {
     // const next = this.$route.path !== '/' ? `?next=${this.$route.path}` : '';
     // window.open('/auth/google/start' + next, '_self');
-    const newWindow = openWindow('/auth/google/start', 'NextGIS ID', 540, 540);
+    const newWindow = openWindow(
+      // 'http://localhost:3000' +
+      '/auth/google/start',
+      'NextGIS ID',
+      540,
+      540
+    );
     const cleanTempStore = () => {
       window.localStorage.removeItem(APP_TOKEN_KEY);
       window.removeEventListener('storage', messageReceive);
