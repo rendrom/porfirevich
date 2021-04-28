@@ -15,7 +15,7 @@ function generateUserToken(req: Request, res: Response) {
   const userId = req.user && req.user.uid;
   if (userId) {
     const accessToken = generateAccessToken(userId);
-    res.redirect('/?token=' + accessToken);
+    res.redirect('/auth-redirect?token=' + accessToken);
   }
 }
 

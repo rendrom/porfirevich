@@ -22,6 +22,10 @@ export default new Router({
       component: () => import('../views/Login')
     },
     {
+      path: '/auth-redirect',
+      component: () => import('../views/AuthRedirect.vue')
+    },
+    {
       path: '/:id?',
       name: 'transformer',
       props: true,

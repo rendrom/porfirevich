@@ -5,14 +5,15 @@ import { Component, Vue } from 'vue-property-decorator';
 import UserService from './services/UserService';
 import { appModule } from './store/app';
 import config from '../config';
+import openWindow from './utils/openWindow';
+import { APP_TOKEN_KEY } from './utils/constants';
+
+const urlParams = new UrlParams();
 
 @Component
 export default class App extends Vue {
   isLoading = true;
   rememberMe = true;
-  get urlParams() {
-    return new UrlParams();
-  }
 
   get user() {
     return appModule.user;
@@ -23,7 +24,7 @@ export default class App extends Vue {
   }
 
   async mounted() {
-    let token: string | null = this.urlParams.get('token') as string;
+    let token: string | null = urlParams.get('token') as string;
     if (token) {
       token = token.replace(/#$/, '');
       if (this.rememberMe) {
@@ -46,8 +47,34 @@ export default class App extends Vue {
   }
 
   login() {
-    const next = this.$route.path !== '/' ? `?next=${this.$route.path}` : '';
-    window.open('/auth/google/start' + next, '_self');
+    // const next = this.$route.path !== '/' ? `?next=${this.$route.path}` : '';
+    // window.open('/auth/google/start' + next, '_self');
+    const newWindow = openWindow('/auth/google/start', 'NextGIS ID', 540, 540);
+    const cleanTempStore = () => {
+      window.localStorage.removeItem(APP_TOKEN_KEY);
+      window.removeEventListener('storage', messageReceive);
+      if (newWindow) {
+        newWindow.close();
+      }
+    };
+    const messageReceive = (ev: StorageEvent) => {
+      if (ev.key === APP_TOKEN_KEY) {
+        const token = ev.newValue;
+        if (token) {
+          appModule.setToken(token).then(() => {
+            UserService.getUser(token).then(user => {
+              appModule.setUser(user);
+            });
+          });
+        }
+        cleanTempStore();
+      }
+    };
+    if (newWindow) {
+      // introduce new temporary storage for communication between browser tabs
+      window.localStorage.setItem(APP_TOKEN_KEY, '');
+      window.addEventListener('storage', messageReceive);
+    }
   }
 
   logout() {
@@ -57,6 +84,6 @@ export default class App extends Vue {
   }
 
   private removeTokenFromUrl() {
-    this.urlParams.remove('token');
+    urlParams.remove('token');
   }
 }
