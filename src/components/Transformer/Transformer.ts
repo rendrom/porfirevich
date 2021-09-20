@@ -262,7 +262,7 @@ export default class Transformer extends Vue {
         this.replies = replies;
       }
     } catch (err) {
-      if (err && err.name === 'AbortError') {
+      if (err instanceof Error && err.name === 'AbortError') {
         // aborted
         mem.isAborted = true;
       } else {

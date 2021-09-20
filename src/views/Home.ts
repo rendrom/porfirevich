@@ -50,6 +50,14 @@ export default class Home extends Vue {
     appModule.getLikes();
   }
 
+  @Watch('$route')
+  onRouteChange() {
+    if (this.$route.name === 'transformer' && this.$route.fullPath === '/') {
+      this.transformer.clean();
+      this.clean();
+    }
+  }
+
   mounted() {
     this._mounted();
   }
