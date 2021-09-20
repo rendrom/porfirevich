@@ -55,7 +55,8 @@ export default class App extends Vue {
     // const next = this.$route.path !== '/' ? `?next=${this.$route.path}` : '';
     // window.open('/auth/google/start' + next, '_self');
     const newWindow = openWindow(
-      'http://localhost:3000' + '/auth/google/start',
+      // 'http://localhost:3000' +
+      '/auth/google/start',
       'NextGIS ID',
       540,
       540
