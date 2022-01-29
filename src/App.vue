@@ -3,7 +3,7 @@
     <b-navbar type fixed-top>
       <template slot="brand">
         <b-navbar-item tag="router-link" :to="{ path: '/' }">
-          <img src="images/logo.svg" alt="Порфирьевич" class="neuro-logo" />
+          <img src="images/logo-joke.svg" alt="Порфирьевич" class="neuro-logo" />
         </b-navbar-item>
       </template>
       <!-- <template slot="start">
