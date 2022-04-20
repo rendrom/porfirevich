@@ -79,7 +79,7 @@
     "babel-eslint": "^10.0.3",
     "bcryptjs": "^2.4.3",
     "connect-history-api-fallback": "^1.6.0",
-    "convict": "^5.2.0",
+    "convict": "^6.2.2",
     "dotenv": "^8.2.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.0.0",
