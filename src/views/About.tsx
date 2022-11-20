@@ -25,8 +25,9 @@ export default class About extends Vue {
               </p>
               <p>
                 Вопросы, жалобы и предложения принимаются тут:&nbsp;
-                <a href="https://twitter.com/mgrankin" target="_blank">
-                  mgrankin
+                <a href="https://t.me/+x3FR1E6PIbVjN2I6" target="_blank">
+                  <b-icon size="small" icon="telegram" />
+                  porfirevich_ru
                 </a>
               </p>
             </div>

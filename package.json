@@ -96,9 +96,9 @@
     "sass-loader": "^8.0.2",
     "shortid": "^2.2.15",
     "sqlite3": "^4.1.1",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.9.1",
     "ts-node-dev": "^1.1.1",
-    "typescript": "^3.7.5",
+    "typescript": "^4.2.3",
     "vue-cli-plugin-express": "^1.0.2",
     "vue-template-compiler": "^2.6.12"
   }

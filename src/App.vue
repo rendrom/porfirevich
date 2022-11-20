@@ -61,6 +61,9 @@
     <footer class="footer">
       <div class="content has-text-centered">
         <p>
+          <a href="https://t.me/+x3FR1E6PIbVjN2I6" target="_blank" title="porfirevich_ru">
+            <b-icon size="is-large" icon="telegram" />
+          </a>
           <a href="https://github.com/mgrankin/ru_transformers" target="_blank">
             <b-icon size="is-large" icon="github" />
           </a>
