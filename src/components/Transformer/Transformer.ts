@@ -9,11 +9,6 @@ import { PRIMARY_COLOR } from '../../config';
 import { schemeToDelta, deltaToScheme } from '../../utils/schemeUtils';
 import { appModule } from '@/store/app';
 
-// const ESC = 27;
-// const TAB = 9;
-// const CTRL = 17;
-// const ALT = 18;
-
 Quill.register('modules/clipboard', PlainClipboard, true);
 
 interface TransformResp {
@@ -41,6 +36,11 @@ export default class Transformer extends Vue {
 
   abortControllers: AbortController[] = [];
   promptMaxLength = 1000;
+  debouncedTextChange!: (
+    delta: Delta,
+    oldDelta: Delta,
+    source: Sources
+  ) => void;
   debouncedTransform!: () => void;
   debouncedHistory!: () => void;
 
@@ -91,9 +91,16 @@ export default class Transformer extends Vue {
       this.historyInterval
     );
   }
+  bindDebounceTextChange() {
+    this.debouncedTextChange = debounce(
+      (delta, oldDelta, source) => this.onTextChange(delta, oldDelta, source),
+      10
+    );
+  }
 
   mounted() {
     this.bindDebounceTransform();
+    this.bindDebounceTextChange();
     this.bindDebounceHistory();
     this._createQuill();
     this.__onKeydown = event => {
@@ -376,7 +383,7 @@ export default class Transformer extends Vue {
     this.quill.on(
       'text-change',
       (delta: Delta, oldDelta: Delta, source: Sources) =>
-        this.onTextChange(delta, oldDelta, source)
+        this.debouncedTextChange(delta, oldDelta, source)
     );
     if (this.scheme && this.scheme.length) {
       this._setScheme(this.scheme);
