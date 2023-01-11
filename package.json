@@ -36,7 +36,7 @@
     "abortcontroller-polyfill": "^1.5.0",
     "body-parser": "^1.19.0",
     "buefy": "^0.9.3",
-    "class-validator": "^0.12.2",
+    "class-validator": "^0.14.0",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
     "debounce": "^1.2.0",
