@@ -8,7 +8,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint --fix",
     "watch:client": "vue-cli-service build --watch --mode development",
-    "watch:server": "nodemon",
+    "watch:server": "nodemon -L",
     "watch": "npm run watch:server",
     "express": "vue-cli-service express:watch",
     "express:run": "vue-cli-service express:run",
