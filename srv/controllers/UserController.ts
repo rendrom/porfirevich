@@ -11,7 +11,7 @@ class UserController {
     //Get users from database
     const userRepository = getRepository(User);
     const users = await userRepository.find({
-      select: ['uid', 'username', 'isSuperuser'] //We dont want to send the passwords on response
+      select: ['uid', 'username', 'isSuperuser'] //We don't want to send the passwords on response
     });
 
     //Send the users object
