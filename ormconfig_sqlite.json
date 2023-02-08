@@ -1,11 +1,6 @@
 {
-   "type": "postgres",
-
-   "host": "db",
-   "port": 5432,
-   "username": "porf",
-   "password": "123456",
-   "database": "porf",
+   "type": "sqlite",
+   "database": "srv/data/line.sqlite",
 
    "synchronize": true,
    "logging": false,

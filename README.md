@@ -42,14 +42,32 @@ npm run express
 npm run serve
 ```
 
-### Run your tests
-
-```bash
-npm run test
-```
-
 ### Lints and fixes files
 
 ```bash
 npm run lint
+```
+
+## Docker
+
+```bash
+docker-compose build
+```
+
+Production
+
+```bash
+docker-compose up
+```
+
+Development
+
+```bash
+docker-compose -f ./docker-compose-dev.yml up
+```
+
+To run DB migration
+
+```bash
+node ./node_modules/ts-node/dist/bin.js ./scripts/moveToPg.ts 
 ```
