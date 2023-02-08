@@ -8,4 +8,4 @@ docker-compose*
 .env
 */bin
 */obj
-
+/media
