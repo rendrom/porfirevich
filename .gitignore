@@ -24,4 +24,3 @@ yarn-error.log*
 .env
 /media
 configLocal.ts
-/ormconfig.json

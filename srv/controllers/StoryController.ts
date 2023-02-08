@@ -110,7 +110,6 @@ export default class StoryController {
       }
 
       const results = await list.getRawMany();
-      console.log(results)
 
       if (req.accepts('json')) {
         const resp: StoriesResponse = {
