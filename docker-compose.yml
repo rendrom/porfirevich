@@ -13,6 +13,7 @@ services:
     ports:
       - 3000:3000
     command: npm start
+    working_dir: /app
     volumes:
       - ./:/app
       - /app/node_modules

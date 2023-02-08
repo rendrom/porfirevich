@@ -46,14 +46,7 @@ const updateQuery = (
   if (opt.isPublic !== undefined && !opt.isPublic) {
     delete where.isPublic;
   }
-  // const whereString = Object.keys(where)
-  //   .map(x => `story.${x} = :${x}`)
-  //   .join(' AND ');
-
-  queryBuilder.where(where).addSelect(select.map(x => `story.${x}`));
-  // .innerJoin('story.user', 'u');
-  // .andWhere('u.isBanned = :isBanned', { isBanned: false })
-  // .addSelect(['u.isBanned']);
+  queryBuilder.where(where).addSelect(select.map(x => `s.${x}`));
   return queryBuilder;
 };
 
@@ -75,7 +68,7 @@ export default class StoryController {
     // // Get stories from database
     try {
       const repository = getRepository(Story);
-      const list = repository.createQueryBuilder('story');
+      const list = repository.createQueryBuilder('s');
       updateQuery(list, {
         afterDate,
         isPublic: !my
@@ -89,32 +82,35 @@ export default class StoryController {
           if (x === 'RAND()') {
             list.orderBy('random()');
           } else {
-            list.orderBy(`story.${x}`, 'DESC');
+            list.orderBy(`s.${x}`, 'DESC');
           }
         });
+      } else {
+        list.addOrderBy('s.createdAt', 'DESC');
       }
-      list.addOrderBy('story.createdAt', 'DESC');
       if (userId !== undefined) {
         if (filter === 'my') {
-          list.andWhere('userId = :userId', { userId });
+          list.andWhere('s.userId = :userId', { userId });
         } else if (filter === 'favorite') {
           list
-            .leftJoinAndSelect('story.likes', 'like')
-            .andWhere('like.userId = :userId', { userId });
+            .leftJoin('s.likes', 'l')
+            .addSelect(['l.userId'])
+            .andWhere('l.userId = :userId', { userId });
         }
       }
       if (queryParam) {
-        list.andWhere('story.content like :query', {
+        list.andWhere('s.content like :query', {
           query: `%${queryParam}%`
         });
       }
       if (tagsParam) {
         tagsParam.split(',').forEach(x => {
-          list.andWhere(`story.content LIKE '%${x}%'`);
+          list.andWhere(`s.content LIKE '%${x}%'`);
         });
       }
 
-      const results = await list.getMany();
+      const results = await list.getRawMany();
+      console.log(results)
 
       if (req.accepts('json')) {
         const resp: StoriesResponse = {
@@ -342,10 +338,6 @@ export default class StoryController {
       res.status(403).send('Not permitted');
       return;
     }
-    // } else if (story.editId !== editId) {
-    //   res.status(404).send('No `editId`');
-    //   return;
-    // }
     // Validate the new values on model
     for (const p in params) {
       if (p in story) {
