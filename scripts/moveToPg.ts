@@ -31,7 +31,7 @@ const moveToPg = async () => {
       name: 'User',
       findOptions: { take: 1000 }
     });
-  
+
     for await (const items of getUserItems) {
       await userPgRepository
       .createQueryBuilder()
@@ -49,12 +49,13 @@ const moveToPg = async () => {
     name: 'Story',
     findOptions: {
       relations: ['likes'],
-      where: { userId: Not(IsNull()) },
-      take: 100
+      take: 1000
     }
   });
 
   for await (const items of getStoryItems) {
+
+
     const newStories = await storyPgRepository
       .createQueryBuilder()
       .insert()
@@ -72,7 +73,7 @@ const moveToPg = async () => {
           .execute()
       }
       num += 1
-    } 
+    }
 
   }
 };
@@ -106,10 +107,10 @@ async function* iterEntries<E>({
     const resp = await repository.find({ take, skip, ...findOptions });
     for (const item of resp) {
       counter += 1;
-      console.log(
-        `${name} - ${Math.ceil((counter / total) * 100)}% ${counter}/${total}`
-      );
     }
+    console.log(
+      `${name} - ${Math.ceil((counter / total) * 100)}% ${counter}/${total}`
+    );
     yield resp;
   }
 }
