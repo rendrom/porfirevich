@@ -228,6 +228,7 @@ export default class StoryController {
       story.postcard = postcardPath;
       newStory = await repository.save(story);
     } catch (error) {
+      console.log(error)
       // res.status(500).send({ message: 'postcard create error', error });
       // return;
     }
