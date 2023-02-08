@@ -24,24 +24,21 @@ const moveToPg = async () => {
   const userPgRepository = connectionPg.getRepository(User);
 
   const isUserInPgAlredy = await userPgRepository.count();
-  if (isUserInPgAlredy) {
-    throw new Error(
-      'There are already records in the database, migration is not possible. Clear the `User` table and run arain'
-    );
-  }
-
-  const pgUserIdUidAlias: Record<number, number> = {};
-
-  const getUserItems = iterEntries({
-    connection,
-    Entity: User,
-    name: 'User',
-    findOptions: { take: 1000 }
-  });
-
-  for await (const item of getUserItems) {
-    const newUser = await userPgRepository.save(item);
-    pgUserIdUidAlias[item.id] = newUser.id;
+  if (!isUserInPgAlredy) {
+    const getUserItems = iterEntries({
+      connection,
+      Entity: User,
+      name: 'User',
+      findOptions: { take: 1000 }
+    });
+  
+    for await (const items of getUserItems) {
+      await userPgRepository
+      .createQueryBuilder()
+      .insert()
+      .values(items)
+      .execute()
+    }
   }
 
   const storyPgRepository = connectionPg.getRepository(Story);
@@ -53,33 +50,30 @@ const moveToPg = async () => {
     findOptions: {
       relations: ['likes'],
       where: { userId: Not(IsNull()) },
-      take: 10
+      take: 100
     }
   });
 
-  for await (const item of getStoryItems) {
-    if (typeof item.userId === 'number') {
-      const user = pgUserIdUidAlias[item.userId];
-      if (user !== undefined) {
-        const newStory = await storyPgRepository.save({
-          ...item,
-          userId: user
-        });
+  for await (const items of getStoryItems) {
+    const newStories = await storyPgRepository
+      .createQueryBuilder()
+      .insert()
+      .values(items)
+      .returning('id')
+      .execute()
 
-        for await (const like of item.likes) {
-          if (typeof like.userId === 'number') {
-            const lUser = pgUserIdUidAlias[like.userId];
-            if (lUser) {
-              await likePgRepository.save({
-                ...like,
-                userId: lUser,
-                storyId: newStory.id
-              });
-            }
-          }
-        }
+    let num = 0
+    for (const item of items) {
+      if (item.likes.length) {
+        await likePgRepository
+          .createQueryBuilder()
+          .insert()
+          .values(item.likes.map((x) => ({...x, storyId: newStories.raw[num].id})))
+          .execute()
       }
-    }
+      num += 1
+    } 
+
   }
 };
 
@@ -95,7 +89,7 @@ async function* iterEntries<E>({
   total?: number;
   connection: Connection;
   Entity: ObjectType<E> | EntitySchema<E> | string;
-}): AsyncGenerator<E, void, unknown> {
+}): AsyncGenerator<E[], void, unknown> {
   const repository = connection.getRepository(Entity);
 
   total = total !== undefined ? total : await repository.count();
@@ -115,8 +109,8 @@ async function* iterEntries<E>({
       console.log(
         `${name} - ${Math.ceil((counter / total) * 100)}% ${counter}/${total}`
       );
-      yield item;
     }
+    yield resp;
   }
 }
 
