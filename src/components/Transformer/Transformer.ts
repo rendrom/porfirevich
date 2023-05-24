@@ -16,6 +16,8 @@ interface TransformResp {
   detail?: string;
 }
 
+// let i = 0;
+
 @Component
 export default class Transformer extends Vue {
   @Model('change', { type: Array, default: () => [] }) readonly scheme!: Scheme;
@@ -54,7 +56,7 @@ export default class Transformer extends Vue {
   get prompt() {
     return this._stripHtml(this.text)
       .replace(this.lastReply, '')
-      .trimLeft();
+      .trimStart();
   }
 
   @Watch('isAutocomplete')
@@ -163,6 +165,15 @@ export default class Transformer extends Vue {
     }
   }
 
+  easyEscape() {
+    if (this.isLoading) {
+      this.abort();
+    }
+    if (this.lastReply) {
+      this.lastReply = '';
+    }
+  }
+
   cleanLastReply() {
     const text = this.quill.getText();
     const index = text.indexOf(this.lastReply);
@@ -226,7 +237,7 @@ export default class Transformer extends Vue {
         this.transform();
       }
     } else if (e.key === 'Escape') {
-      // this.escape();
+      this.easyEscape();
     } else if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ') {
       this.historyBack();
     }
@@ -265,7 +276,10 @@ export default class Transformer extends Vue {
           },
           'api'
         );
-        this.lastReply = reply;
+        // OMG! Timer 20 is needed to write lastReply after debounce
+        setTimeout(() => {
+            this.lastReply = reply;
+        }, 20);
         this.replies = replies;
       }
     } catch (err) {
@@ -347,7 +361,8 @@ export default class Transformer extends Vue {
     });
     const data: TransformResp = await resp.json();
     return data;
-    // return {replies:["testase asdf asdf asdf asdf asdf asdf asdf asdfafe"]};
+
+    // return {replies:[String(i++)]};
   }
 
   private _createQuill() {
