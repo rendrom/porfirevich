@@ -45,8 +45,10 @@
               icon-left="cog"
               @click="isSettings = !isSettings"
             />
-            <b-button v-if="models.length > 1" size="is-small" type="is-ghost" @click="changeModel">{{ activeModel }}</b-button>
           </div>
+        </div>
+        <div class="column is-1">
+          <b-button v-if="models.length > 1" size="is-small" type="is-ghost" @click="changeModel">{{ activeModel }}</b-button>
         </div>
         <div class="column has-text-centered">
           <b-button
@@ -62,6 +64,8 @@
           </b-button>
         </div>
 
+        <div class="column is-1">
+        </div>
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <b-button

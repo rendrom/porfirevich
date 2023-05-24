@@ -328,14 +328,14 @@ export default class Transformer extends Vue {
   }
 
   private async _getModels() {
-    const resp = await fetch(`${config.endpoint}/models`, {
-      method: 'GET',
-    });
-    const data: string[] = await resp.json();
-    // const data = [
-    //   "gpt3",
-    //   "frida"
-    // ];
+    // const resp = await fetch(`${config.endpoint}/models`, {
+    //   method: 'GET',
+    // });
+    // const data: string[] = await resp.json();
+    const data = [
+      "gpt3",
+      "frida"
+    ];
     this.models = data;
     this.activeModel = data[0];
   }
