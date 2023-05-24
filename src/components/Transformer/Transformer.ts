@@ -8,6 +8,7 @@ import { Delta, Scheme } from '../../interfaces';
 import { PRIMARY_COLOR } from '../../config';
 import { schemeToDelta, deltaToScheme } from '../../utils/schemeUtils';
 import { appModule } from '@/store/app';
+import { threadId } from 'worker_threads';
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 
@@ -49,6 +50,8 @@ export default class Transformer extends Vue {
   historyInterval = 300;
   historyLength = 2000;
   history: Scheme[] = [];
+  models: string[] = [];
+  activeModel = '';
 
   __onKeydown!: (e: KeyboardEvent) => void;
   __windowUnload?: (e: BeforeUnloadEvent) => void;
@@ -101,19 +104,25 @@ export default class Transformer extends Vue {
   }
 
   mounted() {
-    this.bindDebounceTransform();
-    this.bindDebounceTextChange();
-    this.bindDebounceHistory();
-    this._createQuill();
-    this.__onKeydown = event => {
-      this.onKeydown(event);
-    };
-    window.addEventListener('keydown', this.__onKeydown);
+    this._getModels().finally(() => {
+      this._initialize();
+    })
   }
 
   destroyed() {
     window.removeEventListener('keydown', this.__onKeydown);
     this.removeWindowUnloadListener();
+  }
+
+  changeModel() {
+    const activeModelIndex = this.models.indexOf(this.activeModel);
+    let nextActiveModel;
+    if (activeModelIndex !== -1) {
+      nextActiveModel = this.models[(activeModelIndex + 1) % this.models.length]
+    } else {
+      nextActiveModel = this.models[0];
+    }
+    this.activeModel = nextActiveModel;
   }
 
   appendHistory(scheme: Scheme) {
@@ -318,6 +327,30 @@ export default class Transformer extends Vue {
     }
   }
 
+  private async _getModels() {
+    const resp = await fetch(`${config.endpoint}/models`, {
+      method: 'GET',
+    });
+    const data: string[] = await resp.json();
+    // const data = [
+    //   "gpt3",
+    //   "frida"
+    // ];
+    this.models = data;
+    this.activeModel = data[0];
+  }
+
+  private async _initialize() {
+    this.bindDebounceTransform();
+    this.bindDebounceTextChange();
+    this.bindDebounceHistory();
+    this._createQuill();
+    this.__onKeydown = event => {
+      this.onKeydown(event);
+    };
+    window.addEventListener('keydown', this.__onKeydown);
+  }
+
   private _addWindowUnloadListener() {
     if (!this.__windowUnload) {
       this.__windowUnload = (e: BeforeUnloadEvent) => {
@@ -355,6 +388,7 @@ export default class Transformer extends Vue {
       signal: controller.signal,
       body: JSON.stringify({
         prompt,
+        model: this.activeModel,
         length: this.length
         // num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
       })
