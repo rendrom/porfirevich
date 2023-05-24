@@ -336,17 +336,18 @@ export default class Transformer extends Vue {
     prompt = prompt.slice(-this.promptMaxLength);
     prompt = prompt.trim();
 
-    // const resp = await fetch(`${config.endpoint}/generate/`, {
-    //   method: 'POST',
-    //   signal: controller.signal,
-    //   body: JSON.stringify({
-    //     prompt,
-    //     length: this.length
-    //     // num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
-    //   })
-    // });
-    // const data: TransformResp = await resp.json();
-    return {replies:["testase asdf asdf asdf asdf asdf asdf asdf asdfafe"]};
+    const resp = await fetch(`${config.endpoint}/generate/`, {
+      method: 'POST',
+      signal: controller.signal,
+      body: JSON.stringify({
+        prompt,
+        length: this.length
+        // num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
+      })
+    });
+    const data: TransformResp = await resp.json();
+    return data;
+    // return {replies:["testase asdf asdf asdf asdf asdf asdf asdf asdfafe"]};
   }
 
   private _createQuill() {
