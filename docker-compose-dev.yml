@@ -12,7 +12,8 @@ services:
       - NODE_ENV=development
     ports:
       - 3000:3000
-    command: npm run watch
+    command: npm start
+
     working_dir: /app
     volumes:
       - ./:/app

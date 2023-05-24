@@ -13,8 +13,7 @@ try {
 }
 
 const defaultConfig: Partial<Config> = {
-  // endpoint: 'https://models.dobro.ai',
-  endpoint: 'https://pelevin.gpt.dobro.ai',
+  endpoint: 'https://api.porfirevich.com',
   primaryColor: '#5371FF',
   site: 'https://porfirevich.ru'
 };

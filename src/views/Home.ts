@@ -120,6 +120,6 @@ export default class Home extends Vue {
       }
     }
 
-    setTimeout(() => this.$watch('scheme', () => this.clean()));
+    setTimeout(() => this.$watch('scheme', () => this.clean()), 20);
   }
 }
