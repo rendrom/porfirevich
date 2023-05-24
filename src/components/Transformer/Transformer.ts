@@ -35,7 +35,7 @@ export default class Transformer extends Vue {
   localScheme: Scheme = [];
 
   abortControllers: AbortController[] = [];
-  promptMaxLength = 1000;
+  promptMaxLength = 1000000;
   debouncedTextChange!: (
     delta: Delta,
     oldDelta: Delta,
