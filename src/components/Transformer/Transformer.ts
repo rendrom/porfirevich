@@ -2,28 +2,22 @@ import { Vue, Component, Watch, Emit, Model } from 'vue-property-decorator';
 import Quill, { Sources } from 'quill';
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
 import debounce from 'debounce';
-import config from '../../../config';
+
+import { generateApi, getModelsApi } from '../../api/porfirevich';
 import PlainClipboard from '../../utils/PlainClipboard';
 import { Delta, Scheme } from '../../interfaces';
 import { PRIMARY_COLOR } from '../../config';
 import { schemeToDelta, deltaToScheme } from '../../utils/schemeUtils';
 import { appModule } from '@/store/app';
-import { threadId } from 'worker_threads';
 
 Quill.register('modules/clipboard', PlainClipboard, true);
-
-interface TransformResp {
-  replies?: string[];
-  detail?: string;
-}
-
-// let i = 0;
 
 @Component
 export default class Transformer extends Vue {
   @Model('change', { type: Array, default: () => [] }) readonly scheme!: Scheme;
   text = '';
   html = '';
+  isReady = false;
   isLoading = false;
   isError = false;
   isAutocomplete = false;
@@ -83,6 +77,12 @@ export default class Transformer extends Vue {
     return val;
   }
 
+  @Watch('ready')
+  @Emit()
+  ready(val: boolean) {
+    return val;
+  }
+
   @Emit('change')
   setContent() {
     this.html = this.quill.root.innerHTML;
@@ -106,7 +106,7 @@ export default class Transformer extends Vue {
   mounted() {
     this._getModels().finally(() => {
       this._initialize();
-    })
+    });
   }
 
   destroyed() {
@@ -118,11 +118,14 @@ export default class Transformer extends Vue {
     const activeModelIndex = this.models.indexOf(this.activeModel);
     let nextActiveModel;
     if (activeModelIndex !== -1) {
-      nextActiveModel = this.models[(activeModelIndex + 1) % this.models.length]
+      nextActiveModel = this.models[
+        (activeModelIndex + 1) % this.models.length
+      ];
     } else {
       nextActiveModel = this.models[0];
     }
     this.activeModel = nextActiveModel;
+    this.replies = [];
   }
 
   appendHistory(scheme: Scheme) {
@@ -198,10 +201,11 @@ export default class Transformer extends Vue {
     this.setContent();
     this.text = this.quill.getText();
     this.setPlaceholder();
-    this.lastReply = '';
-    this.replies = [];
     this.abort();
+
     if (source === 'user') {
+      this.lastReply = '';
+      this.replies = [];
       let insert: string | undefined;
       let retain = 0;
       delta.ops.forEach(x => {
@@ -287,7 +291,7 @@ export default class Transformer extends Vue {
         );
         // OMG! Timer 20 is needed to write lastReply after debounce
         setTimeout(() => {
-            this.lastReply = reply;
+          this.lastReply = reply;
         }, 20);
         this.replies = replies;
       }
@@ -306,10 +310,8 @@ export default class Transformer extends Vue {
   }
 
   setCursor() {
-    const length = this.text ? this.text.length : 0;
     setTimeout(() => {
       this.quill.focus();
-      // this.quill.setSelection(length, length);
     }, 0);
   }
 
@@ -328,14 +330,7 @@ export default class Transformer extends Vue {
   }
 
   private async _getModels() {
-    // const resp = await fetch(`${config.endpoint}/models`, {
-    //   method: 'GET',
-    // });
-    // const data: string[] = await resp.json();
-    const data = [
-      "gpt3",
-      "frida"
-    ];
+    const data = await getModelsApi();
     this.models = data;
     this.activeModel = data[0];
   }
@@ -349,6 +344,7 @@ export default class Transformer extends Vue {
       this.onKeydown(event);
     };
     window.addEventListener('keydown', this.__onKeydown);
+    this.isReady = true;
   }
 
   private _addWindowUnloadListener() {
@@ -383,20 +379,12 @@ export default class Transformer extends Vue {
     prompt = prompt.slice(-this.promptMaxLength);
     prompt = prompt.trim();
 
-    const resp = await fetch(`${config.endpoint}/generate/`, {
-      method: 'POST',
+    return generateApi({
+      prompt,
       signal: controller.signal,
-      body: JSON.stringify({
-        prompt,
-        model: this.activeModel,
-        length: this.length
-        // num_samples: 4 // eslint-disable-line @typescript-eslint/camelcase
-      })
+      model: this.activeModel,
+      length: this.length
     });
-    const data: TransformResp = await resp.json();
-    return data;
-
-    // return {replies:[String(i++)]};
   }
 
   private _createQuill() {
@@ -432,8 +420,9 @@ export default class Transformer extends Vue {
     this.quill.focus();
     this.quill.on(
       'text-change',
-      (delta: Delta, oldDelta: Delta, source: Sources) =>
-        this.debouncedTextChange(delta, oldDelta, source)
+      (delta: Delta, oldDelta: Delta, source: Sources) => {
+        this.debouncedTextChange(delta, oldDelta, source);
+      }
     );
     if (this.scheme && this.scheme.length) {
       this._setScheme(this.scheme);

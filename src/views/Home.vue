@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div v-if="!isLoading">
     <Transformer
       ref="Transformer"
-      v-if="!isLoading"
+      
       v-model="scheme"
       @loading="checkTransformLoading"
+      @ready="onTransformerReady"
     />
     <div class="save-control columns">
       <div class="column is-1">
