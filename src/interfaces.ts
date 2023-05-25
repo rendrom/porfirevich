@@ -9,6 +9,18 @@ export interface SchemeToHtmlOptions {
   color?: string;
 }
 
+export interface TransformResp {
+  replies?: string[];
+  detail?: string;
+}
+
+export interface GenerateApiOptions {
+  prompt: string;
+  model: string;
+  length: number;
+  signal: AbortSignal;
+}
+
 export type StoryResponseSelect =
   | 'id'
   | 'content'

@@ -30,6 +30,7 @@ export default class Home extends Vue {
   isShareModalActive = false;
   isLoading = false;
   isTransformLoading = false;
+  isReady = false;
 
   get isShareDisabled() {
     return (
@@ -53,8 +54,12 @@ export default class Home extends Vue {
   @Watch('$route')
   onRouteChange() {
     if (this.$route.name === 'transformer' && this.$route.fullPath === '/') {
-      this.transformer.clean();
-      this.clean();
+      setTimeout(() => {
+        this.transformer.clean();
+        this.clean();
+      }, 20);
+    } else {
+      this._restore(this.$route.fullPath.substring(1));
     }
   }
 
@@ -64,7 +69,7 @@ export default class Home extends Vue {
 
   async saveStory() {
     if (!appModule.story) {
-      const isCorrupted = false; // checkCorrupted(this.scheme);
+      const isCorrupted = false;
       if (isCorrupted) {
         Toast.open({
           message:
@@ -102,24 +107,31 @@ export default class Home extends Vue {
     copyStory(schemeToHtml(this.scheme), 'text', this.story);
   }
 
+  onTransformerReady(val: boolean) {
+    this.isReady = false;
+    setTimeout(() => this.$watch('scheme', () => this.clean()), 20);
+  }
+
   private async _mounted() {
     if (this.id) {
-      this.isLoading = true;
-      try {
-        const story = await appModule.getStory(this.id);
-        if (story) {
-          this.scheme = JSON.parse(story.content) as Scheme;
-          const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
-          appModule.appendReplies(replies);
-          this.transformer.removeWindowUnloadListener();
-        }
-      } catch (er) {
-        //
-      } finally {
-        this.isLoading = false;
-      }
+      this._restore(this.id);
     }
+  }
 
-    setTimeout(() => this.$watch('scheme', () => this.clean()), 20);
+  private async _restore(id: string) {
+    this.isLoading = true;
+    try {
+      const story = await appModule.getStory(id);
+      if (story) {
+        this.scheme = JSON.parse(story.content) as Scheme;
+        const replies = this.scheme.filter(x => x[1] === 1).map(x => x[0]);
+        appModule.appendReplies(replies);
+        this.transformer.removeWindowUnloadListener();
+      }
+    } catch (er) {
+      //
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
