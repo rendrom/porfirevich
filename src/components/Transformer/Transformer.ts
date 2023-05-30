@@ -77,7 +77,7 @@ export default class Transformer extends Vue {
     return val;
   }
 
-  @Watch('ready')
+  @Watch('isReady')
   @Emit()
   ready(val: boolean) {
     return val;
