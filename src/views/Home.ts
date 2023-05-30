@@ -32,6 +32,8 @@ export default class Home extends Vue {
   isTransformLoading = false;
   isReady = false;
 
+  routerWatcherStop: (() => void) | null = null;
+
   get isShareDisabled() {
     return (
       !this.scheme.filter(x => x[0] !== '\n').length || this.isTransformLoading
@@ -51,7 +53,6 @@ export default class Home extends Vue {
     appModule.getLikes();
   }
 
-  @Watch('$route')
   onRouteChange() {
     if (this.$route.name === 'transformer' && this.$route.fullPath === '/') {
       setTimeout(() => {
@@ -65,7 +66,21 @@ export default class Home extends Vue {
 
   mounted() {
     this._mounted();
+    this.startRouterWatch();
   }
+
+  stopRouterWatch() {
+    if (this.routerWatcherStop) {
+      this.routerWatcherStop();
+    }
+    this.routerWatcherStop = null;
+  }
+
+  startRouterWatch() {
+    this.routerWatcherStop = this.$watch('$route', this.onRouteChange);
+  }
+
+ 
 
   async saveStory() {
     if (!appModule.story) {
@@ -82,7 +97,7 @@ export default class Home extends Vue {
         const story = await appModule.createStory(this.scheme);
         const path = '/' + (story ? story.id : '');
         if (this.$route.path !== path) {
-          this.$router.push(path);
+          await this._pushRoute(path);
         }
         this.transformer.removeWindowUnloadListener();
       }
@@ -95,11 +110,11 @@ export default class Home extends Vue {
     this.isTransformLoading = val;
   }
 
-  clean() {
+  async clean() {
     this.isShareModalActive = false;
     appModule.removeActiveStory();
     if (this.$route.params.id) {
-      this.$router.push('/');
+      await this._pushRoute('/');
     }
   }
 
@@ -109,7 +124,19 @@ export default class Home extends Vue {
 
   onTransformerReady(val: boolean) {
     this.isReady = false;
-    setTimeout(() => this.$watch('scheme', () => this.clean()), 20);
+    setTimeout(
+      () =>
+        this.$watch('scheme', () => {
+          this.clean();
+        }),
+      20
+    );
+  }
+
+  private async _pushRoute(path: string) {
+    this.stopRouterWatch();
+    await this.$router.push(path);
+    this.startRouterWatch();
   }
 
   private async _mounted() {
