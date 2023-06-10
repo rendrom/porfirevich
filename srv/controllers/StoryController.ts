@@ -46,7 +46,10 @@ const updateQuery = (
   if (opt.isPublic !== undefined && !opt.isPublic) {
     delete where.isPublic;
   }
-  queryBuilder.where(where).addSelect(select.map(x => `s.${x}`));
+  queryBuilder.where(where).addSelect(select.map(x => `s.${x}`))
+    .leftJoin('s.user', 'u')
+    .andWhere('u.isBanned = :isBanned', { isBanned: false })
+    .addSelect(['u.isBanned']);
   return queryBuilder;
 };
 
@@ -65,7 +68,7 @@ export default class StoryController {
     let limit = Number(req.query.limit as string);
     limit = limit && limit < 21 ? limit : 20;
     const orderBy = req.query.orderBy as string;
-    // // Get stories from database
+    // Get stories from database
     try {
       const repository = getRepository(Story);
       const list = repository.createQueryBuilder('s');
@@ -73,9 +76,9 @@ export default class StoryController {
         afterDate,
         isPublic: !my
       });
-      list.take(limit);
+      list.limit(limit);
       if (offset) {
-        list.skip(offset);
+        list.offset(offset);
       }
       if (orderBy) {
         orderBy.split(',').forEach(x => {
@@ -109,7 +112,7 @@ export default class StoryController {
         });
       }
 
-      const results = await list.getRawMany();
+      const results = await list.getMany();
 
       if (req.accepts('json')) {
         const resp: StoriesResponse = {
