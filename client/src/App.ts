@@ -1,10 +1,10 @@
 import UrlParams from '@nextgis/url-runtime-params';
 import { Component, Vue } from 'vue-property-decorator';
 
-import config from '../shared/config';
+import config from '@shared/config';
 
 import UserService from './services/UserService';
-import { appModule } from './store/app';
+import { useAppStore } from './store/app';
 import { APP_TOKEN_KEY } from './utils/constants';
 import openWindow from './utils/openWindow';
 
@@ -17,8 +17,12 @@ export default class App extends Vue {
   isLoading = true;
   rememberMe = true;
 
+  get appModule() {
+    return useAppStore();
+  }
+
   get user() {
-    return appModule.user;
+    return this.appModule.user;
   }
 
   get color() {
@@ -42,9 +46,9 @@ export default class App extends Vue {
     }
     if (token) {
       try {
-        await appModule.setToken(token);
+        await this.appModule.setToken(token);
         const user = await UserService.getUser(token);
-        await appModule.setUser(user);
+        await this.appModule.setUser(user);
       } catch (er) {
         this.logout();
       }
@@ -61,7 +65,7 @@ export default class App extends Vue {
       '/auth/google/start',
       'NextGIS ID',
       540,
-      540,
+      540
     );
     const cleanTempStore = () => {
       window.localStorage.removeItem(APP_TOKEN_KEY);
@@ -74,9 +78,9 @@ export default class App extends Vue {
       if (ev.key === APP_TOKEN_KEY) {
         const token = ev.newValue;
         if (token) {
-          appModule.setToken(token).then(() => {
+          this.appModule.setToken(token).then(() => {
             UserService.getUser(token).then((user) => {
-              appModule.setUser(user);
+              this.appModule.setUser(user);
             });
           });
         }
@@ -92,8 +96,8 @@ export default class App extends Vue {
 
   logout() {
     localStorage.setItem('token', '');
-    appModule.setUser(false);
-    appModule.setToken(false);
+    this.appModule.setUser(null);
+    this.appModule.setToken(null);
   }
 
   private removeTokenFromUrl() {

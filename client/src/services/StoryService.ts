@@ -1,24 +1,23 @@
-import { appModule } from '../store/app';
+import { useAppStore } from '../store/app';
 import { getQueryString } from '../utils/getQueryString';
 
-import type { Story } from '../../classes/Story';
-import type {
-  GetStoriesOptions,
-  StoriesResponse,
-  StoryResponse,
-} from '../interfaces';
+import type { Story, StoriesResponse } from '@shared/types/Story';
+
+import type { GetStoriesOptions } from '../interfaces';
 
 import { getAuthHeaders } from '@/utils/getAuthHeaders';
 
 export default {
   async one(id: string) {
+    const appModule = useAppStore();
     const token = appModule.token;
     const resp = await fetch('/api/story/' + id, { ...getAuthHeaders(token) });
-    const json = (await resp.json()) as StoryResponse;
+    const json = (await resp.json()) as Story;
     return json;
   },
 
   async all(opt?: GetStoriesOptions) {
+    const appModule = useAppStore();
     const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''), {
       ...getAuthHeaders(appModule.token),
     });
@@ -27,6 +26,7 @@ export default {
   },
 
   async like(story: Story) {
+    const appModule = useAppStore();
     const token = appModule.token;
     if (token) {
       await fetch('/api/story/' + story.id + '/like', {
@@ -39,6 +39,7 @@ export default {
   },
 
   async dislike(story: Story) {
+    const appModule = useAppStore();
     const token = appModule.token;
     if (token) {
       await fetch('/api/story/' + story.id + '/dislike', {
@@ -51,6 +52,7 @@ export default {
   },
 
   async violation(story: Story) {
+    const appModule = useAppStore();
     const token = appModule.token;
 
     await fetch('/api/story/' + story.id + '/violation', {
@@ -65,25 +67,26 @@ export default {
       content: string;
       description?: string;
     },
-    opt: { token?: string } = {},
+    opt: { token?: string } = {}
   ) {
     const resp = await fetch('/api/story', {
       method: 'POST',
       body: JSON.stringify(data),
       ...getAuthHeaders(opt.token),
     });
-    const json = (await resp.json()) as StoryResponse;
+    const json = (await resp.json()) as Story;
     return json;
   },
 
   async edit(id: string, data: Partial<Story>) {
+    const appModule = useAppStore();
     const token = appModule.token;
     const resp = await fetch('/api/story/' + id, {
       method: 'PATCH',
       body: JSON.stringify(data),
       ...getAuthHeaders(token),
     });
-    const json = (await resp.json()) as StoryResponse;
+    const json = (await resp.json()) as Story;
     return json;
   },
 };

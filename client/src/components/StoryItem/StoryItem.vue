@@ -1,23 +1,18 @@
 <template>
-  <div class="story-item" v-bind:class="{ isdeleted: story.isDeleted }">
-    <span v-html="content">
-    </span>
+  <div class="story-item" :class="{ isdeleted: story.isDeleted }">
+    <span v-html="content" />
 
     <div class="item-controls">
       <div class="columns is-mobile controls-pane">
         <div class="column is-1">
-          <LikeButton :story="story"></LikeButton>
+          <LikeButton :story="story" />
         </div>
 
         <div class="main-actions column buttons has-text-centered">
           <b-button size="is-small" icon-left="share-variant" @click="show"
             >Поделиться</b-button
           >
-          <b-button
-            size="is-small"
-            icon-left="border-color"
-            @click="go"
-          ></b-button>
+          <b-button size="is-small" icon-left="border-color" @click="go" />
         </div>
 
         <div class="column is-1">
@@ -34,9 +29,9 @@
                   :icon-right="story.isDeleted ? 'restore' : 'delete'"
                   type="is-danger"
                   position="is-left"
-                  @click="remove"
                   :loading="deleteLoading"
-                ></b-button>
+                  @click="remove"
+                />
               </b-tooltip>
             </section>
           </div>
@@ -54,9 +49,9 @@
                   size="is-small"
                   :icon-right="story.isPublic ? 'eye-off' : 'eye'"
                   position="is-left"
-                  @click="publish"
                   :loading="publishLoading"
-                ></b-button>
+                  @click="publish"
+                />
               </b-tooltip>
             </section>
           </div>
@@ -75,9 +70,9 @@
                   size="is-small"
                   icon-right="alert-circle-outline"
                   position="is-left"
-                  @click="violation"
                   :loading="violationLoading"
-                ></b-button>
+                  @click="violation"
+                />
               </b-tooltip>
             </section>
           </div>

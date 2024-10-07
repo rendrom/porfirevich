@@ -5,7 +5,7 @@
         <b-field label="Автодополнение">
           <div class="autocomplate-control">
             <b-switch v-model="isAutocomplete" size="is-small">
-              {{ isAutocomplete ? "вкл" : "выкл" }}
+              {{ isAutocomplete ? 'вкл' : 'выкл' }}
             </b-switch>
           </div>
         </b-field>
@@ -48,7 +48,13 @@
           </div>
         </div>
         <div class="column is-1">
-          <b-button v-if="models.length > 1" size="is-small" type="is-ghost" @click="changeModel">{{ activeModel }}</b-button>
+          <b-button
+            v-if="models.length > 1"
+            size="is-small"
+            type="is-ghost"
+            @click="changeModel"
+            >{{ activeModel }}</b-button
+          >
         </div>
         <div class="column has-text-centered">
           <b-button
@@ -60,21 +66,21 @@
             class="transform-btn"
             @click="transform"
           >
-            {{ (lastReply ? "Варианты" : "Дополнить") + " (Tab)" }}
+            {{ (lastReply ? 'Варианты' : 'Дополнить') + ' (Tab)' }}
           </b-button>
         </div>
 
-        <div class="column is-1">
-        </div>
+        <div class="column is-1" />
         <div class="column is-1">
           <div class="tools is-pulled-right">
             <b-button
               size="is-small"
               type
-              :icon-right="isLoading || !history.length ? 'close' : 'arrow-left'"
+              :icon-right="
+                isLoading || !history.length ? 'close' : 'arrow-left'
+              "
               @click="escape"
-            >
-            </b-button>
+            />
           </div>
         </div>
       </div>

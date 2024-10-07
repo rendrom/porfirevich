@@ -1,10 +1,10 @@
 import { Component, Vue, Watch } from 'vue-property-decorator';
 
+import { useAppStore } from '@/store/app';
 import StoryItem from '../../components/StoryItem/StoryItem.vue';
 import { Nav } from '../../services/Nav';
-import { appModule } from '../../store/app';
 
-import type { Story } from '../../../classes/Story';
+import type { Story } from '@shared/types/Story';
 import type {
   FilterType,
   GetStoriesOptions,
@@ -12,6 +12,7 @@ import type {
   SortType,
 } from '../../interfaces';
 
+const appModule = useAppStore();
 const today = new Date();
 
 const PERIODS: Record<Period, Date | null> = {
@@ -156,7 +157,7 @@ export default class Gallery extends Vue {
       await appModule.setTags(
         Array.isArray(tags)
           ? (tags.filter((x) => x) as string[])
-          : tags.split(','),
+          : tags.split(',')
       );
     }
     if (appModule.token) {

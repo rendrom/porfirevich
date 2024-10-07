@@ -10,11 +10,14 @@ import { deltaToScheme, schemeToDelta } from '../../utils/schemeUtils';
 
 import type { Sources } from 'quill';
 
-import type { Delta, Scheme } from '../../interfaces';
+import type { Delta } from '../../interfaces';
+import { Scheme } from '@shared/types/Scheme';
 
-import { appModule } from '@/store/app';
+import { useAppStore } from '@/store/app';
 
 Quill.register('modules/clipboard', PlainClipboard, true);
+
+const appModule = useAppStore();
 
 @Component
 export default class Transformer extends Vue {
@@ -40,7 +43,7 @@ export default class Transformer extends Vue {
   debouncedTextChange!: (
     delta: Delta,
     oldDelta: Delta,
-    source: Sources,
+    source: Sources
   ) => void;
   debouncedTransform!: () => void;
   debouncedHistory!: () => void;
@@ -69,7 +72,7 @@ export default class Transformer extends Vue {
   bindDebounceTransform() {
     this.debouncedTransform = debounce(
       () => this.transform(),
-      this.interval * 1000,
+      this.interval * 1000
     );
   }
 
@@ -95,13 +98,14 @@ export default class Transformer extends Vue {
   bindDebounceHistory() {
     this.debouncedHistory = debounce(
       () => this.updateHistory(),
-      this.historyInterval,
+      this.historyInterval
     );
   }
   bindDebounceTextChange() {
     this.debouncedTextChange = debounce(
-      (delta, oldDelta, source) => this.onTextChange(delta, oldDelta, source),
-      10,
+      (delta: Delta, oldDelta: Delta, source: Sources) =>
+        this.onTextChange(delta, oldDelta, source),
+      10
     );
   }
 
@@ -198,7 +202,7 @@ export default class Transformer extends Vue {
     this.setCursor();
   }
 
-  onTextChange(delta: Delta, oldDelta: Delta, source: Sources) {
+  onTextChange(delta: Delta, _oldDelta: Delta, source: Sources) {
     this.setContent();
     this.text = this.quill.getText();
     this.setPlaceholder();
@@ -209,13 +213,15 @@ export default class Transformer extends Vue {
       this.replies = [];
       let insert: string | undefined;
       let retain = 0;
-      delta.ops.forEach((x) => {
-        if (x.insert) {
-          insert = x.insert;
-        } else if (x.retain) {
-          retain = x.retain;
+      delta.ops.forEach((opt) => {
+        if (opt.insert) {
+          insert = opt.insert as string;
+        } else if (opt.retain) {
+          retain = opt.retain as number;
         }
-        x.attributes = [];
+        if (opt.attributes) {
+          opt.attributes = {};
+        }
       });
       if (insert) {
         this.quill.removeFormat(retain, insert.length);
@@ -226,7 +232,7 @@ export default class Transformer extends Vue {
             bold: false,
             color: '#000',
           },
-          'api',
+          'api'
         );
       }
       if (this.isAutocomplete) {
@@ -288,7 +294,7 @@ export default class Transformer extends Vue {
             bold: true,
             color: PRIMARY_COLOR,
           },
-          'api',
+          'api'
         );
         // OMG! Timer 20 is needed to write lastReply after debounce
         setTimeout(() => {
@@ -419,12 +425,9 @@ export default class Transformer extends Vue {
     }
     this.setPlaceholder();
     this.quill.focus();
-    this.quill.on(
-      'text-change',
-      (delta: Delta, oldDelta: Delta, source: Sources) => {
-        this.debouncedTextChange(delta, oldDelta, source);
-      },
-    );
+    this.quill.on('text-change', (delta, oldDelta, source) => {
+      this.debouncedTextChange(delta, oldDelta, source);
+    });
     if (this.scheme && this.scheme.length) {
       this._setScheme(this.scheme);
     }
@@ -433,8 +436,8 @@ export default class Transformer extends Vue {
   private _setScheme(scheme: Scheme) {
     const delta = schemeToDelta(scheme);
     const ops = delta.ops;
-    // @ts-ignore
-    this.quill.setContents(ops, 'api');
+
+    this.quill.setContents(delta, 'api');
     this.setCursor();
   }
 

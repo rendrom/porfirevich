@@ -23,9 +23,9 @@
           aria-role="menu"
           trap-focus
         >
-          <a class="navbar-item" slot="trigger" role="button">
+          <a slot="trigger" class="navbar-item" role="button">
             <span>Вход</span>
-            <b-icon icon="menu-down"></b-icon>
+            <b-icon icon="menu-down" />
           </a>
 
           <b-dropdown-item
@@ -49,19 +49,23 @@
 
     <section class="section">
       <div class="columns is-mobile">
-        <div class="column is-full" v-if="!isLoading">
+        <div v-if="!isLoading" class="column is-full">
           <router-view v-slot="{ Component }" :key="pageKey">
             <component :is="Component" />
           </router-view>
         </div>
-        <b-loading v-else :is-full-page="false"></b-loading>
+        <b-loading v-else :is-full-page="false" />
       </div>
     </section>
 
     <footer class="footer">
       <div class="content has-text-centered">
         <p>
-          <a href="https://t.me/+x3FR1E6PIbVjN2I6" target="_blank" title="porfirevich_ru">
+          <a
+            href="https://t.me/+x3FR1E6PIbVjN2I6"
+            target="_blank"
+            title="porfirevich_ru"
+          >
             <b-icon size="is-large" icon="telegram" />
           </a>
           <a href="https://github.com/mgrankin/ru_transformers" target="_blank">
@@ -110,8 +114,7 @@
   </div>
 </template>
 
-<script lang="ts" src="./App.ts">
-</script>
+<script lang="ts" src="./App.ts"></script>
 
 <style lang="css" scoped>
 .main {

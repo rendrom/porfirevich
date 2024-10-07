@@ -4,7 +4,7 @@ import { SITE } from '../config';
 
 import { stripHtml } from './stripHtml';
 
-import type { Story } from '../../classes/Story';
+import type { Story } from '@shared/types/Story';
 
 export type CopyType = 'html' | 'text' | 'quote';
 
@@ -47,7 +47,7 @@ export function copyToClipboard(str: string) {
 export function copyStory(
   content: string,
   type: CopyType = 'text',
-  story?: Story | false,
+  story?: Story | null
 ) {
   if (type === 'text' || type === 'quote') {
     content = stripHtml(content);

@@ -1,13 +1,15 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 import StoryService from '../services/StoryService';
-import { appModule } from '../store/app';
+import { useAppStore } from '../store/app';
 
-import type { StoryResponse } from '../interfaces';
+import type { Story } from '@shared/types/Story';
+
+const appModule = useAppStore();
 
 @Component
 export default class LikeButton extends Vue {
-  @Prop({ type: Object }) story!: StoryResponse;
+  @Prop({ type: Object }) story!: Story;
 
   isLoading = false;
   likesCount = 0;
@@ -32,8 +34,8 @@ export default class LikeButton extends Vue {
           this.disabled
             ? 'Сначала войдите'
             : this.alreadySet
-              ? 'Больше не нравится'
-              : 'Мне нравится'
+            ? 'Больше не нравится'
+            : 'Мне нравится'
         }
       >
         <b-button
