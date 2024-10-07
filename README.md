@@ -65,9 +65,3 @@ Development
 ```bash
 docker-compose -f ./docker-compose-dev.yml up
 ```
-
-To run DB migration
-
-```bash
-node ./node_modules/ts-node/dist/bin.js ./scripts/moveToPg.ts 
-```

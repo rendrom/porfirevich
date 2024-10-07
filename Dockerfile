@@ -1,5 +1,14 @@
-FROM node:12
+FROM node:12 as client
 
+WORKDIR /app
+
+COPY ./client ./
+
+RUN npm install
+RUN npm run build
+
+
+FROM node:12 
 #Update stretch repositories
 RUN sed -i s/deb.debian.org/archive.debian.org/g /etc/apt/sources.list
 RUN sed -i 's|security.debian.org|archive.debian.org/|g' /etc/apt/sources.list
@@ -10,11 +19,8 @@ RUN apt update && apt install -y fonts-liberation gconf-service libappindicator1
 WORKDIR /app
 
 
-
-COPY ./ ./
-
-RUN npm install
-RUN npm run build
+COPY ./server ./
+COPY --from=client app/dist /client/dist
 
 RUN chmod -R o+rwx node_modules/puppeteer/.local-chromium
 
