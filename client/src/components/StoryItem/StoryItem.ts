@@ -12,7 +12,7 @@ import type { Story } from '@shared/types/Story';
 const appModule = useAppStore();
 
 @Component({ components: { LikeButton } })
-export default class extends Vue {
+export default class StoryItem extends Vue {
   @Prop({ type: Object }) readonly story!: Story;
 
   violationLoading = false;

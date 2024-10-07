@@ -16,6 +16,7 @@ export class Story {
   isDeleted!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
+  violationsCount!: number;
 }
 
 export interface StoriesResponse {

@@ -9,7 +9,6 @@ import PlainClipboard from '../../utils/PlainClipboard';
 import { deltaToScheme, schemeToDelta } from '../../utils/schemeUtils';
 
 import type { Sources } from 'quill';
-
 import type { Delta } from '../../interfaces';
 import { Scheme } from '@shared/types/Scheme';
 
@@ -39,7 +38,8 @@ export default class Transformer extends Vue {
   localScheme: Scheme = [];
 
   abortControllers: AbortController[] = [];
-  promptMaxLength = 1000000;
+  private readonly promptMaxLength = 1000000;
+  private readonly debounceDelay = 10;
   debouncedTextChange!: (
     delta: Delta,
     oldDelta: Delta,
@@ -48,17 +48,27 @@ export default class Transformer extends Vue {
   debouncedTransform!: () => void;
   debouncedHistory!: () => void;
 
-  historyInterval = 300;
-  historyLength = 2000;
+  private readonly historyInterval = 300;
+  private readonly historyLength = 2000;
   history: Scheme[] = [];
   models: string[] = [];
   activeModel = '';
 
-  __onKeydown!: (e: KeyboardEvent) => void;
-  __windowUnload?: (e: BeforeUnloadEvent) => void;
+  private handleKeydown: (e: KeyboardEvent) => void;
+  private handleBeforeUnload: (e: BeforeUnloadEvent) => void;
+
+  constructor() {
+    super();
+    this.handleKeydown = this.onKeydown.bind(this);
+    this.handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue =
+        'Вы действительно хотите покинуть страницу? История будет утеряна.';
+    };
+  }
 
   get prompt() {
-    return this._stripHtml(this.text).replace(this.lastReply, '').trimStart();
+    return this.stripHtml(this.text).replace(this.lastReply, '').trimStart();
   }
 
   @Watch('isAutocomplete')
@@ -71,7 +81,7 @@ export default class Transformer extends Vue {
   @Watch('interval')
   bindDebounceTransform() {
     this.debouncedTransform = debounce(
-      () => this.transform(),
+      this.transform.bind(this),
       this.interval * 1000
     );
   }
@@ -91,56 +101,47 @@ export default class Transformer extends Vue {
   @Emit('change')
   setContent() {
     this.html = this.quill.root.innerHTML;
-    this.localScheme = this._getScheme();
+    this.localScheme = this.getScheme();
     return this.localScheme;
   }
 
   bindDebounceHistory() {
     this.debouncedHistory = debounce(
-      () => this.updateHistory(),
+      this.updateHistory.bind(this),
       this.historyInterval
     );
   }
+
   bindDebounceTextChange() {
     this.debouncedTextChange = debounce(
       (delta: Delta, oldDelta: Delta, source: Sources) =>
         this.onTextChange(delta, oldDelta, source),
-      10
+      this.debounceDelay
     );
   }
 
   mounted() {
-    this._getModels().finally(() => {
-      this._initialize();
+    this.getModels().finally(() => {
+      this.initialize();
     });
   }
 
   destroyed() {
-    window.removeEventListener('keydown', this.__onKeydown);
+    window.removeEventListener('keydown', this.handleKeydown);
     this.removeWindowUnloadListener();
   }
 
   changeModel() {
     const activeModelIndex = this.models.indexOf(this.activeModel);
-    let nextActiveModel;
-    if (activeModelIndex !== -1) {
-      nextActiveModel =
-        this.models[(activeModelIndex + 1) % this.models.length];
-    } else {
-      nextActiveModel = this.models[0];
-    }
-    this.activeModel = nextActiveModel;
+    this.activeModel =
+      activeModelIndex !== -1
+        ? this.models[(activeModelIndex + 1) % this.models.length]
+        : this.models[0];
     this.replies = [];
   }
 
   appendHistory(scheme: Scheme) {
-    const history = [...this.history];
-    if (history.length > this.historyLength) {
-      history.splice(0, history.length - this.historyLength);
-    }
-    history.push(scheme);
-
-    this.history = history;
+    this.history = [...this.history, scheme].slice(-this.historyLength);
   }
 
   historyBack() {
@@ -150,7 +151,7 @@ export default class Transformer extends Vue {
     history.pop(); // last changes
     const prev = history.pop();
     if (prev) {
-      this._setScheme(prev);
+      this.setScheme(prev, true);
     } else {
       this.clean();
     }
@@ -158,7 +159,7 @@ export default class Transformer extends Vue {
   }
 
   updateHistory() {
-    const scheme = this._getScheme();
+    const scheme = this.getScheme();
     this.appendHistory(scheme);
   }
 
@@ -211,46 +212,30 @@ export default class Transformer extends Vue {
     if (source === 'user') {
       this.lastReply = '';
       this.replies = [];
-      let insert: string | undefined;
-      let retain = 0;
-      delta.ops.forEach((opt) => {
-        if (opt.insert) {
-          insert = opt.insert as string;
-        } else if (opt.retain) {
-          retain = opt.retain as number;
-        }
-        if (opt.attributes) {
-          opt.attributes = {};
+
+      delta.ops.forEach((op) => {
+        if (op.attributes) {
+          op.attributes = {};
         }
       });
-      if (insert) {
-        this.quill.removeFormat(retain, insert.length);
-        this.quill.formatText(
-          retain,
-          insert.length,
-          {
-            bold: false,
-            color: '#000',
-          },
-          'api'
-        );
-      }
+
       if (this.isAutocomplete) {
         this.debouncedTransform();
       }
     }
+
     this.debouncedHistory();
+
     if (this.text.trim().length) {
-      this._addWindowUnloadListener();
+      this.addWindowUnloadListener();
     } else {
       this.removeWindowUnloadListener();
     }
   }
 
   onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Alt') {
-      // this.isAutocomplete = !this.isAutocomplete;
-    } else if (e.key === 'Tab') {
+    if (e.key === 'Tab') {
+      e.preventDefault();
       if (this.isLoading) {
         this.abort();
       } else {
@@ -276,7 +261,7 @@ export default class Transformer extends Vue {
       if (this.replies.length) {
         replies = this.replies;
       } else {
-        const data = await this._request(prompt);
+        const data = await this.request(prompt);
         replies = data && data.replies;
         if (replies) {
           appModule.appendReplies(replies);
@@ -296,7 +281,6 @@ export default class Transformer extends Vue {
           },
           'api'
         );
-        // OMG! Timer 20 is needed to write lastReply after debounce
         setTimeout(() => {
           this.lastReply = reply;
         }, 20);
@@ -304,11 +288,10 @@ export default class Transformer extends Vue {
       }
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
-        // aborted
         mem.isAborted = true;
       } else {
         this.isError = true;
-        this._handleRequestError();
+        this.handleRequestError();
       }
     } finally {
       this.isLoading = false;
@@ -325,47 +308,33 @@ export default class Transformer extends Vue {
   setPlaceholder() {
     const q = this.quill;
     const text = q.getText();
-    // TODO: remove always first '/n' to set init length 0
     q.root.dataset.placeholder = text.length > 1 ? '' : this.placeholder;
   }
 
   removeWindowUnloadListener() {
-    if (this.__windowUnload) {
-      window.removeEventListener('beforeunload', this.__windowUnload);
-      this.__windowUnload = undefined;
-    }
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
   }
 
-  private async _getModels() {
+  private async getModels() {
     const data = await getModelsApi();
     this.models = data;
     this.activeModel = data[0];
   }
 
-  private async _initialize() {
+  private initialize() {
     this.bindDebounceTransform();
     this.bindDebounceTextChange();
     this.bindDebounceHistory();
-    this._createQuill();
-    this.__onKeydown = (event) => {
-      this.onKeydown(event);
-    };
-    window.addEventListener('keydown', this.__onKeydown);
+    this.createQuill();
+    window.addEventListener('keydown', this.handleKeydown);
     this.isReady = true;
   }
 
-  private _addWindowUnloadListener() {
-    if (!this.__windowUnload) {
-      this.__windowUnload = (e: BeforeUnloadEvent) => {
-        e.preventDefault();
-        e.returnValue =
-          'Вы действительно хотите покинуть страницу? История будет утеряна.';
-      };
-      window.addEventListener('beforeunload', this.__windowUnload);
-    }
+  private addWindowUnloadListener() {
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
 
-  private _handleRequestError() {
+  private handleRequestError() {
     Snackbar.open({
       duration: 5000,
       message: '<b>Ошибка</b></br>Нейросеть не отвечает.',
@@ -379,7 +348,7 @@ export default class Transformer extends Vue {
     });
   }
 
-  private async _request(prompt: string) {
+  private async request(prompt: string) {
     const controller = new AbortController();
     this.abortControllers.push(controller);
 
@@ -394,9 +363,8 @@ export default class Transformer extends Vue {
     });
   }
 
-  private _createQuill() {
+  private createQuill() {
     const bindings = {
-      // This will overwrite the default binding also named 'tab'
       tab: {
         key: 9,
         handler: () => {
@@ -415,9 +383,6 @@ export default class Transformer extends Vue {
         },
       },
       placeholder: 'Придумайте начало вашей истории',
-      // clipboard: {
-      //   matchVisual: false
-      // }
     });
     const keyboard = this.quill.getModule('keyboard');
     for (const key in keyboard.hotkeys) {
@@ -429,24 +394,31 @@ export default class Transformer extends Vue {
       this.debouncedTextChange(delta, oldDelta, source);
     });
     if (this.scheme && this.scheme.length) {
-      this._setScheme(this.scheme);
+      this.setScheme(this.scheme);
     }
   }
 
-  private _setScheme(scheme: Scheme) {
-    const delta = schemeToDelta(scheme);
-    const ops = delta.ops;
-
-    this.quill.setContents(delta, 'api');
-    this.setCursor();
+  private setCursorToEnd() {
+    const length = this.quill.getLength();
+    this.quill.setSelection(length - 1, 0);
   }
 
-  private _getScheme(): Scheme {
+  private setScheme(scheme: Scheme, setCursorToEnd: boolean = false) {
+    const delta = schemeToDelta(scheme);
+    this.quill.setContents(delta, 'api');
+    if (setCursorToEnd) {
+      this.setCursorToEnd();
+    } else {
+      this.setCursor();
+    }
+  }
+
+  private getScheme(): Scheme {
     const content = this.quill.getContents();
     return deltaToScheme(content);
   }
 
-  private _stripHtml(html: string) {
+  private stripHtml(html: string) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
