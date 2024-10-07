@@ -1,129 +1,142 @@
+import {
+  defineComponent,
+  ref,
+  computed,
+  PropType,
+  getCurrentInstance,
+} from 'vue';
 import { ToastProgrammatic as Toast } from 'buefy';
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
-
-import { escapeHtml } from '../../../../shared/utils/escapeHtml';
+import { escapeHtml } from '@shared/utils/escapeHtml';
 import config from '@shared/config';
-import StoryService from '../../services/StoryService';
-import { useAppStore } from '../../store/app';
-import LikeButton from '../LikeButton';
-
+import StoryService from '@/services/StoryService';
+import { useAppStore } from '@/store/app';
+import LikeButton from '@/components/LikeButton';
 import type { Story } from '@shared/types/Story';
 
-const appModule = useAppStore();
+export default defineComponent({
+  name: 'StoryItem',
+  components: { LikeButton },
+  props: {
+    story: {
+      type: Object as PropType<Story>,
+      required: true,
+    },
+  },
+  emits: ['show'],
+  setup(props, { emit }) {
+    const appModule = useAppStore();
+    const instance = getCurrentInstance();
+    const router = instance?.proxy.$router;
 
-@Component({ components: { LikeButton } })
-export default class StoryItem extends Vue {
-  @Prop({ type: Object }) readonly story!: Story;
+    const violationLoading = ref(false);
+    const deleteLoading = ref(false);
+    const publishLoading = ref(false);
 
-  violationLoading = false;
-  deleteLoading = false;
-  publishLoading = false;
-
-  get content() {
-    const c = JSON.parse(this.story.content) as [string, number][];
-    let html = '';
-    c.forEach((x) => {
-      let text = escapeHtml(x[0]);
-      text = text.replace(/\n/g, '<br>');
-      if (x[1]) {
-        html += `<strong style="color:${this.color}">${text}</strong>`;
-      } else {
-        html += `<span>${text}</span>`;
-      }
-      // lineBreaks.forEach(() => {
-      //   html += '<br>';
-      // });
+    const content = computed(() => {
+      const c = JSON.parse(props.story.content) as [string, number][];
+      let html = '';
+      c.forEach((x) => {
+        let text = escapeHtml(x[0]);
+        text = text.replace(/\n/g, '<br>');
+        if (x[1]) {
+          html += `<strong style="color:${color.value}">${text}</strong>`;
+        } else {
+          html += `<span>${text}</span>`;
+        }
+      });
+      return html;
     });
-    return html;
-  }
 
-  get color() {
-    return config.primaryColor;
-  }
+    const color = computed(() => config.primaryColor);
+    const user = computed(() => appModule.user);
+    const userCanEdit = computed(() => isSuperuser.value || isOwner.value);
+    const isOwner = computed(
+      () => user.value && user.value.id === props.story.user?.id
+    );
+    const isSuperuser = computed(() => user.value && user.value.isSuperuser);
+    const alreadySet = computed(() => appModule.liked.includes(props.story.id));
+    const disabled = computed(() => !appModule.user);
 
-  get user() {
-    return appModule.user;
-  }
+    const show = () => {
+      emit('show', props.story);
+    };
 
-  get userCanEdit() {
-    return this.isSuperuser || this.isOwner;
-  }
+    const go = () => {
+      router?.push('/' + props.story.id);
+    };
 
-  get isOwner() {
-    return this.user && this.user.id === this.story.user?.id;
-  }
-
-  get isSuperuser() {
-    return this.user && this.user.isSuperuser;
-  }
-
-  get alreadySet(): boolean {
-    return appModule.liked.includes(this.story.id);
-  }
-
-  get disabled() {
-    return !appModule.user;
-  }
-
-  @Emit()
-  show() {
-    return this.story;
-  }
-
-  go() {
-    this.$router.push('/' + this.story.id);
-  }
-
-  async remove() {
-    this.deleteLoading = true;
-    try {
-      const deleted = await StoryService.edit(this.story.id, {
-        isDeleted: !this.story.isDeleted,
-      });
-      if (deleted) {
-        appModule.updateStory({
-          id: this.story.id,
-          params: { isDeleted: deleted.isDeleted },
+    const remove = async () => {
+      deleteLoading.value = true;
+      try {
+        const deleted = await StoryService.edit(props.story.id, {
+          isDeleted: !props.story.isDeleted,
         });
+        if (deleted) {
+          appModule.updateStory({
+            id: props.story.id,
+            params: { isDeleted: deleted.isDeleted },
+          });
+        }
+      } catch {
+        // Handle error
+      } finally {
+        deleteLoading.value = false;
       }
-    } catch {
-      //
-    }
-    this.deleteLoading = false;
-  }
+    };
 
-  async publish() {
-    this.publishLoading = true;
-    try {
-      const resp = await StoryService.edit(this.story.id, {
-        isPublic: !this.story.isPublic,
-      });
-      if (resp) {
-        appModule.updateStory({
-          id: this.story.id,
-          params: { isPublic: resp.isPublic },
+    const publish = async () => {
+      publishLoading.value = true;
+      try {
+        const resp = await StoryService.edit(props.story.id, {
+          isPublic: !props.story.isPublic,
         });
+        if (resp) {
+          appModule.updateStory({
+            id: props.story.id,
+            params: { isPublic: resp.isPublic },
+          });
+        }
+      } catch {
+        // Handle error
+      } finally {
+        publishLoading.value = false;
       }
-    } catch {
-      //
-    }
-    this.publishLoading = false;
-  }
+    };
 
-  async violation() {
-    this.violationLoading = true;
-    try {
-      await StoryService.violation(this.story);
-      Toast.open({
-        message: 'Спасибо, сообщение о нарушение отправлено на рассмотрение',
-        type: 'is-success',
-        position: 'is-bottom',
-        duration: 6000,
-      });
-    } catch (er) {
-      console.log(er);
-    } finally {
-      this.violationLoading = false;
-    }
-  }
-}
+    const violation = async () => {
+      violationLoading.value = true;
+      try {
+        await StoryService.violation(props.story);
+        Toast.open({
+          message: 'Спасибо, сообщение о нарушение отправлено на рассмотрение',
+          type: 'is-success',
+          position: 'is-bottom',
+          duration: 6000,
+        });
+      } catch (er) {
+        console.log(er);
+      } finally {
+        violationLoading.value = false;
+      }
+    };
+
+    return {
+      violationLoading,
+      deleteLoading,
+      publishLoading,
+      content,
+      color,
+      user,
+      userCanEdit,
+      isOwner,
+      isSuperuser,
+      alreadySet,
+      disabled,
+      show,
+      go,
+      remove,
+      publish,
+      violation,
+    };
+  },
+});

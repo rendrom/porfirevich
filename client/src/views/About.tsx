@@ -1,7 +1,7 @@
-import { Component, Vue } from 'vue-property-decorator';
+import { defineComponent } from 'vue';
 
-@Component
-export default class About extends Vue {
+export default defineComponent({
+  name: 'About',
   render(): Vue.VNode {
     return (
       <div class="box">
@@ -35,5 +35,5 @@ export default class About extends Vue {
         </article>
       </div>
     );
-  }
-}
+  },
+});
