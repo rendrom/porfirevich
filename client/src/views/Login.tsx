@@ -1,18 +1,10 @@
-import { Component, Vue } from 'vue-property-decorator';
+import { defineComponent, h } from 'vue';
 
-@Component
-export default class About extends Vue {
-  render(): Vue.VNode {
-    return (
+export default defineComponent({
+  name: 'About',
+  setup() {
+    return () => (
       <a href="/auth/google/start">Нажмите, чтобы войти с помощью Google</a>
-      // <div>
-      //   <p>Войти через:</p>
-      //   <b-button
-      //     type
-      //     icon-left="google"
-      //   >
-      //   </b-button>
-      // </div>
     );
-  }
-}
+  },
+});

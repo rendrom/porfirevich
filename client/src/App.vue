@@ -3,12 +3,10 @@
     <b-navbar type fixed-top>
       <template slot="brand">
         <b-navbar-item tag="router-link" :to="{ path: '/' }">
-          <img src="images/logo.svg" alt="Порфирьевич" class="neuro-logo" />
+          <img src="images/favicon.svg" alt="Порфирьевич" class="neuro-logo" />
+          <span class="neuro-logo-text primary">Порфирьевич</span>
         </b-navbar-item>
       </template>
-      <!-- <template slot="start">
-
-      </template> -->
 
       <template slot="end">
         <b-navbar-item tag="router-link" to="/gallery">
@@ -16,7 +14,7 @@
         </b-navbar-item>
         <b-navbar-item tag="router-link" to="/about">О проекте</b-navbar-item>
         <b-navbar-item v-if="user" @click="logout">Выход</b-navbar-item>
-        <!-- <b-navbar-item v-else tag="router-link" to="/login">Вход</b-navbar-item> -->
+
         <b-dropdown
           v-else
           position="is-bottom-left"
@@ -95,11 +93,11 @@
                 target="_blank"
               >
                 <img
-                  src="https://bulma.io/images/become-a-patron.png"
+                  src="https://bulma.io/assets/images/become-a-patron.png"
                   srcset="
-                    https://bulma.io/images/become-a-patron.png    1x,
-                    https://bulma.io/images/become-a-patron@2x.png 2x,
-                    https://bulma.io/images/become-a-patron@3x.png 3x
+                    https://bulma.io/assets/images/become-a-patron.png    1x,
+                    https://bulma.io/assets/images/become-a-patron@2x.png 2x,
+                    https://bulma.io/assets/images/become-a-patron@3x.png 3x
                   "
                   alt="Become a Patron"
                   width="148"
@@ -116,7 +114,8 @@
 
 <script lang="ts" src="./App.ts"></script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "./style.scss";
 .main {
   display: flex;
   min-height: 100vh;
@@ -141,7 +140,13 @@
 }
 
 .neuro-logo {
+  width: 54px;
   max-height: 2.3rem;
+}
+
+.neuro-logo-text {
+  color: $primary;
+  font-weight: 500;
 }
 
 .section {

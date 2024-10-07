@@ -1,20 +1,25 @@
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+  watch,
+  getCurrentInstance,
+} from 'vue';
 import { ToastProgrammatic as Toast } from 'buefy';
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 
 import LikeButton from '../components/LikeButton';
 import Transformer from '../components/Transformer/Transformer.vue';
 import UserItem from '../components/UserItem/UserItem.vue';
 import { useAppStore } from '../store/app';
+import { useTransformerStore } from '@/store/transformerStore';
 import { copyStory } from '../utils/copyToClipboard';
 import { schemeToHtml } from '../utils/schemeUtils';
 
-import type { Story } from '@shared/types/Story';
 import type { Scheme } from '@shared/types/Scheme';
-import type TransformerKlass from '../components/Transformer/Transformer';
 
-const appModule = useAppStore();
-
-@Component({
+export default defineComponent({
+  name: 'Home',
   components: {
     Transformer,
     LikeButton,
@@ -22,143 +27,147 @@ const appModule = useAppStore();
     Share: () =>
       import(/* webpackChunkName: "share" */ '../components/Share/Share.vue'),
   },
-})
-export default class Home extends Vue {
-  @Prop({ type: String, default: '' }) id!: string;
-  @Ref('Transformer') readonly transformer!: TransformerKlass;
+  props: {
+    id: {
+      type: String,
+      default: '',
+    },
+  },
+  setup(props) {
+    const instance = getCurrentInstance();
+    const appStore = useAppStore();
+    const transformerStore = useTransformerStore();
 
-  scheme: Scheme = [];
-  isShareModalActive = false;
-  isLoading = false;
-  isTransformLoading = false;
-  isReady = false;
+    const isShareModalActive = ref(false);
+    const isLoading = ref(false);
 
-  routerWatcherStop: (() => void) | null = null;
+    const isShareDisabled = computed(() => {
+      return (
+        !transformerStore.localScheme.filter((x) => x[0] !== '\n').length ||
+        transformerStore.isLoading
+      );
+    });
 
-  get isShareDisabled() {
-    return (
-      !this.scheme.filter((x) => x[0] !== '\n').length ||
-      this.isTransformLoading
+    const story = computed(() => appStore.story);
+    const user = computed(() => appStore.user);
+
+    watch(
+      () => appStore.story,
+      () => {
+        appStore.getLikes();
+      }
     );
-  }
 
-  get story(): Story | null {
-    return appModule.story;
-  }
-
-  get user() {
-    return appModule.user;
-  }
-
-  @Watch('story')
-  onStoryChange() {
-    appModule.getLikes();
-  }
-
-  onRouteChange() {
-    if (this.$route.name === 'transformer' && this.$route.fullPath === '/') {
-      setTimeout(() => {
-        this.transformer.clean();
-        this.clean();
-      }, 20);
-    } else {
-      this._restore(this.$route.fullPath.substring(1));
-    }
-  }
-
-  mounted() {
-    this._mounted();
-    this.startRouterWatch();
-  }
-
-  stopRouterWatch() {
-    if (this.routerWatcherStop) {
-      this.routerWatcherStop();
-    }
-    this.routerWatcherStop = null;
-  }
-
-  startRouterWatch() {
-    this.routerWatcherStop = this.$watch('$route', this.onRouteChange);
-  }
-
-  async saveStory() {
-    if (!appModule.story) {
-      const isCorrupted = false;
-      if (isCorrupted) {
-        Toast.open({
-          message:
-            'Обнаружены недопустимые модификации дополнений Порфирьевича. Публикация истории отменена.',
-          type: 'is-danger',
-          position: 'is-bottom',
-        });
+    const onRouteChange = () => {
+      if (
+        instance?.proxy.$route.name === 'transformer' &&
+        instance.proxy.$route.fullPath === '/'
+      ) {
+        setTimeout(() => {
+          transformerStore.clean();
+          clean();
+        }, 20);
       } else {
-        this.isShareModalActive = true;
-        const story = await appModule.createStory(this.scheme);
-        const path = '/' + (story ? story.id : '');
-        if (this.$route.path !== path) {
-          await this._pushRoute(path);
+        restore(instance?.proxy.$route.fullPath.substring(1) || '');
+      }
+    };
+
+    const saveStory = async () => {
+      if (!appStore.story) {
+        const isCorrupted = false;
+        if (isCorrupted) {
+          Toast.open({
+            message:
+              'Обнаружены недопустимые модификации дополнений Порфирьевича. Публикация истории отменена.',
+            type: 'is-danger',
+            position: 'is-bottom',
+          });
+        } else {
+          isShareModalActive.value = true;
+          const story = await appStore.createStory(
+            transformerStore.localScheme
+          );
+          const path = '/' + (story ? story.id : '');
+          if (instance?.proxy.$route.path !== path) {
+            await pushRoute(path);
+          }
+          transformerStore.removeWindowUnloadListener();
         }
-        this.transformer.removeWindowUnloadListener();
+      } else {
+        isShareModalActive.value = true;
       }
-    } else {
-      this.isShareModalActive = true;
-    }
-  }
+    };
 
-  checkTransformLoading(val: boolean) {
-    this.isTransformLoading = val;
-  }
-
-  async clean() {
-    this.isShareModalActive = false;
-    appModule.removeActiveStory();
-    if (this.$route.params.id) {
-      await this._pushRoute('/');
-    }
-  }
-
-  copyToClipboard() {
-    copyStory(schemeToHtml(this.scheme), 'text', this.story);
-  }
-
-  onTransformerReady(_val: boolean) {
-    this.isReady = false;
-    setTimeout(
-      () =>
-        this.$watch('scheme', () => {
-          this.clean();
-        }),
-      20
-    );
-  }
-
-  private async _pushRoute(path: string) {
-    this.stopRouterWatch();
-    await this.$router.push(path);
-    this.startRouterWatch();
-  }
-
-  private async _mounted() {
-    if (this.id) {
-      this._restore(this.id);
-    }
-  }
-
-  private async _restore(id: string) {
-    this.isLoading = true;
-    try {
-      const story = await appModule.getStory(id);
-      if (story) {
-        this.scheme = JSON.parse(story.content) as Scheme;
-        const replies = this.scheme.filter((x) => x[1] === 1).map((x) => x[0]);
-        appModule.appendReplies(replies);
-        this.transformer.removeWindowUnloadListener();
+    const clean = async () => {
+      isShareModalActive.value = false;
+      appStore.removeActiveStory();
+      if (instance?.proxy.$route.params.id) {
+        await pushRoute('/');
       }
-    } catch (er) {
-      //
-    } finally {
-      this.isLoading = false;
-    }
-  }
-}
+    };
+
+    const copyToClipboard = () => {
+      copyStory(
+        schemeToHtml(transformerStore.localScheme),
+        'text',
+        story.value
+      );
+    };
+
+    const onTransformerReady = (_val: boolean) => {
+      transformerStore.setIsReady(false);
+      setTimeout(() => {
+        watch(
+          () => transformerStore.localScheme,
+          () => {
+            clean();
+          }
+        );
+      }, 20);
+    };
+
+    const pushRoute = async (path: string) => {
+      await instance?.proxy.$router.push(path);
+    };
+
+    const restore = async (id: string) => {
+      isLoading.value = true;
+      try {
+        const story = await appStore.getStory(id);
+        if (story) {
+          const scheme = JSON.parse(story.content) as Scheme;
+          transformerStore.setScheme(scheme);
+          const replies = scheme.filter((x) => x[1] === 1).map((x) => x[0]);
+          appStore.appendReplies(replies);
+          transformerStore.removeWindowUnloadListener();
+        }
+      } catch (er) {
+        // Handle error
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      if (props.id) {
+        restore(props.id);
+      }
+      watch(() => instance?.proxy.$route, onRouteChange);
+
+      transformerStore.initialize();
+    });
+
+    return {
+      transformerStore,
+      isShareModalActive,
+      isLoading,
+      isShareDisabled,
+      story,
+      user,
+      saveStory,
+      clean,
+      copyToClipboard,
+      onTransformerReady,
+    };
+  },
+});

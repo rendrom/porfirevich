@@ -1,9 +1,6 @@
 <template>
   <div v-if="!isLoading">
     <Transformer
-      ref="Transformer"
-      v-model="scheme"
-      @loading="checkTransformLoading"
       @ready="onTransformerReady"
     />
     <div class="save-control columns">
