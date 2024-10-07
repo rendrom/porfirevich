@@ -23,7 +23,7 @@
       <div class="column">
         <b-field label="Количество автодополняемых слов">
           <b-slider v-model="length" size="is-small" :min="1" :max="60" rounded>
-            <template v-for="val in [10, 20, 30, 40, 50]">
+            <template v-for="val in [10, 20, 30, 40, 50]" >
               <b-slider-tick :key="val" :value="val">
                 {{ val }}
               </b-slider-tick>

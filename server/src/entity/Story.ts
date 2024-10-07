@@ -18,9 +18,11 @@ import { Like } from './Like';
 import { User } from './User';
 import { Violation } from './Violation';
 
+import type { Story as S } from '../../../shared/types/Story';
+
 @Entity()
 @Unique(['id', 'editId'])
-export class Story {
+export class Story implements S {
   @PrimaryColumn()
   id!: string;
 
