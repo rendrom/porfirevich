@@ -2,12 +2,14 @@ import { ToastProgrammatic as Toast } from 'buefy';
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
 
 import { escapeHtml } from '../../../../shared/utils/escapeHtml';
-import config from '../../../shared/config';
+import config from '@shared/config';
 import StoryService from '../../services/StoryService';
-import { appModule } from '../../store/app';
+import { useAppStore } from '../../store/app';
 import LikeButton from '../LikeButton';
 
-import type { Story } from '../../../classes/Story';
+import type { Story } from '@shared/types/Story';
+
+const appModule = useAppStore();
 
 @Component({ components: { LikeButton } })
 export default class extends Vue {

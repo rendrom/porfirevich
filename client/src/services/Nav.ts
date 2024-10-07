@@ -19,7 +19,7 @@ export class Nav {
     opt: {
       params?: Record<string, string>;
       query?: Record<string, string>;
-    } = {},
+    } = {}
   ) {
     const route = router.currentRoute;
     let paramsEqual = true;

@@ -1,11 +1,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-import type { User } from '../../../classes/User';
+import type { User } from '@shared/types/User';
 
 import UserService from '@/services/UserService';
 
 @Component
-export default class extends Vue {
+export default class UserItem extends Vue {
   @Prop({ type: Object }) readonly user!: User;
 
   isBanLoading = false;

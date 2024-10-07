@@ -2,14 +2,13 @@
   <div v-if="!isLoading">
     <Transformer
       ref="Transformer"
-      
       v-model="scheme"
       @loading="checkTransformLoading"
       @ready="onTransformerReady"
     />
     <div class="save-control columns">
       <div class="column is-1">
-        <LikeButton v-if="story" :story="story"></LikeButton>
+        <LikeButton v-if="story" :story="story" />
       </div>
       <div class="column buttons has-text-centered">
         <b-button
@@ -27,13 +26,13 @@
         >
       </div>
       <div class="column is-1">
-        <div class="tools is-pulled-right"></div>
+        <div class="tools is-pulled-right" />
       </div>
     </div>
     <UserItem
-      v-if="story && story.user && user.isSuperuser"
+      v-if="story && story.user && user && user.isSuperuser"
       :user="story.user"
-    ></UserItem>
+    />
 
     <b-modal :active.sync="isShareModalActive" :width="620">
       <Share v-if="isShareModalActive" v-model="story" />
@@ -41,9 +40,7 @@
   </div>
 </template>
 
-<script lang="ts" src="./Home.ts">
-</script>
-
+<script lang="ts" src="./Home.ts"></script>
 
 <style scoped>
 .save-control {

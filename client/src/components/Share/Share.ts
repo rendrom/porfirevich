@@ -1,14 +1,16 @@
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
 import { Component, Model, Vue, Watch } from 'vue-property-decorator';
 
-import { appModule } from '../..//store/app';
+import { useAppStore } from '../../store/app';
 import { SITE } from '../../config';
 import StoryService from '../../services/StoryService';
 import { copyStory } from '../../utils/copyToClipboard';
 import { schemeToHtml } from '../../utils/schemeUtils';
 
-import type { Story } from '../../../classes/Story';
+import type { Story } from '@shared/types/Story';
 import type { CopyType } from '../../utils/copyToClipboard';
+
+const appModule = useAppStore();
 
 @Component
 export default class extends Vue {

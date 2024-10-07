@@ -4,14 +4,15 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import LikeButton from '../components/LikeButton';
 import Transformer from '../components/Transformer/Transformer.vue';
 import UserItem from '../components/UserItem/UserItem.vue';
-import { appModule } from '../store/app';
+import { useAppStore } from '../store/app';
 import { copyStory } from '../utils/copyToClipboard';
 import { schemeToHtml } from '../utils/schemeUtils';
 
-import type { Story } from '../../classes/Story';
+import type { Story } from '@shared/types/Story';
+import type { Scheme } from '@shared/types/Scheme';
 import type TransformerKlass from '../components/Transformer/Transformer';
-import type { Scheme } from '../interfaces';
-// import { checkCorrupted } from '../utils/checkCorrupted';
+
+const appModule = useAppStore();
 
 @Component({
   components: {
@@ -41,7 +42,7 @@ export default class Home extends Vue {
     );
   }
 
-  get story(): Story | false {
+  get story(): Story | null {
     return appModule.story;
   }
 
@@ -121,14 +122,14 @@ export default class Home extends Vue {
     copyStory(schemeToHtml(this.scheme), 'text', this.story);
   }
 
-  onTransformerReady(val: boolean) {
+  onTransformerReady(_val: boolean) {
     this.isReady = false;
     setTimeout(
       () =>
         this.$watch('scheme', () => {
           this.clean();
         }),
-      20,
+      20
     );
   }
 

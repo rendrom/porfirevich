@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="field is-horizontal">
-        <div class="field-label is-small mr-1" v-if="usePeriods || user">
+        <div v-if="usePeriods || user" class="field-label is-small mr-1">
           <label class="label">Показать</label>
         </div>
         <div class="field mr-1">
@@ -25,23 +25,18 @@
             size="is-small"
             :disabled="isLoading"
           >
-            <option v-for="f in filterItems" :value="f.value" :key="f.text">
+            <option v-for="f in filterItems" :key="f.text" :value="f.value">
               {{ f.text }}
             </option>
           </b-select>
         </div>
-        <div class="field-label is-small mr-1" v-if="usePeriods">
+        <div v-if="usePeriods" class="field-label is-small mr-1">
           <label class="label">за:</label>
         </div>
-        <div class="field-body" v-if="usePeriods">
+        <div v-if="usePeriods" class="field-body">
           <div class="field">
-            <b-select
-
-              v-model="period"
-              size="is-small"
-              :disabled="isLoading"
-            >
-              <option v-for="p in periods" :value="p.value" :key="p.text">
+            <b-select v-model="period" size="is-small" :disabled="isLoading">
+              <option v-for="p in periods" :key="p.text" :value="p.value">
                 {{ p.text }}
               </option>
             </b-select>
@@ -53,14 +48,14 @@
         <div class="field-body">
           <div class="field">
             <b-taginput
-                maxlength="20"
-                maxtags="5"
-                size="is-small"
-                :disabled="isLoading"
-                :has-counter="false"
-                v-model="tags"
-                :before-adding="beforeTagAdding">
-            </b-taginput>
+              v-model="tags"
+              maxlength="20"
+              maxtags="5"
+              size="is-small"
+              :disabled="isLoading"
+              :has-counter="false"
+              :before-adding="beforeTagAdding"
+            />
             <!-- <b-input
               v-model="query"
               maxlength="20"
@@ -78,7 +73,7 @@
     </div>
     <div v-for="i in stories" :key="i.id" class="columns">
       <div class="column">
-        <story-item :story="i" @show="showStory"></story-item>
+        <story-item :story="i" @show="showStory" />
       </div>
     </div>
     <div class="columns">
@@ -98,8 +93,6 @@
   </div>
 </template>
 
-<script lang="ts" src="./Gallery.ts">
-</script>
+<script lang="ts" src="./Gallery.ts"></script>
 
-<style scoped>
-</style>
+<style scoped></style>

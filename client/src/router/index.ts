@@ -5,7 +5,7 @@ Vue.use(Router);
 
 export default new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: '/',
   routes: [
     {
       path: '/about',
@@ -23,7 +23,7 @@ export default new Router({
     },
     {
       path: '/auth-redirect',
-      component: () => import('../views/AuthRedirect.vue'),
+      component: () => import('../views/AuthRedirect'),
     },
     {
       path: '/:id?',

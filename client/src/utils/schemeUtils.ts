@@ -1,25 +1,30 @@
-import config from '../../shared/config';
+import config from '@shared/config';
 
+import Delta from 'quill-delta';
 import type { DeltaOperation } from 'quill';
 
-import type { Delta, Scheme, SchemeToHtmlOptions } from '../interfaces';
+import type { SchemeToHtmlOptions } from '../interfaces';
+import type { Scheme } from '@shared/types/Scheme';
 
 export function deltaToScheme(delta: Delta): Scheme {
   return delta.ops.map((x) => {
-    return [x.insert, x.attributes && x.attributes.bold ? 1 : 0];
+    return [x.insert as string, x.attributes && x.attributes.bold ? 1 : 0];
   });
 }
 
 export function schemeToDelta(scheme: Scheme): Delta {
-  return {
-    ops: scheme.map((x) => {
-      const op: DeltaOperation = { insert: x[0] };
-      if (x[1]) {
-        op.attributes = { bold: true, color: config.primaryColor };
-      }
-      return op;
-    }),
-  };
+  const ops: DeltaOperation[] = scheme.map((x) => {
+    const op: DeltaOperation = { insert: x[0] };
+    if (x[1]) {
+      op.attributes = { bold: true, color: config.primaryColor };
+    }
+    return op;
+  });
+
+  const delta = new Delta();
+  delta.ops = ops;
+
+  return delta;
 }
 
 export function schemeToHtml(scheme: Scheme, opt?: SchemeToHtmlOptions) {

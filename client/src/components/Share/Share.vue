@@ -49,7 +49,6 @@
           </div>
         </div>
         <div class="pt10">
-
           <b-tooltip
             v-if="isUserAuthor"
             type="is-dark"
@@ -57,7 +56,9 @@
             :active="!user"
           >
             <b-field>
-              <b-checkbox v-model="story.isPublic" :disabled="!user || changePublicStatusLoading"
+              <b-checkbox
+                v-model="story.isPublic"
+                :disabled="!user || changePublicStatusLoading"
                 >Публиковать в галерее</b-checkbox
               >
             </b-field>
@@ -68,8 +69,8 @@
         </div>-->
       </div>
       <b-notification
-        class="pt10"
         v-if="story.editId && !user"
+        class="pt10"
         type="is-info"
         aria-close-label="Close notification"
         role="alert"
