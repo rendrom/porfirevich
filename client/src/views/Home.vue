@@ -1,29 +1,40 @@
 <template>
   <div v-if="!isLoading">
-    <Transformer
-      @ready="onTransformerReady"
-    />
+    <Transformer @ready="onTransformerReady" />
     <div class="save-control columns">
+      <div class="column is-1">
+        <div class="tools">
+          <b-dropdown position="is-bottom-left" aria-role="menu" trap-focus>
+            <template #trigger>
+              <b-button size="is-small" type icon-left="cog" />
+            </template>
+
+            <b-dropdown-item custom aria-role="listitem">
+              <TransformerSettings />
+            </b-dropdown-item>
+          </b-dropdown>
+        </div>
+      </div>
       <div class="column is-1">
         <LikeButton v-if="story" :story="story" />
       </div>
-      <div class="column buttons has-text-centered">
+      <div class="column buttons has-text-right">
         <b-button
           type
           icon-left="content-copy"
+          size="is-small"
           :disabled="isShareDisabled"
           @click="copyToClipboard"
         />
         <b-button
           type
           icon-left="share-variant"
+          size="is-small"
           :disabled="isShareDisabled"
           @click="saveStory"
-          >Поделиться</b-button
         >
-      </div>
-      <div class="column is-1">
-        <div class="tools is-pulled-right" />
+          Поделиться
+        </b-button>
       </div>
     </div>
     <UserItem

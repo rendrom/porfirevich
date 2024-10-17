@@ -5,17 +5,13 @@ import { getRepository } from 'typeorm';
 
 import { Story } from '../entity/Story';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 import type { Scheme } from '../../../shared/types/Scheme';
 
-export async function appendOgImage(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function appendOgImage(req: Request, res: Response) {
   const id: string = req.params.id;
-  const htmlPath = path.resolve(__dirname, '../../dist/index.html');
+  const htmlPath = path.resolve(__dirname, '../../../client/dist/index.html');
   const repository = getRepository(Story);
   try {
     const story = await repository.findOneOrFail(id, {
@@ -40,7 +36,7 @@ export async function appendOgImage(
       `<meta charset=utf-8>${addMeta.join('')}`,
     );
     res.send(html);
-  } catch (error) {
+  } catch {
     res.sendFile(htmlPath);
   }
 }

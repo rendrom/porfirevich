@@ -6,12 +6,6 @@ export interface Config {
 
 let localSettings: Partial<Config> | undefined;
 
-// try {
-//   localSettings = require('./configLocal.ts');
-// } catch (er) {
-//   // throw new Error('No local config founded');
-// }
-
 const defaultConfig: Partial<Config> = {
   endpoint: 'https://api.porfirevich.com',
   primaryColor: '#5371FF',

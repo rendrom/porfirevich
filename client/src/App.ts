@@ -63,7 +63,7 @@ export default class App extends Vue {
     const newWindow = openWindow(
       // 'http://localhost:3000' +
       '/auth/google/start',
-      'NextGIS ID',
+      'Google ID',
       540,
       540
     );

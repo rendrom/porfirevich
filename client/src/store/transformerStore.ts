@@ -260,7 +260,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       'Вы действительно хотите покинуть страницу? История будет утеряна.';
   }
 
-  function setScheme(scheme: Scheme, cursorToEnd: boolean = false) {
+  function setScheme(scheme: Scheme, cursorToEnd = false) {
     if (quill.value) {
       const delta = schemeToDelta(scheme);
       quill.value.setContents(delta, 'api');

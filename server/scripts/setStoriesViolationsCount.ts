@@ -1,14 +1,13 @@
-import chalk from 'chalk';
-import prompts from 'prompts';
 import { createConnection } from 'typeorm';
 
-import { Story } from '../srv/entity/Story';
-import { User } from '../srv/entity/User';
-import { Violation } from '../srv/entity/Violation';
-const ormconfig = require('../ormconfig.json');
+import ormconfig from '../ormconfig.json';
+import { Story } from '../src/entity/Story';
+import { Violation } from '../src/entity/Violation';
+
+import type { ConnectionOptions } from 'typeorm';
 
 const setBannedStories = async () => {
-  const connection = await createConnection(ormconfig);
+  const connection = await createConnection(ormconfig as ConnectionOptions);
   try {
     const rep = connection.getRepository(Violation);
     const list = await rep.query(`

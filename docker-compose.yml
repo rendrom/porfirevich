@@ -13,9 +13,9 @@ services:
     ports:
       - 3000:3000
     command: npm start
-    working_dir: /app
+    working_dir: /app/server
     volumes:
-      - ./media:/app/media
+      - ./media:/app/server/media
   db:
     image: postgres:14-alpine
     restart: always

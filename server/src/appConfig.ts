@@ -1,6 +1,9 @@
-import path from 'node:path';
 import fs from 'node:fs';
-import express, { Application } from 'express';
+import path from 'node:path';
+
+import express from 'express';
+
+import type { Application } from 'express';
 
 export function appConfig(app: Application) {
   const mediaPath = path.resolve(__dirname, '../media');

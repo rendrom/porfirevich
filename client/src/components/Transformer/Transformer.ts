@@ -1,11 +1,4 @@
-import {
-  defineComponent,
-  onMounted,
-  onUnmounted,
-  watch,
-  ref,
-  PropType,
-} from 'vue';
+import { defineComponent, onMounted, onUnmounted, watch, PropType } from 'vue';
 import { useTransformerStore } from '@/store/transformerStore';
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
 import { Scheme } from '@shared/types/Scheme';
@@ -21,8 +14,6 @@ export default defineComponent({
   emits: ['change', 'loading', 'ready'],
   setup(props, { emit }) {
     const store = useTransformerStore();
-
-    const isSettings = ref(false);
 
     const handleRequestError = () => {
       Snackbar.open({
@@ -87,7 +78,6 @@ export default defineComponent({
     store.$patch({ handleRequestError });
 
     return {
-      isSettings,
       store,
     };
   },

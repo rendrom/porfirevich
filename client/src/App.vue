@@ -115,10 +115,15 @@
 <script lang="ts" src="./App.ts"></script>
 
 <style lang="scss" scoped>
-@import "./style.scss";
+@import './style.scss';
+
+.footer {
+  padding: 1rem 1.5rem 1rem;
+}
+
 .main {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 52px);
   flex-direction: column;
 }
 

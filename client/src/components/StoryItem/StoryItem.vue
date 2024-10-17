@@ -62,7 +62,9 @@
               <b-tooltip
                 type="is-dark"
                 :label="`Сообщить о нарушении${
-                  user && user.isSuperuser ? ' (' + story.violationsCount + ')' : ''
+                  user && user.isSuperuser
+                    ? ' (' + story.violationsCount + ')'
+                    : ''
                 }`"
                 class="right-control-btn"
               >

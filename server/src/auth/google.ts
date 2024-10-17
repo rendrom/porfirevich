@@ -21,7 +21,8 @@ const callbackURL = config.get('site');
 const passportConfig: IOAuth2StrategyOption = {
   clientID,
   clientSecret,
-  callbackURL: callbackURL + '/auth/google/redirect',
+  // callbackURL: callbackURL + '/auth/google/redirect',
+  callbackURL: 'http://localhost:3000/auth/google/redirect',
 };
 
 if (passportConfig.clientID) {

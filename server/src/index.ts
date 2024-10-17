@@ -8,7 +8,7 @@ import type { Application } from 'express';
 
 export default (app: Application) => {
   createConnection()
-    .then(async (connection) => {
+    .then(async () => {
       appConfig(app);
       api(app);
 

@@ -9,12 +9,12 @@ import { appConfig } from './appConfig';
 import config from './config';
 
 createConnection()
-  .then(async (connection) => {
+  .then(async () => {
     const app = express();
     appConfig(app);
     api(app);
 
-    const publicPath = resolve(__dirname, '../dist');
+    const publicPath = resolve(__dirname, '../../client/dist');
 
     const staticConf = { maxAge: '1y', etag: false };
 

@@ -8,8 +8,8 @@ export default defineComponent({
   props: {
     story: {
       type: Object as () => Story,
-      required: true
-    }
+      required: true,
+    },
   },
   setup(props) {
     const appModule = useAppStore();
@@ -57,28 +57,40 @@ export default defineComponent({
       }
     };
 
-    return () => h('b-tooltip', {
-      props: {
-        type: 'is-dark',
-        label: disabled.value
-          ? 'Сначала войдите'
-          : alreadySet.value
-          ? 'Больше не нравится'
-          : 'Мне нравится'
-      }
-    }, [
-      h('b-button', {
-        props: {
-          'icon-left': 'thumb-up-outline',
-          size: 'is-small',
-          type: alreadySet.value && !disabled.value ? 'is-primary' : 'is-light',
-          loading: isLoading.value,
-          disabled: disabled.value
+    return () =>
+      h(
+        'b-tooltip',
+        {
+          props: {
+            type: 'is-dark',
+            label: disabled.value
+              ? 'Сначала войдите'
+              : alreadySet.value
+              ? 'Больше не нравится'
+              : 'Мне нравится',
+          },
         },
-        on: {
-          click: onLikeBtnClick
-        }
-      }, likesCount.value)
-    ]);
-  }
+        [
+          h(
+            'b-button',
+            {
+              props: {
+                'icon-left': 'thumb-up-outline',
+                size: 'is-small',
+                type:
+                  alreadySet.value && !disabled.value
+                    ? 'is-primary'
+                    : 'is-light',
+                loading: isLoading.value,
+                disabled: disabled.value,
+              },
+              on: {
+                click: onLikeBtnClick,
+              },
+            },
+            likesCount.value
+          ),
+        ]
+      );
+  },
 });

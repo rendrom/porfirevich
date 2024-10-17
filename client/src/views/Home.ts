@@ -10,6 +10,7 @@ import { ToastProgrammatic as Toast } from 'buefy';
 
 import LikeButton from '../components/LikeButton';
 import Transformer from '../components/Transformer/Transformer.vue';
+import TransformerSettings from '../components/TransformerSettings/TransformerSettings.vue';
 import UserItem from '../components/UserItem/UserItem.vue';
 import { useAppStore } from '../store/app';
 import { useTransformerStore } from '@/store/transformerStore';
@@ -24,6 +25,7 @@ export default defineComponent({
     Transformer,
     LikeButton,
     UserItem,
+    TransformerSettings,
     Share: () =>
       import(/* webpackChunkName: "share" */ '../components/Share/Share.vue'),
   },
@@ -38,6 +40,7 @@ export default defineComponent({
     const appStore = useAppStore();
     const transformerStore = useTransformerStore();
 
+    const isSettings = ref(false);
     const isShareModalActive = ref(false);
     const isLoading = ref(false);
 
@@ -158,14 +161,15 @@ export default defineComponent({
     });
 
     return {
-      transformerStore,
       isShareModalActive,
-      isLoading,
+      transformerStore,
       isShareDisabled,
+      isSettings,
+      isLoading,
       story,
       user,
-      saveStory,
       clean,
+      saveStory,
       copyToClipboard,
       onTransformerReady,
     };

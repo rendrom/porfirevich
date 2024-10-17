@@ -2,8 +2,10 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 import { createConnection } from 'typeorm';
 
-import { User } from '../srv/entity/User';
-const ormconfig = require('../ormconfig.json');
+import ormconfig from '../ormconfig.json';
+import { User } from '../src/entity/User';
+
+import type { ConnectionOptions } from 'typeorm';
 
 let email: string | null = null;
 // const myArgs = process.argv.slice(2);
@@ -11,7 +13,7 @@ let email: string | null = null;
 // email = myArgs[0];
 
 const setSuperuser = async () => {
-  const connection = await createConnection(ormconfig);
+  const connection = await createConnection(ormconfig as ConnectionOptions);
 
   const response = await prompts({
     type: 'text',
@@ -27,7 +29,7 @@ const setSuperuser = async () => {
       user.isSuperuser = true;
       await userRepository.save(user);
       console.log(chalk.green(`User ${email} in now superuser`));
-    } catch (error) {
+    } catch {
       console.log(chalk.red(`Can't find user with email ${email}`));
     }
   }

@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
-const ESLintPlugin = require('eslint-webpack-plugin');
+// const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
+const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 const sassLoaderOptions = {
@@ -87,6 +89,9 @@ module.exports = (env, argv) => {
       //   extensions: ['ts', 'vue'],
       //   fix: true,
       // }),
+      new CopyPlugin({
+        patterns: [{ from: 'public' }],
+      }),
       new ForkTsCheckerWebpackPlugin(),
       new VueLoaderPlugin(),
       new webpack.DefinePlugin({
@@ -94,9 +99,11 @@ module.exports = (env, argv) => {
         __VUE_PROD_DEVTOOLS__: false,
       }),
       new HtmlWebpackPlugin({
-        template: 'public/index.html',
+        template: 'src/index.html',
         filename: 'index.html',
       }),
+
+      ...(isProd ? [new MiniCssExtractPlugin()] : []),
     ],
     optimization: {
       runtimeChunk: 'single',
@@ -111,6 +118,20 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'public'),
       },
       hot: true,
+      proxy: [
+        {
+          context: ['/api'],
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          // pathRewrite: { '^/api': '' },
+        },
+        {
+          context: ['/auth'],
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
+      ],
+      historyApiFallback: true,
     },
   };
 };

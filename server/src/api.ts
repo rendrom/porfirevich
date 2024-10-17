@@ -10,7 +10,9 @@ import type { Application } from 'express';
 export function api(app: Application) {
   app.use(passport.initialize());
   app.use(cors());
-  app.use(helmet());
+  // helmet({
+  //   contentSecurityPolicy: false,
+  // });
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
   // app.use(appendOgImage);
