@@ -62,11 +62,6 @@ WORKDIR /app/server
 RUN npm ci
 
 
-RUN mkdir -p /app/server/.cache/puppeteer \
-    && chmod -R o+rwx /app/server/.cache
-
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 EXPOSE 3000
 

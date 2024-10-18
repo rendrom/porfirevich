@@ -51,7 +51,7 @@ npm run lint
 ## Docker
 
 ```bash
-docker-compose build
+docker-compose build --no-cache
 ```
 
 Production
