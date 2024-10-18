@@ -28,7 +28,7 @@ export async function postcard(story: Story) {
     height: 200000,
     deviceScaleFactor: 1,
   });
-  const postcardPath = path.join('media', story.id + '.png');
+  const postcardPath = path.join('..', 'media', story.id + '.png');
   await page.setContent(getHtml(story));
   await screenshotDOMElement({
     page,

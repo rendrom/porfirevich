@@ -15,7 +15,7 @@ services:
     command: npm start
     working_dir: /app/server
     volumes:
-      - ./server/media:/app/server/media
+      - ./media:/app/media
   db:
     image: postgres:14-alpine
     restart: always

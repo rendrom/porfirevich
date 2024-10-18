@@ -6,7 +6,7 @@ import express from 'express';
 import type { Application } from 'express';
 
 export function appConfig(app: Application) {
-  const mediaPath = path.resolve(__dirname, '../media');
+  const mediaPath = path.resolve(__dirname, '../../media');
 
   if (!fs.existsSync(mediaPath)) {
     fs.mkdirSync(mediaPath);

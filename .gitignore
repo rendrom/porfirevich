@@ -22,6 +22,6 @@ yarn-error.log*
 
 *.sqlite
 .env
-*/media
+**/media
 configLocal.ts
 */dist
