@@ -61,7 +61,20 @@ export const useTransformerStore = defineStore('transformer', () => {
     }
   }
 
-  watch([tokens, temperature, activeModel], saveSettings, { deep: true });
+  function setTemperature(value: number) {
+    temperature.value = value;
+    saveSettings();
+  }
+
+  watch(
+    [tokens, temperature, activeModel],
+    () => {
+      abort();
+      cleanLastReply();
+      saveSettings();
+    },
+    { deep: true }
+  );
 
   const createQuill = (selector: string) => {
     const bindings = {
@@ -449,6 +462,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     setScheme,
     getScheme,
     setContent,
+    setTemperature,
     clean,
     cleanLastReply,
     setCursor,

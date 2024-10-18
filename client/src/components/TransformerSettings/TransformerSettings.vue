@@ -1,35 +1,33 @@
 <template>
   <div class="settings-control">
     <div class="field">
-      <b-field label="Объем генерируемого текста">
+      <b-field label="Объем генерируемого текста (токенов)">
         <b-slider
           v-model="store.tokens"
           size="is-small"
+          rounded
+          indicator
+          :tooltip="false"
           :min="1"
           :max="300"
-          rounded
-        >
-          <b-slider-tick v-for="val in [50, 150, 250]" :key="val" :value="val">
-            {{ val }}
-          </b-slider-tick>
-        </b-slider>
+        />
       </b-field>
     </div>
 
     <div class="field">
-      <b-field label="Креативность">
+      <b-field label="Креативность (шиз)">
         <b-slider
-          v-model="store.temperature"
+          :value="temperatureToSliderValue(store.temperature)"
           size="is-small"
-          :min="0.1"
+          rounded
+          indicator
+          :tooltip="false"
+          :min="0"
           :max="10"
           :step="0.1"
-          rounded
-        >
-          <b-slider-tick v-for="val in [0.1, 5, 10]" :key="val" :value="val">
-            {{ val }}
-          </b-slider-tick>
-        </b-slider>
+          :custom-formatter="formatTemperature"
+          @input="updateTemperature"
+        />
       </b-field>
     </div>
 
@@ -52,21 +50,7 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { useTransformerStore } from '@/store/transformerStore';
-
-export default defineComponent({
-  name: 'TransformerSettings',
-  setup() {
-    const store = useTransformerStore();
-
-    return {
-      store,
-    };
-  },
-});
-</script>
+<script src="./TransformerSettings.ts"></script>
 
 <style scoped>
 .settings-control {
