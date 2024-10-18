@@ -1,6 +1,6 @@
 {
-  "name": "porfirevich-server",
-  "version": "1.0.1",
+  "name": "porfirevich-web",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "client": "cd ./client && npm start",
