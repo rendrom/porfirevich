@@ -1,10 +1,16 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading && !error">
     <Transformer @ready="onTransformerReady" />
+
     <div class="save-control columns">
       <div class="column is-1">
         <div class="tools">
-          <b-dropdown position="is-bottom-left" aria-role="menu" trap-focus>
+          <b-dropdown
+            class="settings-dropdown"
+            position="is-bottom-left"
+            aria-role="menu"
+            trap-focus
+          >
             <template #trigger>
               <b-button size="is-small" type icon-left="cog" />
             </template>
@@ -18,6 +24,7 @@
       <div class="column is-1">
         <LikeButton v-if="story" :story="story" />
       </div>
+
       <div class="column buttons has-text-right">
         <b-button
           type
@@ -43,9 +50,10 @@
     />
 
     <b-modal :active.sync="isShareModalActive" :width="620">
-      <Share v-if="isShareModalActive" v-model="story" />
+      <Share v-if="story && isShareModalActive" :story="story" />
     </b-modal>
   </div>
+  <LoadingPage v-else :error="error" />
 </template>
 
 <script lang="ts" src="./Home.ts"></script>
@@ -53,5 +61,14 @@
 <style scoped>
 .save-control {
   padding-top: 20px;
+}
+
+.settings-dropdown ::v-deep .dropdown-menu {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.settings-dropdown ::v-deep .dropdown-content {
+  width: 100%;
 }
 </style>

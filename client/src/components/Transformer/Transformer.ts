@@ -1,18 +1,10 @@
-import { defineComponent, onMounted, onUnmounted, watch, PropType } from 'vue';
+import { defineComponent, onMounted, onUnmounted } from 'vue';
 import { useTransformerStore } from '@/store/transformerStore';
 import { SnackbarProgrammatic as Snackbar } from 'buefy';
-import { Scheme } from '@shared/types/Scheme';
 
 export default defineComponent({
   name: 'Transformer',
-  props: {
-    scheme: {
-      type: Array as PropType<Scheme>,
-      default: () => [],
-    },
-  },
-  emits: ['change', 'loading', 'ready'],
-  setup(props, { emit }) {
+  setup() {
     const store = useTransformerStore();
 
     const handleRequestError = () => {
@@ -49,9 +41,6 @@ export default defineComponent({
         store.initialize();
         store.createQuill('#editorjs');
         window.addEventListener('keydown', onKeydown);
-        if (props.scheme && props.scheme.length) {
-          store.setScheme(props.scheme);
-        }
       });
     });
 
@@ -59,21 +48,6 @@ export default defineComponent({
       window.removeEventListener('keydown', onKeydown);
       store.removeWindowUnloadListener();
     });
-
-    watch(() => store.isAutocomplete, store.abort);
-    watch(() => store.interval, store.bindDebounceTransform);
-    watch(
-      () => store.isLoading,
-      (val) => emit('loading', val)
-    );
-    watch(
-      () => store.isReady,
-      (val) => emit('ready', val)
-    );
-    watch(
-      () => store.localScheme,
-      (val) => emit('change', val)
-    );
 
     store.$patch({ handleRequestError });
 

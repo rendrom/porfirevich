@@ -18,8 +18,9 @@ export interface TransformResp {
 export interface GenerateApiOptions {
   prompt: string;
   model: string;
-  length: number;
+  tokens: number;
   signal: AbortSignal;
+  temperature?: number;
 }
 
 export type StoryResponseSelect =

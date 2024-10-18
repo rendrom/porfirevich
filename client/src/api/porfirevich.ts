@@ -17,8 +17,9 @@ async function mockResponse<T>(data: T): Promise<T> {
 export async function generateApi({
   prompt,
   model,
-  length,
+  tokens,
   signal,
+  temperature,
 }: GenerateApiOptions): Promise<TransformResp> {
   if (DEBUG) {
     return mockResponse({ replies: [String(i++), String(i++), String(i++)] });
@@ -30,7 +31,8 @@ export async function generateApi({
     body: JSON.stringify({
       prompt,
       model,
-      length,
+      length: tokens,
+      temperature,
     }),
   });
   const data: TransformResp = await resp.json();

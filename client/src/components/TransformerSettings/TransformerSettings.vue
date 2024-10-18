@@ -1,41 +1,52 @@
 <template>
-  <div class="columns settings-control">
-    <div class="column">
-      <b-field label="Автодополнение">
-        <div class="autocomplate-control">
-          <b-switch v-model="store.isAutocomplete" size="is-small">
-            {{ store.isAutocomplete ? 'вкл' : 'выкл' }}
-          </b-switch>
-        </div>
-      </b-field>
-    </div>
-    <div class="column">
-      <b-field label="Задержка автодополнения" style="max-width: 250px">
-        <b-numberinput
-          v-model="store.interval"
-          size="is-small"
-          controls-rounded
-          :min="1"
-        />
-      </b-field>
-    </div>
-    <div class="column">
-      <b-field label="Количество автодополняемых слов">
+  <div class="settings-control">
+    <div class="field">
+      <b-field label="Объем генерируемого текста">
         <b-slider
-          v-model="store.length"
+          v-model="store.tokens"
           size="is-small"
           :min="1"
-          :max="60"
+          :max="300"
           rounded
         >
-          <b-slider-tick
-            v-for="val in [10, 20, 30, 40, 50]"
-            :key="val"
-            :value="val"
-          >
+          <b-slider-tick v-for="val in [50, 150, 250]" :key="val" :value="val">
             {{ val }}
           </b-slider-tick>
         </b-slider>
+      </b-field>
+    </div>
+
+    <div class="field">
+      <b-field label="Креативность">
+        <b-slider
+          v-model="store.temperature"
+          size="is-small"
+          :min="0.1"
+          :max="10"
+          :step="0.1"
+          rounded
+        >
+          <b-slider-tick v-for="val in [0.1, 5, 10]" :key="val" :value="val">
+            {{ val }}
+          </b-slider-tick>
+        </b-slider>
+      </b-field>
+    </div>
+
+    <div class="field">
+      <b-field label="Модель">
+        <b-field grouped group-multiline>
+          <b-radio-button
+            v-for="model in store.models"
+            :key="model"
+            v-model="store.activeModel"
+            :native-value="model"
+            type="is-primary is-light is-outlined"
+            size="is-small"
+          >
+            {{ model }}
+          </b-radio-button>
+        </b-field>
       </b-field>
     </div>
   </div>
@@ -56,3 +67,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.settings-control {
+  margin-bottom: 1rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+</style>

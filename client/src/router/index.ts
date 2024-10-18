@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import Main from '@/layouts/Main.vue';
 
 Vue.use(Router);
 
@@ -8,28 +9,34 @@ export default new Router({
   base: '/',
   routes: [
     {
-      path: '/about',
-      component: () => import('../views/About'),
-    },
-    {
-      path: '/gallery',
-      name: 'gallery',
-      component: () => import('../views/Gallery/Gallery.vue'),
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('../views/Login'),
-    },
-    {
       path: '/auth-redirect',
-      component: () => import('../views/AuthRedirect'),
+      component: () => import('../views/AuthRedirect.vue'),
     },
     {
-      path: '/:id?',
-      name: 'transformer',
-      props: true,
-      component: () => import('../views/Home.vue'),
+      path: '/',
+      component: Main,
+      children: [
+        {
+          path: '/about',
+          component: () => import('../views/About'),
+        },
+        {
+          path: '/gallery',
+          name: 'gallery',
+          component: () => import('../views/Gallery/Gallery.vue'),
+        },
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('../views/Login'),
+        },
+        {
+          path: '/:id?',
+          name: 'transformer',
+          props: true,
+          component: () => import('../views/Home.vue'),
+        },
+      ],
     },
   ],
 });

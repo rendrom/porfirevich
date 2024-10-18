@@ -125,11 +125,11 @@ module.exports = (env, argv) => {
           changeOrigin: true,
           // pathRewrite: { '^/api': '' },
         },
-        {
-          context: ['/auth'],
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-        },
+        // {
+        //   context: ['/auth'],
+        //   target: 'http://localhost:3000',
+        //   changeOrigin: true,
+        // },
       ],
       historyApiFallback: true,
     },

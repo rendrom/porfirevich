@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Quill, { Sources } from 'quill';
 import type Delta from 'quill-delta';
 import debounce from 'debounce';
@@ -22,7 +22,8 @@ export const useTransformerStore = defineStore('transformer', () => {
   const lastReply = ref('');
   const replies = ref<string[]>([]);
   const interval = ref(1);
-  const length = ref(30);
+  const tokens = ref(150);
+  const temperature = ref(1.0);
   const placeholder = ref('Придумайте начало истории');
   const localScheme = ref<Scheme>([]);
   const abortControllers = ref<AbortController[]>([]);
@@ -39,6 +40,28 @@ export const useTransformerStore = defineStore('transformer', () => {
   const historyLength = 2000;
   const debounceDelay = 10;
   const historyInterval = 300;
+
+  function saveSettings() {
+    localStorage.setItem(
+      'transformerSettings',
+      JSON.stringify({
+        tokens: tokens.value,
+        temperature: temperature.value,
+        activeModel: activeModel.value,
+      })
+    );
+  }
+  function loadSettings() {
+    const settings = localStorage.getItem('transformerSettings');
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      tokens.value = parsedSettings.tokens;
+      temperature.value = parsedSettings.temperature;
+      activeModel.value = parsedSettings.activeModel;
+    }
+  }
+
+  watch([tokens, temperature, activeModel], saveSettings, { deep: true });
 
   const createQuill = (selector: string) => {
     const bindings = {
@@ -65,6 +88,9 @@ export const useTransformerStore = defineStore('transformer', () => {
     const keyboard = quill.value.getModule('keyboard');
     for (const key in keyboard.bindings) {
       delete keyboard.bindings[key];
+    }
+    if (localScheme.value) {
+      setScheme(localScheme.value, true);
     }
     setPlaceholder();
     quill.value.focus();
@@ -154,6 +180,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   async function transform() {
     abort();
     const mem = { isAborted: false };
+
     try {
       if (!prompt.value) {
         return;
@@ -237,9 +264,12 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   async function getModels() {
-    const data = await getModelsApi();
-    models.value = data;
-    activeModel.value = data[0];
+    if (!models.value.length) {
+      const data = await getModelsApi();
+      models.value = data;
+      activeModel.value = data[0];
+    }
+    loadSettings();
   }
 
   function setPlaceholder() {
@@ -332,7 +362,8 @@ export const useTransformerStore = defineStore('transformer', () => {
       prompt,
       signal: controller.signal,
       model: activeModel.value,
-      length: length.value,
+      tokens: tokens.value,
+      temperature: temperature.value,
     });
   }
 
@@ -340,18 +371,6 @@ export const useTransformerStore = defineStore('transformer', () => {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
-  }
-
-  function bindDebounceTransform() {
-    debouncedTransform = debounce(transform, interval.value * 1000);
-  }
-
-  function bindDebounceHistory() {
-    debouncedHistory = debounce(updateHistory, historyInterval);
-  }
-
-  function bindDebounceTextChange() {
-    debouncedTextChange = debounce(onTextChange, debounceDelay);
   }
 
   function updateHistory() {
@@ -372,10 +391,21 @@ export const useTransformerStore = defineStore('transformer', () => {
     replies.value = [];
   }
 
+  function setActiveModel(model: string) {
+    activeModel.value = model;
+  }
+
+  function bindDebounceTransform() {
+    debouncedTransform = debounce(transform, interval.value * 1000);
+  }
+
+  watch(isAutocomplete, abort);
+  watch(interval, bindDebounceTransform);
+
   function initialize() {
     bindDebounceTransform();
-    bindDebounceTextChange();
-    bindDebounceHistory();
+    debouncedHistory = debounce(updateHistory, historyInterval);
+    debouncedTextChange = debounce(onTextChange, debounceDelay);
 
     if (quill.value) {
       quill.value.format('color', 'black');
@@ -395,7 +425,8 @@ export const useTransformerStore = defineStore('transformer', () => {
     lastReply,
     replies,
     interval,
-    length,
+    tokens,
+    temperature,
     placeholder,
     localScheme,
     history,
@@ -423,10 +454,8 @@ export const useTransformerStore = defineStore('transformer', () => {
     setCursor,
     setCursorToEnd,
     addWindowUnloadListener,
+    setActiveModel,
     changeModel,
     initialize,
-    bindDebounceTransform,
-    bindDebounceHistory,
-    bindDebounceTextChange,
   };
 });

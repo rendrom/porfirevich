@@ -11,6 +11,7 @@ import { ToastProgrammatic as Toast } from 'buefy';
 import LikeButton from '../components/LikeButton';
 import Transformer from '../components/Transformer/Transformer.vue';
 import TransformerSettings from '../components/TransformerSettings/TransformerSettings.vue';
+import LoadingPage from '../components/LoadingPage.vue';
 import UserItem from '../components/UserItem/UserItem.vue';
 import { useAppStore } from '../store/app';
 import { useTransformerStore } from '@/store/transformerStore';
@@ -22,9 +23,10 @@ import type { Scheme } from '@shared/types/Scheme';
 export default defineComponent({
   name: 'Home',
   components: {
+    UserItem,
     Transformer,
     LikeButton,
-    UserItem,
+    LoadingPage,
     TransformerSettings,
     Share: () =>
       import(/* webpackChunkName: "share" */ '../components/Share/Share.vue'),
@@ -42,7 +44,8 @@ export default defineComponent({
 
     const isSettings = ref(false);
     const isShareModalActive = ref(false);
-    const isLoading = ref(false);
+    const isLoading = ref(true);
+    const error = ref('');
 
     const isShareDisabled = computed(() => {
       return (
@@ -134,30 +137,28 @@ export default defineComponent({
     };
 
     const restore = async (id: string) => {
-      isLoading.value = true;
-      try {
-        const story = await appStore.getStory(id);
-        if (story) {
-          const scheme = JSON.parse(story.content) as Scheme;
-          transformerStore.setScheme(scheme);
-          const replies = scheme.filter((x) => x[1] === 1).map((x) => x[0]);
-          appStore.appendReplies(replies);
-          transformerStore.removeWindowUnloadListener();
-        }
-      } catch (er) {
-        // Handle error
-      } finally {
-        isLoading.value = false;
+      const restoredStory = await appStore.getStory(id);
+      if (restoredStory) {
+        const scheme = JSON.parse(restoredStory.content) as Scheme;
+        transformerStore.setScheme(scheme);
+        const replies = scheme.filter((x) => x[1] === 1).map((x) => x[0]);
+        appStore.appendReplies(replies);
+        transformerStore.removeWindowUnloadListener();
       }
     };
 
-    onMounted(() => {
-      if (props.id) {
-        restore(props.id);
+    onMounted(async () => {
+      isLoading.value = true;
+      try {
+        await transformerStore.getModels();
+        if (props.id) {
+          await restore(props.id);
+        }
+      } catch (er) {
+        error.value = 'Ошибка соединения с сервером';
       }
+      isLoading.value = false;
       watch(() => instance?.proxy.$route, onRouteChange);
-
-      transformerStore.initialize();
     });
 
     return {
@@ -167,6 +168,7 @@ export default defineComponent({
       isSettings,
       isLoading,
       story,
+      error,
       user,
       clean,
       saveStory,

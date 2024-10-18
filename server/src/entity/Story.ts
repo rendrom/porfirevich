@@ -37,6 +37,7 @@ export class Story implements S {
   @OneToMany(() => Violation, (violation: Violation) => violation.story)
   violations!: Violation[];
 
+  // name: 'userid'
   @Column({ type: 'int', nullable: true })
   userId?: number | null;
 
