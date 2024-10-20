@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
-import Quill, { Sources } from 'quill';
-import type Delta from 'quill-delta';
+import Quill, { EmitterSource } from 'quill';
+import Delta from 'quill-delta';
 import debounce from 'debounce';
 import { generateApi, getModelsApi } from '@/api/porfirevich';
 import { PRIMARY_COLOR } from '@/config';
@@ -18,12 +18,11 @@ export const useTransformerStore = defineStore('transformer', () => {
   const isReady = ref(false);
   const isLoading = ref(false);
   const isError = ref(false);
-  const isAutocomplete = ref(false);
   const lastReply = ref('');
   const replies = ref<string[]>([]);
-  const interval = ref(1);
+
   const tokens = ref(150);
-  const temperature = ref(1.0);
+  const temperature = ref(0.3);
   const placeholder = ref('Придумайте начало истории');
   const localScheme = ref<Scheme>([]);
   const abortControllers = ref<AbortController[]>([]);
@@ -32,13 +31,11 @@ export const useTransformerStore = defineStore('transformer', () => {
   const activeModel = ref('');
 
   const handleRequestError = ref(() => {
-    // Implement error handling, e.g., show a notification
     console.error('Request error occurred');
   });
 
   const promptMaxLength = 1000000;
   const historyLength = 2000;
-  const debounceDelay = 10;
   const historyInterval = 300;
 
   function saveSettings() {
@@ -51,6 +48,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       })
     );
   }
+
   function loadSettings() {
     const settings = localStorage.getItem('transformerSettings');
     if (settings) {
@@ -79,14 +77,14 @@ export const useTransformerStore = defineStore('transformer', () => {
   const createQuill = (selector: string) => {
     const bindings = {
       tab: {
-        key: 9,
+        key: 'Tab',
         handler: () => {
           // Handle tab
         },
       },
     };
+
     quill.value = new Quill(selector, {
-      formats: ['bold', 'color'],
       modules: {
         keyboard: { bindings },
         history: {
@@ -95,33 +93,47 @@ export const useTransformerStore = defineStore('transformer', () => {
           userOnly: true,
         },
         toolbar: false,
+        clipboard: {
+          matchVisual: false,
+        },
       },
       placeholder: placeholder.value,
+      formats: ['bold', 'color'],
     });
-    const keyboard = quill.value.getModule('keyboard');
-    for (const key in keyboard.bindings) {
-      delete keyboard.bindings[key];
-    }
-    if (localScheme.value) {
-      setScheme(localScheme.value, true);
-    }
-    setPlaceholder();
-    quill.value.focus();
-    quill.value.on('text-change', (delta, oldDelta, source) => {
-      debouncedTextChange(delta, oldDelta, source);
+
+    quill.value.clipboard.addMatcher(Node.ELEMENT_NODE, (node, delta) => {
+      delta.ops.forEach((op) => {
+        if (op.attributes) {
+          delete op.attributes.color;
+          delete op.attributes.bold;
+        }
+      });
+      return delta;
     });
+
+    const keyboard = quill.value.keyboard;
+    if (keyboard) {
+      keyboard.addBinding({ key: 'Tab' }, () => {
+        // Custom tab handling
+      });
+
+      if (localScheme.value) {
+        setScheme(localScheme.value, true);
+      }
+
+      setPlaceholder();
+      quill.value.focus();
+
+      quill.value.on('text-change', (delta, oldDelta, source) => {
+        onTextChange(delta, oldDelta, source);
+      });
+    }
   };
 
   const prompt = computed(() => {
     return stripHtml(text.value).replace(lastReply.value, '').trimStart();
   });
 
-  let debouncedTextChange: (
-    delta: Delta,
-    oldDelta: Delta,
-    source: Sources
-  ) => void;
-  let debouncedTransform: () => void;
   let debouncedHistory: () => void;
 
   function setQuill(q: Quill) {
@@ -132,7 +144,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     isReady.value = value;
   }
 
-  function onTextChange(delta: Delta, _oldDelta: Delta, source: Sources) {
+  function onTextChange(delta: Delta, _oldDelta: Delta, source: EmitterSource) {
     setContent();
     text.value = quill.value?.getText() || '';
     setPlaceholder();
@@ -145,7 +157,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       let changeIndex = 0;
       let changeLength = 0;
 
-      delta.ops.forEach((op) => {
+      delta.ops?.forEach((op) => {
         if (op.insert) {
           changeLength += typeof op.insert === 'string' ? op.insert.length : 1;
         } else if (op.retain) {
@@ -168,10 +180,6 @@ export const useTransformerStore = defineStore('transformer', () => {
           },
           'api'
         );
-      }
-
-      if (isAutocomplete.value) {
-        debouncedTransform();
       }
     }
 
@@ -408,17 +416,8 @@ export const useTransformerStore = defineStore('transformer', () => {
     activeModel.value = model;
   }
 
-  function bindDebounceTransform() {
-    debouncedTransform = debounce(transform, interval.value * 1000);
-  }
-
-  watch(isAutocomplete, abort);
-  watch(interval, bindDebounceTransform);
-
   function initialize() {
-    bindDebounceTransform();
     debouncedHistory = debounce(updateHistory, historyInterval);
-    debouncedTextChange = debounce(onTextChange, debounceDelay);
 
     if (quill.value) {
       quill.value.format('color', 'black');
@@ -434,10 +433,9 @@ export const useTransformerStore = defineStore('transformer', () => {
     isReady,
     isLoading,
     isError,
-    isAutocomplete,
+
     lastReply,
     replies,
-    interval,
     tokens,
     temperature,
     placeholder,

@@ -1,7 +1,6 @@
 import config from '@shared/config';
 
 import Delta from 'quill-delta';
-import type { DeltaOperation } from 'quill';
 
 import type { SchemeToHtmlOptions } from '../interfaces';
 import type { Scheme } from '@shared/types/Scheme';
@@ -13,8 +12,8 @@ export function deltaToScheme(delta: Delta): Scheme {
 }
 
 export function schemeToDelta(scheme: Scheme): Delta {
-  const ops: DeltaOperation[] = scheme.map((x) => {
-    const op: DeltaOperation = { insert: x[0] };
+  const ops: Delta['ops'] = scheme.map((x) => {
+    const op: Delta['ops'][0] = { insert: x[0] };
     if (x[1]) {
       op.attributes = { bold: true, color: config.primaryColor };
     }
