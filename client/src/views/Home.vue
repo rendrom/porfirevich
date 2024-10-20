@@ -5,7 +5,12 @@
     <div class="save-control columns">
       <div class="column is-1">
         <div class="tools">
-          <b-dropdown class="settings-dropdown" aria-role="menu" trap-focus>
+          <b-dropdown
+            class="settings-dropdown"
+            position="is-bottom-right"
+            aria-role="menu"
+            trap-focus
+          >
             <template #trigger>
               <b-button size="is-small" type icon-left="cog" />
             </template>
