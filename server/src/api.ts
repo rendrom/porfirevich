@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import helmet from 'helmet';
+// import helmet from 'helmet';
 import passport from 'passport';
 
 import routes from './routers';

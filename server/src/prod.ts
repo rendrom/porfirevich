@@ -7,8 +7,9 @@ import { idDef } from './routers/story';
 import { api } from './api';
 import { appConfig } from './appConfig';
 import config from './config';
+import { ormconfig } from '../orm';
 
-createConnection()
+createConnection(ormconfig)
   .then(async () => {
     const app = express();
     appConfig(app);

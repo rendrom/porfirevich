@@ -2,10 +2,8 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 import { createConnection } from 'typeorm';
 
-import ormconfig from '../ormconfig.json';
 import { User } from '../src/entity/User';
-
-import type { ConnectionOptions } from 'typeorm';
+import { ormconfig } from '../orm';
 
 let email: string | null = null;
 // const myArgs = process.argv.slice(2);
@@ -13,7 +11,7 @@ let email: string | null = null;
 // email = myArgs[0];
 
 const setSuperuser = async () => {
-  const connection = await createConnection(ormconfig as ConnectionOptions);
+  const connection = await createConnection(ormconfig);
 
   const response = await prompts({
     type: 'text',

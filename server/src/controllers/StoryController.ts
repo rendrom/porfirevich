@@ -1,5 +1,5 @@
 import { validate } from 'class-validator';
-import { getRepository, LessThan, MoreThan, Repository } from 'typeorm';
+import { getRepository, MoreThan } from 'typeorm';
 
 import { Like } from '../entity/Like';
 import { Story } from '../entity/Story';

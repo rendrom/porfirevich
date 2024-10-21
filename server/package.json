@@ -1,10 +1,11 @@
 {
   "name": "porfirevich-server",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start": "ts-node src/prod.ts",
-    "watch:server": "nodemon -L",
+    "dev": "cross-env NODE_ENV=development ts-node src/prod.ts",
+    "watch:server": "NODE_ENV=development nodemon -L",
     "watch": "npm run watch:server",
     "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run",
     "migration:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -n StoryRefactoring",
@@ -50,6 +51,7 @@
     "bcryptjs": "^2.4.3",
     "concurrently": "^9.0.1",
     "convict": "^6.2.4",
+    "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",

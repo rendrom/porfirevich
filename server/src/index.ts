@@ -3,11 +3,12 @@ import { createConnection } from 'typeorm';
 import { api } from './api';
 import { appConfig } from './appConfig';
 import config from './config';
+import { ormconfig } from '../orm';
 
 import type { Application } from 'express';
 
 export default (app: Application) => {
-  createConnection()
+  createConnection(ormconfig)
     .then(async () => {
       appConfig(app);
       api(app);

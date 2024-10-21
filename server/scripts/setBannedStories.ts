@@ -1,13 +1,12 @@
 import { createConnection } from 'typeorm';
+import { ormconfig } from '../orm';
 
-import ormconfig from '../ormconfig.json';
+
 import { Story } from '../src/entity/Story';
 
-import type { ConnectionOptions } from 'typeorm';
-// import { User } from '../src/entity/User';
 
 const setBannedStories = async () => {
-  const connection = await createConnection(ormconfig as ConnectionOptions);
+  const connection = await createConnection(ormconfig );
   try {
     const rep = connection.getRepository(Story);
     const list = rep

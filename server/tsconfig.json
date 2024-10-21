@@ -20,6 +20,11 @@
       "dom" // for postcard
     ]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "orm.ts"
+  ],
   "exclude": ["node_modules"]
 }

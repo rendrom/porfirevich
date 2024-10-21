@@ -1,6 +1,8 @@
+version: '3.1'
+
 services:
   app:
-    image: porfirevich-front
+    image: porfirevich-front:latest
     build: ./
     depends_on:
       - db
@@ -11,11 +13,9 @@ services:
     ports:
       - 3000:3000
     command: npm start
-
-    working_dir: /app
+    working_dir: /app/server
     volumes:
-      - ./:/app
-
+      - ./media:/app/media
   db:
     image: postgres:14-alpine
     restart: always
