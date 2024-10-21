@@ -23,6 +23,7 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   const tokens = ref(150);
   const temperature = ref(0.3);
+  const isTextSelected = ref(false);
   const placeholder = ref('Придумайте начало истории');
   const localScheme = ref<Scheme>([]);
   const abortControllers = ref<AbortController[]>([]);
@@ -124,8 +125,21 @@ export const useTransformerStore = defineStore('transformer', () => {
       setPlaceholder();
       quill.value.focus();
 
-      quill.value.on('text-change', (delta, oldDelta, source) => {
-        onTextChange(delta, oldDelta, source);
+      quill.value.on('text-change', onTextChange);
+      quill.value.on('selection-change', (range, _, source) => {
+        if (range && range.length > 0) {
+          isTextSelected.value = true;
+        } else {
+          isTextSelected.value = false;
+        }
+        if (source === 'user') {
+          if (range) {
+            if (range.length !== 0) {
+              return;
+            }
+          }
+          resetFormat();
+        }
       });
     }
   };
@@ -144,6 +158,48 @@ export const useTransformerStore = defineStore('transformer', () => {
     isReady.value = value;
   }
 
+  function clearFormatting(delta: Delta) {
+    if (!quill.value) {
+      return;
+    }
+    let changeIndex = 0;
+    let changeLength = 0;
+
+    delta.ops?.forEach((op) => {
+      if (op.insert) {
+        changeLength += typeof op.insert === 'string' ? op.insert.length : 1;
+      } else if (op.retain) {
+        changeIndex += op.retain as number;
+      } else if (op.delete) {
+        changeLength += 1 as number;
+      }
+      if (op.attributes) {
+        op.attributes = {};
+      }
+    });
+
+    if (changeIndex > 0) {
+      quill.value.removeFormat(changeIndex, changeLength);
+      quill.value.formatText(
+        changeIndex,
+        changeLength,
+        {
+          bold: false,
+          italic: false,
+          color: 'black',
+        },
+        'api'
+      );
+    }
+  }
+
+  function resetFormat() {
+    if (quill.value) {
+      quill.value.format('color', 'black');
+      quill.value.format('bold', false);
+    }
+  }
+
   function onTextChange(delta: Delta, _oldDelta: Delta, source: EmitterSource) {
     setContent();
     text.value = quill.value?.getText() || '';
@@ -153,33 +209,11 @@ export const useTransformerStore = defineStore('transformer', () => {
     if (source === 'user') {
       lastReply.value = '';
       replies.value = [];
-
-      let changeIndex = 0;
-      let changeLength = 0;
-
-      delta.ops?.forEach((op) => {
-        if (op.insert) {
-          changeLength += typeof op.insert === 'string' ? op.insert.length : 1;
-        } else if (op.retain) {
-          changeIndex += op.retain as number;
+      if (isTextSelected.value) {
+        if (delta && delta.filter((op) => op.insert !== undefined).length) {
+          clearFormatting(delta);
+          isTextSelected.value = false;
         }
-        if (op.attributes) {
-          op.attributes = {};
-        }
-      });
-
-      if (changeLength > 0 && quill.value) {
-        quill.value.removeFormat(changeIndex, changeLength);
-        quill.value.formatText(
-          changeIndex,
-          changeLength,
-          {
-            bold: false,
-            italic: false,
-            color: 'black',
-          },
-          'api'
-        );
       }
     }
 
@@ -245,7 +279,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       }
     } finally {
       isLoading.value = false;
-      setCursor();
+      setCursorToEnd();
     }
   }
 
@@ -356,6 +390,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   function setCursor() {
+    resetFormat();
     setTimeout(() => {
       quill.value?.focus();
     }, 0);
@@ -363,6 +398,7 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   function setCursorToEnd() {
     if (quill.value) {
+      resetFormat();
       const length = quill.value.getLength();
       quill.value.setSelection(length - 1, 0);
     }
