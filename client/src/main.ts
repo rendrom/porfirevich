@@ -9,6 +9,8 @@ import App from './App.vue';
 import '@mdi/font/css/materialdesignicons.css';
 import './style.scss';
 
+import pkg from '../package.json';
+
 Vue.config.productionTip = false;
 
 Vue.use(PiniaVuePlugin);
@@ -22,3 +24,5 @@ new Vue({
   pinia,
   render: (h) => h(App),
 }).$mount('#app');
+
+console.log(pkg.version);
