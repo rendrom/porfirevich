@@ -23,7 +23,7 @@
     "parchment": "^3.0.0",
     "pinia": "^2.2.4",
     "quill": "^2.0.2",
-    "vue": "^2.7.16",
+    "vue": "^3.0.0",
     "vue-class-component": "^7.2.3",
     "vue-demi": "^0.14.10",
     "vue-html2canvas": "^0.0.4",
