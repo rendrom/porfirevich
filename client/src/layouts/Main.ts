@@ -1,5 +1,5 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router/composables';
+import { useRoute } from 'vue-router/composables';
 import UrlParams from '@nextgis/url-runtime-params';
 import config from '@shared/config';
 import UserService from '../services/UserService';
@@ -14,7 +14,6 @@ const urlParams = new UrlParams();
 export default defineComponent({
   name: 'App',
   setup() {
-    const router = useRouter();
     const route = useRoute();
     const appStore = useAppStore();
 
@@ -44,6 +43,7 @@ export default defineComponent({
         if (ev.key === APP_TOKEN_KEY) {
           const token = ev.newValue;
           if (token) {
+            localStorage.setItem('token', token);
             appStore.setToken(token).then(() => {
               UserService.getUser(token).then((user) => {
                 appStore.setUser(user);

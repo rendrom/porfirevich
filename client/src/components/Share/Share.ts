@@ -16,7 +16,7 @@ export default defineComponent({
     },
   },
   emits: ['update:story'],
-  setup(props, { emit }) {
+  setup(props) {
     const appModule = useAppStore();
     const isError = ref(false);
     const changePublicStatusLoading = ref(false);

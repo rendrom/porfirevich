@@ -64,9 +64,6 @@
             </b-field>
           </b-tooltip>
         </div>
-        <!-- <div class="has-text-grey-light is-size-6 has-text-right">
-          Используйте тег <code>#порфирьевич</code> для социальных сетей
-        </div>-->
       </div>
       <b-notification
         v-if="story.editId && !user"

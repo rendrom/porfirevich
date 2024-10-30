@@ -6,7 +6,6 @@ import {
   watch,
   getCurrentInstance,
 } from 'vue';
-import { ToastProgrammatic as Toast } from 'buefy';
 
 import LikeButton from '../components/LikeButton';
 import Transformer from '../components/Transformer/Transformer.vue';
@@ -16,7 +15,6 @@ import UserItem from '../components/UserItem/UserItem.vue';
 import { useAppStore } from '../store/app';
 import { useTransformerStore } from '@/store/transformerStore';
 import { copyStory } from '../utils/copyToClipboard';
-import { schemeToHtml } from '../utils/schemeUtils';
 
 import type { Scheme } from '@shared/types/Scheme';
 
@@ -40,7 +38,7 @@ export default defineComponent({
   setup(props) {
     const instance = getCurrentInstance();
     const appStore = useAppStore();
-    const transformerStore = useTransformerStore();
+    const transformer = useTransformerStore();
 
     const isSettings = ref(false);
     const isShareModalActive = ref(false);
@@ -49,8 +47,7 @@ export default defineComponent({
 
     const isShareDisabled = computed(() => {
       return (
-        !transformerStore.localScheme.filter((x) => x[0] !== '\n').length ||
-        transformerStore.isLoading
+        !transformer.text.length || transformer.isLoading || isLoading.value
       );
     });
 
@@ -69,10 +66,7 @@ export default defineComponent({
         instance?.proxy.$route.name === 'transformer' &&
         instance.proxy.$route.fullPath === '/'
       ) {
-        setTimeout(() => {
-          transformerStore.clean();
-          clean();
-        }, 20);
+        clean();
       } else {
         restore(instance?.proxy.$route.fullPath.substring(1) || '');
       }
@@ -80,25 +74,16 @@ export default defineComponent({
 
     const saveStory = async () => {
       if (!appStore.story) {
-        const isCorrupted = false;
-        if (isCorrupted) {
-          Toast.open({
-            message:
-              'Обнаружены недопустимые модификации дополнений Порфирьевича. Публикация истории отменена.',
-            type: 'is-danger',
-            position: 'is-bottom',
-          });
-        } else {
-          isShareModalActive.value = true;
-          const story = await appStore.createStory(
-            transformerStore.localScheme
-          );
+        isShareModalActive.value = true;
+        const scheme = transformer.editor?.getContents();
+        if (scheme) {
+          const story = await appStore.createStory(scheme);
           const path = '/' + (story ? story.id : '');
           if (instance?.proxy.$route.path !== path) {
             await pushRoute(path);
           }
-          transformerStore.removeWindowUnloadListener();
         }
+        transformer.removeWindowUnloadListener();
       } else {
         isShareModalActive.value = true;
       }
@@ -113,23 +98,7 @@ export default defineComponent({
     };
 
     const copyToClipboard = () => {
-      copyStory(
-        schemeToHtml(transformerStore.localScheme),
-        'text',
-        story.value
-      );
-    };
-
-    const onTransformerReady = (_val: boolean) => {
-      transformerStore.setIsReady(false);
-      setTimeout(() => {
-        watch(
-          () => transformerStore.localScheme,
-          () => {
-            clean();
-          }
-        );
-      }, 20);
+      copyStory(transformer.editor?.getHtmlStr() || '', 'text', story.value);
     };
 
     const pushRoute = async (path: string) => {
@@ -140,20 +109,30 @@ export default defineComponent({
       const restoredStory = await appStore.getStory(id);
       if (restoredStory) {
         const scheme = JSON.parse(restoredStory.content) as Scheme;
-        transformerStore.setScheme(scheme);
-        const replies = scheme.filter((x) => x[1] === 1).map((x) => x[0]);
-        appStore.appendReplies(replies);
-        transformerStore.removeWindowUnloadListener();
+
+        transformer.setScheme(scheme);
+        transformer.editor?.setCursorToEnd();
+
+        transformer.removeWindowUnloadListener();
       }
     };
 
     onMounted(async () => {
       isLoading.value = true;
       try {
-        await transformerStore.getModels();
-        if (props.id) {
-          await restore(props.id);
-        }
+        await transformer.getModels();
+        const unwatch = watch(
+          () => transformer.isReady,
+          async (val) => {
+            if (val) {
+              unwatch();
+              if (props.id) {
+                await restore(props.id);
+              }
+              watch(() => transformer.text, clean);
+            }
+          }
+        );
       } catch (er) {
         error.value = 'Ошибка соединения с сервером';
       }
@@ -163,7 +142,6 @@ export default defineComponent({
 
     return {
       isShareModalActive,
-      transformerStore,
       isShareDisabled,
       isSettings,
       isLoading,
@@ -173,7 +151,6 @@ export default defineComponent({
       clean,
       saveStory,
       copyToClipboard,
-      onTransformerReady,
     };
   },
 });

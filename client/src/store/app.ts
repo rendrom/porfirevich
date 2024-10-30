@@ -20,7 +20,6 @@ export const useAppStore = defineStore('catalog', {
     user: null as User | null,
     token: null as string | null,
     liked: [] as string[],
-    replies: [] as string[],
     sort: 'random' as SortType,
     filter: 'all' as FilterType,
     period: 'month' as Period,
@@ -62,9 +61,7 @@ export const useAppStore = defineStore('catalog', {
         this.stories.push(story);
       }
     },
-    appendReplies(replies: string[]) {
-      this.replies.push(...replies);
-    },
+
     removeFromStories(story: Story) {
       this.stories = this.stories.filter((x) => x.id !== story.id);
     },

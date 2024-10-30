@@ -49,23 +49,32 @@
 <script lang="ts" src="./Transformer.ts"></script>
 
 <style>
-.ql-editor {
-  min-height: 150px;
+#editorjs {
   white-space: pre-wrap;
+
+  box-sizing: border-box;
+  color: rgb(74, 74, 74);
+  display: block;
+  font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  min-height: 150px;
+  line-break: after-white-space;
+  line-height: 24px;
+
+  overflow-wrap: break-word;
+  text-rendering: optimizelegibility;
+  text-size-adjust: 100%;
+  text-wrap-mode: wrap;
+  unicode-bidi: isolate;
+  white-space-collapse: preserve;
 }
-.ql-editor::before {
-  content: attr(data-placeholder);
-  position: absolute;
-  font-style: italic;
-  color: rgba(0, 0, 0, 0.4);
-  cursor: text;
-}
-.ql-editor,
-.ql-editor:focus {
+
+#editorjs,
+#editorjs:focus {
   outline: none;
-}
-.ql-clipboard {
-  display: none;
 }
 </style>
 

@@ -1,8 +1,8 @@
 <template>
   <div v-if="!isLoading && !error">
-    <Transformer @ready="onTransformerReady" />
+    <Transformer />
 
-    <div class="save-control columns">
+    <div class="save-control columns is-mobile">
       <div class="column is-1">
         <div class="tools">
           <b-dropdown

@@ -1,11 +1,3 @@
-import type D from 'quill-delta';
-
-// export interface Delta {
-//   ops: DeltaOperation[];
-// }
-
-export type Delta = D;
-
 export interface SchemeToHtmlOptions {
   color?: string;
 }

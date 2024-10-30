@@ -39,7 +39,7 @@ export default defineComponent({
     onMounted(() => {
       store.getModels().finally(() => {
         store.initialize();
-        store.createQuill('#editorjs');
+        store.createEditor('#editorjs');
         window.addEventListener('keydown', onKeydown);
       });
     });
