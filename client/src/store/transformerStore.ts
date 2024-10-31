@@ -86,10 +86,11 @@ export const useTransformerStore = defineStore('transformer', () => {
   let debouncedHistory: () => void;
 
   function onTextChange() {
-    text.value = editor.value?.getText() || '';
     setPlaceholder();
     abort();
     cleanLastReply();
+
+    text.value = editor.value?.getText() || '';
 
     debouncedHistory();
 
@@ -126,6 +127,7 @@ export const useTransformerStore = defineStore('transformer', () => {
         const lastBlock = editor.value.insertText(reply, {
           isApi: true,
           isActive: true,
+          silent: true,
         });
         text.value = editor.value.getText();
         lastReply.value = `#${lastBlock.id}`;

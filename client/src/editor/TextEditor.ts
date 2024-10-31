@@ -14,6 +14,7 @@ export class TextEditor {
   private userColor = '#4a4a4a';
   private id = 0;
   private readonly activeTextClass = 'active-text';
+  private observer!: MutationObserver;
 
   constructor(containerId: string, { onTextChange }: TextEditorOptions = {}) {
     this.editor = document.querySelector(containerId) as HTMLElement;
@@ -25,8 +26,20 @@ export class TextEditor {
     this.editor.focus();
   }
 
-  getText(): string {
-    return this.editor.textContent || '';
+  getText(excludeActive = true): string {
+    let str = this.editor.textContent || '';
+    if (excludeActive) {
+      const activeBlocks = this.editor.querySelectorAll(
+        `.${this.activeTextClass}`
+      );
+
+      for (const b of activeBlocks) {
+        if (b.textContent) {
+          str = str.replace(b.textContent, '');
+        }
+      }
+    }
+    return str;
   }
 
   getLength(): number {
@@ -100,15 +113,17 @@ export class TextEditor {
     userInput: string,
     {
       isApi = false,
+      silent = false,
       isActive = false,
-    }: { isApi?: boolean; isActive?: boolean } = {}
+    }: { isApi?: boolean; silent?: boolean; isActive?: boolean } = {}
   ): Element {
+    if (silent) this.disconnectObserver();
+
     const span = this.createTextBlock(userInput, isApi);
     if (isActive) {
       this.removeActiveBlocks();
       span.classList.add(this.activeTextClass);
     }
-
     const lastSpan = Array.from(this.editor.querySelectorAll('span')).pop();
 
     if (
@@ -122,6 +137,8 @@ export class TextEditor {
     } else {
       this.editor.appendChild(span);
     }
+
+    if (silent) this.connectObserver();
 
     return span;
   }
@@ -164,6 +181,18 @@ export class TextEditor {
     }
   }
 
+  private disconnectObserver(): void {
+    this.observer.disconnect();
+  }
+
+  private connectObserver(): void {
+    this.observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
   private onChange() {
     if (this.onTextChange) {
       this.onTextChange();
@@ -174,23 +203,17 @@ export class TextEditor {
     this.editor.contentEditable = 'true';
     this.editor.style.color = this.userColor;
 
-    const observer = new MutationObserver(() => {
+    this.observer = new MutationObserver(() => {
       this.onChange();
     });
-    observer.observe(this.editor, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    // this.editor.addEventListener('input', () => {
-    //   this.onChange();
-    // });
+    this.connectObserver();
 
     this.editor.addEventListener('paste', (e) => {
       e.preventDefault();
       const text = e.clipboardData?.getData('text');
-      if (text) this.insertPlainText(text);
+      if (text) {
+        this.insertPlainText(text);
+      }
     });
 
     this.editor.addEventListener(
@@ -296,6 +319,5 @@ export class TextEditor {
         }
       }
     }
-    // this.onChange();
   }
 }

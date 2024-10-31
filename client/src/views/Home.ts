@@ -89,7 +89,9 @@ export default defineComponent({
       }
     };
 
-    const clean = async () => {
+    const clean = async (old?: string, neq?: string) => {
+      console.log(old, neq);
+
       isShareModalActive.value = false;
       appStore.removeActiveStory();
       if (instance?.proxy.$route.params.id) {
