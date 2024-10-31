@@ -28,6 +28,13 @@
       <div class="column buttons has-text-right">
         <b-button
           type
+          icon-left="backspace-outline"
+          size="is-small"
+          :disabled="isShareDisabled"
+          @click="cleanContent"
+        />
+        <b-button
+          type
           icon-left="content-copy"
           size="is-small"
           :disabled="isShareDisabled"
@@ -46,7 +53,7 @@
     </div>
     <UserItem
       v-if="story && story.user && user && user.isSuperuser"
-      :user="story.user"
+      v-model="story.user"
     />
 
     <b-modal :active.sync="isShareModalActive" :width="620">

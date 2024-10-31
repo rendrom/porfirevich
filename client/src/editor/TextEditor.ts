@@ -29,14 +29,6 @@ export class TextEditor {
     return this.editor.textContent || '';
   }
 
-  deleteText(start: number, end: number, silent = false): void {
-    // this.editor.textContent = '';
-    // deleteText(start, end, this.editor, this.createTextBlock);
-    // if (!silent) {
-    //   this.onChange();
-    // }
-  }
-
   getLength(): number {
     return this.getText().length;
   }
@@ -48,7 +40,7 @@ export class TextEditor {
     }
   }
 
-  clean(isApi = false): void {
+  clean(): void {
     this.editor.innerHTML = '';
   }
 
@@ -73,26 +65,30 @@ export class TextEditor {
       this.editor.appendChild(span);
     });
     if (!isApi) {
-      this.onChange();
+      // this.onChange();
     }
   }
 
   getContents(): Scheme {
     const contents: Scheme = [];
-    this.editor.childNodes.forEach((node) => {
-      if (
-        node.nodeType === Node.TEXT_NODE ||
-        node.nodeType === Node.ELEMENT_NODE
-      ) {
-        const element = node as HTMLElement | CharacterData;
-        const text = element.textContent || '';
-        const type =
-          'getAttribute' in element && element.getAttribute('data-type') === '1'
-            ? 1
-            : 0;
-        contents.push([text, type]);
+
+    const processNode = (node: Node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+
+        if (element.nodeName === 'DIV') {
+          contents.push(['\n', 0]);
+          element.childNodes.forEach(processNode);
+        } else if (element.nodeName === 'SPAN') {
+          const text = element.textContent || '';
+          const type = element.getAttribute('data-type') === '1' ? 1 : 0;
+          contents.push([text, type]);
+        }
       }
-    });
+    };
+
+    this.editor.childNodes.forEach(processNode);
+
     return contents;
   }
 
@@ -112,7 +108,21 @@ export class TextEditor {
       this.removeActiveBlocks();
       span.classList.add(this.activeTextClass);
     }
-    this.editor.appendChild(span);
+
+    const lastSpan = Array.from(this.editor.querySelectorAll('span')).pop();
+
+    if (
+      lastSpan &&
+      lastSpan.childNodes.length === 1 &&
+      lastSpan.firstChild?.nodeName === 'BR'
+    ) {
+      lastSpan.replaceWith(span);
+    } else if (lastSpan) {
+      lastSpan.after(span);
+    } else {
+      this.editor.appendChild(span);
+    }
+
     return span;
   }
 
@@ -164,9 +174,18 @@ export class TextEditor {
     this.editor.contentEditable = 'true';
     this.editor.style.color = this.userColor;
 
-    this.editor.addEventListener('input', () => {
+    const observer = new MutationObserver(() => {
       this.onChange();
     });
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    // this.editor.addEventListener('input', () => {
+    //   this.onChange();
+    // });
 
     this.editor.addEventListener('paste', (e) => {
       e.preventDefault();
@@ -277,6 +296,6 @@ export class TextEditor {
         }
       }
     }
-    this.onChange();
+    // this.onChange();
   }
 }

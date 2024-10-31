@@ -1,11 +1,14 @@
 {
   "name": "porfirevich-web",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "scripts": {
     "client": "cd ./client && npm start",
     "server": "cd ./server && npm start",
     "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "server-watch": "cd ./server && npm run watch",
+    "client-watch": "cd ./client && npm run watch",
+    "watch": "concurrently \"npm run server-watch\" \"npm run client-watch\"",
     "start": "npm run server",
     "lint": "eslint --fix"
   },

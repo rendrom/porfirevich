@@ -47,7 +47,7 @@ export default defineComponent({
 
     const isShareDisabled = computed(() => {
       return (
-        !transformer.text.length || transformer.isLoading || isLoading.value
+        !transformer.scheme.length || transformer.isLoading || isLoading.value
       );
     });
 
@@ -97,6 +97,10 @@ export default defineComponent({
       }
     };
 
+    const cleanContent = async () => {
+      transformer.clean();
+    };
+
     const copyToClipboard = () => {
       copyStory(transformer.editor?.getHtmlStr() || '', 'text', story.value);
     };
@@ -129,7 +133,7 @@ export default defineComponent({
               if (props.id) {
                 await restore(props.id);
               }
-              watch(() => transformer.text, clean);
+              watch(() => transformer.scheme, clean);
             }
           }
         );
@@ -150,6 +154,7 @@ export default defineComponent({
       user,
       clean,
       saveStory,
+      cleanContent,
       copyToClipboard,
     };
   },

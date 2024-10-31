@@ -1,6 +1,6 @@
 {
   "name": "porfirevich-frontend",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "description": "Frontend for Porfirevich project",
   "main": "src/main.ts",
@@ -27,10 +27,7 @@
     "vue-demi": "^0.14.10",
     "vue-html2canvas": "^0.0.4",
     "vue-property-decorator": "^9.0.0",
-    "vue-router": "^3.6.5",
-    "vuex": "^3.5.1",
-    "vuex-class": "^0.3.2",
-    "vuex-module-decorators": "^1.0.1"
+    "vue-router": "^3.6.5"
   },
   "devDependencies": {
     "@babel/core": "^7.24.6",

@@ -1,26 +1,42 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-
+import { defineComponent, ref, computed } from 'vue';
 import type { User } from '@shared/types/User';
-
 import UserService from '@/services/UserService';
 
-@Component
-export default class UserItem extends Vue {
-  @Prop({ type: Object }) readonly user!: User;
+export default defineComponent({
+  name: 'UserItem',
+  props: {
+    user: {
+      type: Object as () => User,
+      required: true,
+    },
+  },
+  emits: ['update:user'],
+  setup(props, { emit }) {
+    const isBanLoading = ref(false);
 
-  isBanLoading = false;
+    const isBanned = computed({
+      get: () => props.user.isBanned,
+      set: (value: boolean) =>
+        emit('update:user', { ...props.user, isBanned: value }),
+    });
 
-  async onBanBtnClick() {
-    this.isBanLoading = true;
-    try {
-      await UserService.edit(String(this.user.id), {
-        isBanned: !this.user.isBanned,
-      });
-      this.user.isBanned = !this.user.isBanned;
-    } catch (er) {
-      console.log(er);
-    }
+    const onBanBtnClick = async () => {
+      isBanLoading.value = true;
+      try {
+        await UserService.edit(String(props.user.id), {
+          isBanned: !isBanned.value,
+        });
+        isBanned.value = !isBanned.value;
+      } catch (er) {
+        console.log(er);
+      }
+      isBanLoading.value = false;
+    };
 
-    this.isBanLoading = false;
-  }
-}
+    return {
+      isBanLoading,
+      isBanned,
+      onBanBtnClick,
+    };
+  },
+});

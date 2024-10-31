@@ -8,7 +8,7 @@ import type { Scheme } from '@shared/types/Scheme';
 
 export const useTransformerStore = defineStore('transformer', () => {
   const editor = ref<TextEditor>();
-  const text = ref('');
+  const scheme = ref<Scheme>([]);
   const isReady = ref(false);
   const isLoading = ref(false);
   const isError = ref(false);
@@ -76,7 +76,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       lastReply.value && editor.value
         ? editor.value.getBlockText(lastReply.value)
         : null;
-    let str = text.value;
+    let str = scheme.value ? editor.value?.getText() || '' : '';
     if (lastReplyText) {
       str = str.replace(lastReplyText, '').trimStart();
     }
@@ -86,14 +86,14 @@ export const useTransformerStore = defineStore('transformer', () => {
   let debouncedHistory: () => void;
 
   function onTextChange() {
-    text.value = editor.value?.getText() || '';
+    scheme.value = editor.value?.getContents() || [];
     setPlaceholder();
     abort();
     cleanLastReply();
 
     debouncedHistory();
 
-    if (text.value.trim().length) {
+    if (scheme.value.length) {
       addWindowUnloadListener();
     } else {
       removeWindowUnloadListener();
@@ -127,7 +127,9 @@ export const useTransformerStore = defineStore('transformer', () => {
           isApi: true,
           isActive: true,
         });
+        scheme.value = editor.value.getContents();
         lastReply.value = `#${lastBlock.id}`;
+        debouncedHistory();
 
         replies.value = currentReplies;
       }
@@ -204,10 +206,10 @@ export const useTransformerStore = defineStore('transformer', () => {
       'Вы действительно хотите покинуть страницу? История будет утеряна.';
   }
 
-  function setScheme(scheme: Scheme, cursorToEnd = false) {
+  function setScheme(newScheme: Scheme, cursorToEnd = false) {
     if (editor.value) {
-      editor.value.setContents(scheme);
-      text.value = editor.value.getText();
+      editor.value.setContents(newScheme);
+      scheme.value = editor.value.getContents();
       if (cursorToEnd) {
         setCursorToEnd();
       } else {
@@ -218,9 +220,9 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   function clean() {
     abort();
-    text.value = '';
     removeWindowUnloadListener();
-    editor.value?.clean(true);
+    editor.value?.clean();
+    scheme.value = [];
   }
 
   function deleteLastReply() {
@@ -298,7 +300,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   return {
-    text,
+    scheme,
     prompt,
     models,
     editor,
