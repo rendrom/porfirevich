@@ -8,7 +8,7 @@ import type { Scheme } from '@shared/types/Scheme';
 
 export const useTransformerStore = defineStore('transformer', () => {
   const editor = ref<TextEditor>();
-  const scheme = ref<Scheme>([]);
+  const text = ref('');
   const isReady = ref(false);
   const isLoading = ref(false);
   const isError = ref(false);
@@ -76,7 +76,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       lastReply.value && editor.value
         ? editor.value.getBlockText(lastReply.value)
         : null;
-    let str = scheme.value ? editor.value?.getText() || '' : '';
+    let str = text.value;
     if (lastReplyText) {
       str = str.replace(lastReplyText, '').trimStart();
     }
@@ -86,14 +86,14 @@ export const useTransformerStore = defineStore('transformer', () => {
   let debouncedHistory: () => void;
 
   function onTextChange() {
-    scheme.value = editor.value?.getContents() || [];
+    text.value = editor.value?.getText() || '';
     setPlaceholder();
     abort();
     cleanLastReply();
 
     debouncedHistory();
 
-    if (scheme.value.length) {
+    if (text.value.trim().length) {
       addWindowUnloadListener();
     } else {
       removeWindowUnloadListener();
@@ -127,7 +127,7 @@ export const useTransformerStore = defineStore('transformer', () => {
           isApi: true,
           isActive: true,
         });
-        scheme.value = editor.value.getContents();
+        text.value = editor.value.getText();
         lastReply.value = `#${lastBlock.id}`;
         debouncedHistory();
 
@@ -209,7 +209,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   function setScheme(newScheme: Scheme, cursorToEnd = false) {
     if (editor.value) {
       editor.value.setContents(newScheme);
-      scheme.value = editor.value.getContents();
+      text.value = editor.value.getText();
       if (cursorToEnd) {
         setCursorToEnd();
       } else {
@@ -222,7 +222,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     abort();
     removeWindowUnloadListener();
     editor.value?.clean();
-    scheme.value = [];
+    text.value = '';
   }
 
   function deleteLastReply() {
@@ -300,7 +300,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   return {
-    scheme,
+    text,
     prompt,
     models,
     editor,

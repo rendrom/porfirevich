@@ -47,7 +47,7 @@ export default defineComponent({
 
     const isShareDisabled = computed(() => {
       return (
-        !transformer.scheme.length || transformer.isLoading || isLoading.value
+        !transformer.text.length || transformer.isLoading || isLoading.value
       );
     });
 
@@ -133,7 +133,7 @@ export default defineComponent({
               if (props.id) {
                 await restore(props.id);
               }
-              watch(() => transformer.scheme, clean);
+              watch(() => transformer.text, clean);
             }
           }
         );
