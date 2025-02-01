@@ -15,6 +15,7 @@ export class TextEditor {
   private id = 0;
   private readonly activeTextClass = 'active-text';
   private observer!: MutationObserver;
+  private isComposing = false; // Flag to track text composition (important for mobile keyboards)
 
   constructor(containerId: string, { onTextChange }: TextEditorOptions = {}) {
     this.editor = document.querySelector(containerId) as HTMLElement;
@@ -32,7 +33,6 @@ export class TextEditor {
       const activeBlocks = this.editor.querySelectorAll(
         `.${this.activeTextClass}`
       );
-
       for (const b of activeBlocks) {
         if (b.textContent) {
           str = str.replace(b.textContent, '');
@@ -40,6 +40,18 @@ export class TextEditor {
       }
     }
     return str;
+  }
+
+  getTextBeforeSelection(): string {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return '';
+    }
+    const range = selection.getRangeAt(0);
+    const preRange = document.createRange();
+    preRange.selectNodeContents(this.editor);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    return preRange.toString();
   }
 
   getLength(): number {
@@ -77,9 +89,6 @@ export class TextEditor {
       const span = this.createTextBlock(text, type === 1);
       this.editor.appendChild(span);
     });
-    if (!isApi) {
-      // this.onChange();
-    }
   }
 
   getContents(): Scheme {
@@ -88,7 +97,6 @@ export class TextEditor {
     const processNode = (node: Node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as HTMLElement;
-
         if (element.nodeName === 'DIV') {
           contents.push(['\n', 0]);
           element.childNodes.forEach(processNode);
@@ -101,7 +109,6 @@ export class TextEditor {
     };
 
     this.editor.childNodes.forEach(processNode);
-
     return contents;
   }
 
@@ -115,7 +122,13 @@ export class TextEditor {
       isApi = false,
       silent = false,
       isActive = false,
-    }: { isApi?: boolean; silent?: boolean; isActive?: boolean } = {}
+      atCurrentSelection = false, // If true, insert at the current cursor position
+    }: {
+      isApi?: boolean;
+      silent?: boolean;
+      isActive?: boolean;
+      atCurrentSelection?: boolean;
+    } = {}
   ): Element {
     if (silent) this.disconnectObserver();
 
@@ -124,19 +137,33 @@ export class TextEditor {
       this.removeActiveBlocks();
       span.classList.add(this.activeTextClass);
     }
-    const lastSpan = Array.from(this.editor.querySelectorAll('span')).pop();
 
-    if (
-      lastSpan &&
-      lastSpan.childNodes.length === 1 &&
-      lastSpan.firstChild?.nodeName === 'BR'
-    ) {
-      lastSpan.replaceWith(span);
-    } else if (lastSpan) {
-      lastSpan.after(span);
+    if (atCurrentSelection) {
+      // Get the current selection range and insert the new span there.
+      const { range } = this.currentSelection();
+      if (range) {
+        range.insertNode(span);
+      } else {
+        this.editor.appendChild(span);
+      }
     } else {
-      this.editor.appendChild(span);
+      const lastSpan = Array.from(this.editor.querySelectorAll('span')).pop();
+      // If the last span contains only a <br>, replace it; otherwise, insert after it.
+      if (lastSpan) {
+        if (
+          lastSpan.childNodes.length === 1 &&
+          lastSpan.firstChild?.nodeName === 'BR'
+        ) {
+          lastSpan.replaceWith(span);
+        } else {
+          lastSpan.after(span);
+        }
+      } else {
+        this.editor.appendChild(span);
+      }
     }
+
+    this.setCursorAfter(span);
 
     if (silent) this.connectObserver();
 
@@ -155,7 +182,6 @@ export class TextEditor {
       const newRange = document.createRange();
       newRange.setStartAfter(node);
       newRange.collapse(true);
-
       selection.removeAllRanges();
       selection.addRange(newRange);
     }
@@ -168,7 +194,6 @@ export class TextEditor {
 
   removeActiveBlocks() {
     const blocks = this.editor.querySelectorAll(`.${this.activeTextClass}`);
-
     for (const b of blocks) {
       b.classList.remove(this.activeTextClass);
     }
@@ -203,6 +228,12 @@ export class TextEditor {
     this.editor.contentEditable = 'true';
     this.editor.style.color = this.userColor;
 
+    // Add mobile-friendly attributes
+    this.editor.setAttribute('inputmode', 'text');
+    this.editor.setAttribute('autocorrect', 'off');
+    this.editor.setAttribute('autocomplete', 'off');
+    this.editor.setAttribute('spellcheck', 'false');
+
     this.observer = new MutationObserver(() => {
       this.onChange();
     });
@@ -214,12 +245,33 @@ export class TextEditor {
       if (text) {
         this.insertPlainText(text);
       }
+      this.focus();
     });
 
+    // Prevent native insertion so that all input is wrapped in our custom span blocks
     this.editor.addEventListener(
       'beforeinput',
       this.handleBeforeInput.bind(this)
     );
+
+    // Handle composition events (for mobile keyboards)
+    this.editor.addEventListener('compositionstart', () => {
+      this.isComposing = true;
+    });
+    this.editor.addEventListener('compositionend', (e: CompositionEvent) => {
+      this.isComposing = false;
+      if (e.data) {
+        // Insert composed text manually once composition ends
+        this.insertPlainText(e.data);
+      }
+    });
+
+    // On mobile touch, ensure the editor is focused
+    this.editor.addEventListener('touchstart', () => {
+      if (document.activeElement !== this.editor) {
+        this.focus();
+      }
+    });
   }
 
   private currentSelection() {
@@ -230,11 +282,10 @@ export class TextEditor {
 
     const range = selection.getRangeAt(0);
     const currentNode = range.startContainer;
-
     const parentElement =
       currentNode.nodeType === Node.TEXT_NODE
         ? currentNode.parentElement
-        : currentNode;
+        : (currentNode as HTMLElement);
 
     const isApi =
       parentElement &&
@@ -245,13 +296,12 @@ export class TextEditor {
   }
 
   private handleBeforeInput(e: InputEvent): void {
-    if (e.data) {
-      const { isApi, parentElement } = this.currentSelection();
+    // If a composition is in progress, let compositionend handle the input
+    if (this.isComposing) return;
 
-      if (isApi || parentElement === this.editor) {
-        e.preventDefault();
-        this.insertPlainText(e.data);
-      }
+    if (e.inputType && e.inputType.startsWith('insert') && e.data) {
+      e.preventDefault();
+      this.insertPlainText(e.data);
     }
   }
 
@@ -275,7 +325,6 @@ export class TextEditor {
     offset: number;
   }): void {
     const fullText = parentElement.textContent || '';
-
     const textBeforeCursor = fullText.slice(0, offset);
     const textAfterCursor = fullText.slice(offset);
 
@@ -292,8 +341,14 @@ export class TextEditor {
       parentElement.parentNode?.insertBefore(secondBlueSpan, parentElement);
     }
     parentElement.parentNode?.removeChild(parentElement);
-
     this.setCursorAfter(userInputSpan);
+  }
+
+  private deleteSelection() {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
   }
 
   private insertPlainText(text: string): void {
@@ -301,23 +356,34 @@ export class TextEditor {
     if (!selection || !range || !parentElement) {
       const span = this.createTextBlock(text);
       this.editor.appendChild(span);
+      this.setCursorAfter(span);
     } else {
-      // this.deleteText(startCharacter, endCharacter, true);
-      if (isApi) {
+      // Delete any currently selected content
+      this.deleteSelection();
+      if (parentElement.classList.contains(this.activeTextClass)) {
+        // If the current block is active, insert a new user text block immediately after it
+        // to preserve the active block without appending user text inside it.
+        const span = this.createTextBlock(text, false);
+        parentElement.parentNode?.insertBefore(span, parentElement.nextSibling);
+        this.setCursorAfter(span);
+      } else if (isApi) {
+        // If insertion is inside an API block, split the block so that the new text is user styled
         this.splitApiBlock({ parentElement, text, offset: range.startOffset });
       } else {
-        const span = this.createTextBlock(text);
+        // Otherwise, insert a new span with user styling
+        const span = this.createTextBlock(text, false);
         range.insertNode(span);
+        // Update the selection: place the cursor after the inserted node
         range.selectNodeContents(span);
-
         range.collapse(false);
-
         const newSelection = window.getSelection();
         if (newSelection) {
           newSelection.removeAllRanges();
           newSelection.addRange(range);
         }
+        this.setCursorAfter(span);
       }
     }
+    this.focus();
   }
 }

@@ -71,17 +71,17 @@ export const useTransformerStore = defineStore('transformer', () => {
     isReady.value = true;
   };
 
-  const prompt = computed(() => {
+  const getPrompt = () => {
     const lastReplyText =
       lastReply.value && editor.value
         ? editor.value.getBlockText(lastReply.value)
         : null;
-    let str = text.value;
+    let str = editor.value?.getTextBeforeSelection() || '';
     if (lastReplyText) {
       str = str.replace(lastReplyText, '').trimStart();
     }
     return str.trimStart();
-  });
+  };
 
   let debouncedHistory: () => void;
 
@@ -108,9 +108,9 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   async function transform() {
     abort();
-
     try {
-      if (!prompt.value) {
+      const prompt = getPrompt();
+      if (!prompt) {
         return;
       }
       isLoading.value = true;
@@ -118,7 +118,7 @@ export const useTransformerStore = defineStore('transformer', () => {
       if (replies.value.length) {
         currentReplies = replies.value;
       } else {
-        const data = await request(prompt.value);
+        const data = await request(prompt);
         currentReplies = data && data.replies;
       }
       if (currentReplies && editor.value) {
@@ -128,6 +128,7 @@ export const useTransformerStore = defineStore('transformer', () => {
           isApi: true,
           isActive: true,
           silent: true,
+          atCurrentSelection: true,
         });
         text.value = editor.value.getText();
         lastReply.value = `#${lastBlock.id}`;
@@ -142,7 +143,6 @@ export const useTransformerStore = defineStore('transformer', () => {
       }
     } finally {
       isLoading.value = false;
-      setCursorToEnd();
     }
   }
 
@@ -161,12 +161,12 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   function escape() {
+    cleanLastReply();
+
     if (isLoading.value) {
       abort();
     } else if (history.value.length) {
       historyBack();
-    } else if (lastReply) {
-      deleteLastReply();
     } else {
       clean();
     }
@@ -176,10 +176,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     if (isLoading.value) {
       abort();
     }
-    if (lastReply.value) {
-      lastReply.value = '';
-      editor.value?.removeActiveBlocks();
-    }
+    cleanLastReply();
   }
 
   async function getModels() {
