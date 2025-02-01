@@ -260,10 +260,6 @@ export class TextEditor {
     });
     this.editor.addEventListener('compositionend', (e: CompositionEvent) => {
       this.isComposing = false;
-      if (e.data) {
-        // Insert composed text manually once composition ends
-        this.insertPlainText(e.data);
-      }
     });
 
     // On mobile touch, ensure the editor is focused
