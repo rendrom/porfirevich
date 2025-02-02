@@ -77,8 +77,8 @@ export default defineComponent({
         isShareModalActive.value = true;
         const scheme = transformer.editor?.getContents();
         if (scheme) {
-          const story = await appStore.createStory(scheme);
-          const path = '/' + (story ? story.id : '');
+          const newStory = await appStore.createStory(scheme);
+          const path = '/' + (newStory ? newStory.id : '');
           if (instance?.proxy.$route.path !== path) {
             await pushRoute(path);
           }
@@ -89,9 +89,7 @@ export default defineComponent({
       }
     };
 
-    const clean = async (old?: string, neq?: string) => {
-      console.log(old, neq);
-
+    const clean = async () => {
       isShareModalActive.value = false;
       appStore.removeActiveStory();
       if (instance?.proxy.$route.params.id) {

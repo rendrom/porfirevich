@@ -19,6 +19,7 @@ interface DomScreenshotOptions {
 
 export async function postcard(story: Story) {
   const browser = await puppeteer.launch({
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     ignoreDefaultArgs: ['--disable-extensions'],
   });
