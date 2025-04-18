@@ -190,7 +190,7 @@ export class TextEditor {
   removeActiveBlocks() {
     const blocks = this.editor.querySelectorAll(`.${this.activeTextClass}`);
     for (const b of blocks) {
-      b.classList.remove(this.activeTextClass);
+      // b.classList.remove(this.activeTextClass);
     }
   }
 
@@ -199,6 +199,32 @@ export class TextEditor {
     for (const b of blocks) {
       b.parentElement?.removeChild(b);
     }
+  }
+
+  private setCursorToEndOfBlock(block: HTMLElement): void {
+    const range = document.createRange();
+
+    range.selectNodeContents(block);
+
+    range.collapse(false);
+
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  private isApiBlock(el: Node | null): el is HTMLElement {
+    return el instanceof HTMLElement && el.getAttribute('data-type') === '1';
+  }
+
+  private isUserBlock(el: Node | null): el is HTMLElement {
+    return el instanceof HTMLElement && el.getAttribute('data-type') === '0';
+  }
+  private isDataBlock(el: HTMLElement): el is HTMLElement {
+    const type = el instanceof HTMLElement && el.getAttribute('data-type');
+    return type === '0' || type === '1';
   }
 
   private disconnectObserver(): void {
@@ -220,6 +246,10 @@ export class TextEditor {
   }
 
   private initializeEditor(): void {
+    if (!this.editor) {
+      throw new Error('Editor element not found');
+    }
+
     this.editor.contentEditable = 'true';
     this.editor.style.color = this.userColor;
 
@@ -264,24 +294,41 @@ export class TextEditor {
       }
     });
   }
-
-  private currentSelection() {
+  private currentSelection(): {
+    selection: Selection | null;
+    range: Range | null;
+    isApi: boolean;
+    parentElement: HTMLElement | null;
+  } {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
-      return { isApi: false, selection };
+      return {
+        selection: null,
+        range: null,
+        isApi: false,
+        parentElement: null,
+      };
     }
 
     const range = selection.getRangeAt(0);
-    const currentNode = range.startContainer;
-    const parentElement =
-      currentNode.nodeType === Node.TEXT_NODE
-        ? currentNode.parentElement
-        : (currentNode as HTMLElement);
 
-    const isApi =
-      parentElement &&
-      parentElement instanceof HTMLElement &&
-      parentElement.getAttribute('data-type') === '1';
+    if (!this.editor.contains(range.startContainer)) {
+      selection.removeAllRanges();
+      return {
+        selection: null,
+        range: null,
+        isApi: false,
+        parentElement: null,
+      };
+    }
+
+    const node = range.startContainer;
+    const parentElement =
+      node.nodeType === Node.TEXT_NODE
+        ? node.parentElement
+        : (node as HTMLElement);
+
+    const isApi = this.isApiBlock(parentElement);
 
     return { selection, range, isApi, parentElement };
   }
@@ -306,34 +353,70 @@ export class TextEditor {
     return block;
   }
 
-  private splitApiBlock({
+  private splitBlock({
+    text,
+    parentElement,
+    offset,
+    newIsApi,
+    oldIsApi,
+  }: {
+    text: string;
+    parentElement: HTMLElement;
+    offset: number;
+    oldIsApi?: boolean;
+    newIsApi?: boolean;
+  }): HTMLElement {
+    const fullText = parentElement.textContent || '';
+    const beforeText = fullText.slice(0, offset);
+    const afterText = fullText.slice(offset);
+
+    if (beforeText) {
+      const beforeSpan = this.createTextBlock(beforeText, oldIsApi);
+      parentElement.parentNode?.insertBefore(beforeSpan, parentElement);
+    }
+
+    const newSpan = this.createTextBlock(text, newIsApi);
+    parentElement.parentNode?.insertBefore(newSpan, parentElement);
+
+    if (afterText) {
+      const afterSpan = this.createTextBlock(afterText, oldIsApi);
+      parentElement.parentNode?.insertBefore(afterSpan, parentElement);
+    }
+
+    parentElement.remove();
+    this.setCursorAfter(newSpan);
+    return newSpan;
+  }
+
+  private insertSameInput({
     text,
     parentElement,
     offset,
   }: {
     text: string;
-    parentElement: Node;
+    parentElement: HTMLElement;
     offset: number;
-  }): HTMLElement {
-    const fullText = parentElement.textContent || '';
-    const textBeforeCursor = fullText.slice(0, offset);
-    const textAfterCursor = fullText.slice(offset);
+  }) {
+    const node = parentElement.firstChild as Text;
+    const fullText = node?.nodeValue ?? '';
+    const before = fullText.slice(0, offset);
+    const after = fullText.slice(offset);
+    const newText = before + text + after;
+    parentElement.textContent = newText;
 
-    if (textBeforeCursor) {
-      const firstBlueSpan = this.createTextBlock(textBeforeCursor, true);
-      parentElement.parentNode?.insertBefore(firstBlueSpan, parentElement);
+    const range = document.createRange();
+    const sel = window.getSelection();
+    const newOffset = offset + text.length;
+
+    if (parentElement.firstChild instanceof Text) {
+      range.setStart(parentElement.firstChild, newOffset);
+    } else {
+      range.selectNodeContents(parentElement);
+      range.collapse(false);
     }
-
-    const userInputSpan = this.createTextBlock(text);
-    parentElement.parentNode?.insertBefore(userInputSpan, parentElement);
-
-    if (textAfterCursor) {
-      const secondBlueSpan = this.createTextBlock(textAfterCursor, true);
-      parentElement.parentNode?.insertBefore(secondBlueSpan, parentElement);
-    }
-    parentElement.parentNode?.removeChild(parentElement);
-    this.setCursorAfter(userInputSpan);
-    return userInputSpan;
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    return parentElement;
   }
 
   private deleteSelection() {
@@ -346,41 +429,40 @@ export class TextEditor {
   private insertPlainText(text: string, fromApi = false): HTMLElement {
     const { selection, range, isApi, parentElement } = this.currentSelection();
     let span: HTMLElement;
+
     if (!selection || !range || !parentElement) {
       span = this.createTextBlock(text, fromApi);
       this.editor.appendChild(span);
       this.setCursorAfter(span);
     } else {
-      // Delete any currently selected content
       this.deleteSelection();
-      if (parentElement.classList.contains(this.activeTextClass)) {
-        // If the current block is active, insert a new user text block immediately after it
-        // to preserve the active block without appending user text inside it.
-        span = this.createTextBlock(text, fromApi);
-        parentElement.parentNode?.insertBefore(span, parentElement.nextSibling);
-        this.setCursorAfter(span);
-      } else if (isApi) {
-        // If insertion is inside an API block, split the block so that the new text is user styled
-        span = this.splitApiBlock({
-          parentElement,
-          text,
-          offset: range.startOffset,
-        });
+
+      if (this.isDataBlock(parentElement)) {
+        if (
+          (!fromApi && this.isUserBlock(parentElement)) ||
+          (fromApi && this.isApiBlock(parentElement))
+        ) {
+          span = this.insertSameInput({
+            text,
+            parentElement,
+            offset: range.startOffset,
+          });
+        } else {
+          span = this.splitBlock({
+            text,
+            parentElement,
+            offset: range.startOffset,
+            newIsApi: fromApi,
+            oldIsApi: isApi,
+          });
+        }
       } else {
-        // Otherwise, insert a new span with user styling
         span = this.createTextBlock(text, fromApi);
         range.insertNode(span);
-        // Update the selection: place the cursor after the inserted node
-        range.selectNodeContents(span);
-        range.collapse(false);
-        const newSelection = window.getSelection();
-        if (newSelection) {
-          newSelection.removeAllRanges();
-          newSelection.addRange(range);
-        }
-        this.setCursorAfter(span);
+        this.setCursorToEndOfBlock(span);
       }
     }
+
     this.focus();
     return span;
   }
