@@ -45,9 +45,16 @@ export class TextEditor {
   getTextBeforeSelection(): string {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
-      return '';
+      return this.editor.textContent || '';
     }
+
     const range = selection.getRangeAt(0);
+
+    // if the caret isn’t inside our editor, return the full editor text
+    if (!this.editor.contains(range.startContainer)) {
+      return this.editor.textContent || '';
+    }
+
     const preRange = document.createRange();
     preRange.selectNodeContents(this.editor);
     preRange.setEnd(range.startContainer, range.startOffset);
