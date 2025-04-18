@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import debounce from 'debounce';
 import { generateApi, getModelsApi } from '@/api/porfirevich';
 import { TextEditor } from '@/editor/TextEditor';

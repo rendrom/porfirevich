@@ -190,7 +190,7 @@ export class TextEditor {
   removeActiveBlocks() {
     const blocks = this.editor.querySelectorAll(`.${this.activeTextClass}`);
     for (const b of blocks) {
-      // b.classList.remove(this.activeTextClass);
+      b.classList.remove(this.activeTextClass);
     }
   }
 
