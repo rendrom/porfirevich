@@ -1,13 +1,13 @@
+import { randomUUID } from 'node:crypto';
+
 import { validate } from 'class-validator';
 import passport from 'passport';
+import type { IOAuth2StrategyOption } from 'passport-google-oauth';
 import { OAuth2Strategy } from 'passport-google-oauth';
-import shortid from 'shortid';
 import { getRepository } from 'typeorm';
 
 import config from '../config';
 import { User } from '../entity/User';
-
-import type { IOAuth2StrategyOption } from 'passport-google-oauth';
 
 const clientID = config.get('auth.google.clientId');
 const clientSecret = config.get('auth.google.clientSecret');
@@ -53,7 +53,7 @@ if (passportConfig.clientID) {
             user = new User();
             user.username = profile.displayName;
             user.uid = profile.id;
-            user.password = shortid.generate();
+            user.password = randomUUID();
             user.provider = 'google';
             const photo =
               profile.photos && profile.photos[0] && profile.photos[0].value;

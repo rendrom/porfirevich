@@ -1,7 +1,6 @@
-import { PRIMARY_COLOR } from '@/config';
 import { Scheme } from '@shared/types/Scheme';
 
-import './TextEditor.scss';
+import './TextEditor.css';
 
 interface TextEditorOptions {
   onTextChange?: () => void;
@@ -10,8 +9,6 @@ interface TextEditorOptions {
 export class TextEditor {
   private editor: HTMLElement;
   private onTextChange?: () => void;
-  private apiColor = PRIMARY_COLOR;
-  private userColor = '#4a4a4a';
   private id = 0;
   private readonly activeTextClass = 'active-text';
   private observer!: MutationObserver;
@@ -78,19 +75,9 @@ export class TextEditor {
 
   setPlaceHolder(val: string): void {
     this.editor.setAttribute('data-placeholder', val);
-    this.editor.addEventListener('focus', () => {
-      if (this.editor.textContent === val) {
-        this.editor.textContent = '';
-      }
-    });
-    this.editor.addEventListener('blur', () => {
-      if (this.editor.textContent === '') {
-        this.editor.textContent = val;
-      }
-    });
   }
 
-  setContents(scheme: Scheme, isApi = true): void {
+  setContents(scheme: Scheme): void {
     this.clean();
     scheme.forEach(([text, type]) => {
       const span = this.createTextBlock(text, type === 1);
@@ -258,7 +245,6 @@ export class TextEditor {
     }
 
     this.editor.contentEditable = 'true';
-    this.editor.style.color = this.userColor;
 
     // Add mobile-friendly attributes
     this.editor.setAttribute('inputmode', 'text');
@@ -354,8 +340,6 @@ export class TextEditor {
     const block = document.createElement('span');
     block.id = `tb-${this.id++}`;
     block.textContent = text;
-    block.style.color = isApi ? this.apiColor : this.userColor;
-    block.style.fontWeight = isApi ? 'bold' : 'normal';
     block.setAttribute('data-type', isApi ? '1' : '0');
     return block;
   }

@@ -335,8 +335,8 @@ export default class StoryController {
       user = await userReposytory.findOne(userId);
     }
     const isSuperuser = user && user.isSuperuser;
-    const isOwner = user && story.userId !== user.id;
-    if (!user && !isSuperuser && !isOwner) {
+    const isOwner = user && story.userId === user.id;
+    if (!isSuperuser && !isOwner) {
       res.status(403).send('Not permitted');
       return;
     }

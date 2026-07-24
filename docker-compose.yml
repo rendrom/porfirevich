@@ -1,40 +1,51 @@
-version: '3.1'
+name: porfirevich
 
 services:
   app:
-    image: porfirevich-front:latest
-    build: ./
+    image: porfirevich:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
     depends_on:
-      - db
-    env_file: 
+      db:
+        condition: service_healthy
+    env_file:
       - .env
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+      PORT: 3000
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-porf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      POSTGRES_DB: ${POSTGRES_DB:-porf}
     ports:
-      - 3000:3000
-    command: npm start
-    working_dir: /app/server
+      - "${APP_PORT:-3000}:3000"
     volumes:
       - ./media:/app/media
+    restart: unless-stopped
+
   db:
-    image: postgres:14-alpine
-    restart: always
-    command:
-      - postgres
-      - -c
-      - 'tcp_keepalives_idle=600'
-      - -c
-      - 'tcp_keepalives_interval=30'
-      - -c
-      - 'tcp_keepalives_count=10'
+    image: postgres:${POSTGRES_VERSION:-14}-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes: 
-      - db:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER:-porf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      POSTGRES_DB: ${POSTGRES_DB:-porf}
     ports:
-      - 5433:5432
+      - "${POSTGRES_EXPOSE_PORT:-5433}:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-porf} -d ${POSTGRES_DB:-porf}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
 volumes:
-  db: {}
+  db:

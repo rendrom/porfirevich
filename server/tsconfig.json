@@ -1,22 +1,21 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "Node16",
     "strict": true,
-    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "moduleResolution": "Node16",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "outDir": "dist",
+    "rootDir": "..",
     "types": ["node", "reflect-metadata"],
-    "paths": {
-      "@/*": ["src/*"]
-    },
     "lib": [
-      "esnext",
+      "ES2022",
       "dom" // for postcard
     ]
   },

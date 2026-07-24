@@ -11,38 +11,26 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref, onMounted } from 'vue';
-import UrlParams from '@nextgis/url-runtime-params';
-import { APP_TOKEN_KEY } from '../utils/constants';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 
-const urlParams = new UrlParams();
+import { APP_TOKEN_KEY } from '@/utils/constants';
 
-export default defineComponent({
-  name: 'AuthCallback',
-  setup() {
-    const loading = ref(true);
-    const error = ref('');
+const loading = ref(true);
+const error = ref('');
 
-    onMounted(() => {
-      let token = urlParams.get('token');
-      if (token) {
-        token = token.replace(/#$/, '');
-      } else {
-        token = localStorage.getItem('token');
-      }
-      if (token) {
-        window.localStorage.setItem(APP_TOKEN_KEY, token);
-        window.close();
-      }
-      loading.value = false;
-    });
+onMounted(() => {
+  const token = new URL(window.location.href).searchParams
+    .get('token')
+    ?.replace(/#$/, '');
 
-    return {
-      loading,
-      error,
-    };
-  },
+  if (token) {
+    window.localStorage.setItem(APP_TOKEN_KEY, token);
+    window.close();
+  } else {
+    error.value = 'Не удалось получить токен авторизации';
+  }
+  loading.value = false;
 });
 </script>
 

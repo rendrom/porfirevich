@@ -1,5 +1,5 @@
 import { createPinia } from 'pinia';
-import { Route } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 /*
  * When adding new properties to stores, you should also
@@ -8,7 +8,7 @@ import { Route } from 'vue-router';
  */
 declare module 'pinia' {
   export interface PiniaCustomProperties {
-    readonly router: Route;
+    readonly router: RouteLocationNormalizedLoaded;
   }
 }
 

@@ -21,7 +21,7 @@ export class Nav {
       query?: Record<string, string>;
     } = {}
   ) {
-    const route = router.currentRoute;
+    const route = router.currentRoute.value;
     let paramsEqual = true;
     let queryEqual = true;
     if (opt.params) {
@@ -30,7 +30,7 @@ export class Nav {
     if (opt.query) {
       queryEqual = objectDeepEqual(route.query || {}, opt.query);
     }
-    if (router.currentRoute.name === name) {
+    if (router.currentRoute.value.name === name) {
       if (!paramsEqual || !queryEqual) {
         router.push({ name, ...opt });
       }

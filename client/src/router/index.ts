@@ -1,12 +1,8 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Main from '@/layouts/Main.vue';
 
-Vue.use(Router);
-
-export default new Router({
-  mode: 'history',
-  base: '/',
+export default createRouter({
+  history: createWebHistory('/'),
   routes: [
     {
       path: '/auth-redirect',
@@ -18,7 +14,7 @@ export default new Router({
       children: [
         {
           path: '/about',
-          component: () => import('../views/About'),
+          component: () => import('../views/About.vue'),
         },
         {
           path: '/gallery',
@@ -28,11 +24,22 @@ export default new Router({
         {
           path: '/login',
           name: 'login',
-          component: () => import('../views/Login'),
+          component: () => import('../views/Login.vue'),
         },
         {
-          path: '/:id?',
+          path: '/admin/users',
+          name: 'admin-users',
+          component: () => import('../views/AdminUsers.vue'),
+        },
+        {
+          path: '',
           name: 'transformer',
+          props: true,
+          component: () => import('../views/Home.vue'),
+        },
+        {
+          path: ':id',
+          name: 'transformer-story',
           props: true,
           component: () => import('../views/Home.vue'),
         },

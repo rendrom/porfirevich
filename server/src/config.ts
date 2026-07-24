@@ -7,6 +7,7 @@ const config = convict({
   http: {
     port: {
       doc: 'The port to listen on',
+      format: 'port',
       default: 3000,
       env: 'PORT',
     },

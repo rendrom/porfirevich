@@ -1,14 +1,19 @@
+import '../auth/jwt';
+import '../auth/google';
+
+import type { Request, Response } from 'express';
 import { Router } from 'express';
 import passport from 'passport';
 import { Strategy as AnonymousStrategy } from 'passport-anonymous';
 
 import AuthController from '../controllers/AuthController';
-import { generateAccessToken } from '../token';
-
-import type { Request, Response } from 'express';
-
-import '../auth/jwt';
-import '../auth/google';
+import {
+  clearRefreshTokenCookie,
+  generateAccessToken,
+  getRefreshToken,
+  setRefreshTokenCookie,
+  verifyRefreshToken,
+} from '../token';
 
 passport.use(new AnonymousStrategy());
 
@@ -18,14 +23,39 @@ function generateUserToken(req: Request, res: Response) {
   const userId = req.user && req.user.uid;
   if (userId) {
     const accessToken = generateAccessToken(userId);
-    res.redirect('/auth-redirect?token=' + accessToken);
+    setRefreshTokenCookie(res, userId);
+    res.redirect('/auth-redirect?token=' + encodeURIComponent(accessToken));
     // res.redirect('http://localhost:3001/auth-redirect?token=' + accessToken);
+  } else {
+    res.status(401).send();
+  }
+}
+
+function refreshSession(req: Request, res: Response) {
+  const refreshToken = getRefreshToken(req);
+  if (!refreshToken) {
+    res.status(401).json({ message: 'Refresh token is missing' });
+    return;
+  }
+
+  try {
+    const userId = verifyRefreshToken(refreshToken);
+    setRefreshTokenCookie(res, userId);
+    res.status(200).json({ token: generateAccessToken(userId) });
+  } catch {
+    clearRefreshTokenCookie(res);
+    res.status(401).json({ message: 'Refresh token is invalid' });
   }
 }
 
 const router = Router();
 //Login route
 router.post('/login', AuthController.login);
+router.post('/refresh', refreshSession);
+router.post('/logout', (req, res) => {
+  clearRefreshTokenCookie(res);
+  res.status(204).send();
+});
 
 //Change my password
 router.post('/change-password', [], AuthController.changePassword);

@@ -3,16 +3,19 @@
   "version": "2.2.1",
   "private": true,
   "scripts": {
-    "client": "cd ./client && npm start",
-    "server": "cd ./server && npm start",
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
     "dev": "concurrently \"npm run client\" \"npm run server\"",
-    "server-watch": "cd ./server && npm run watch",
-    "client-watch": "cd ./client && npm run watch",
-    "watch": "concurrently \"npm run server-watch\" \"npm run client-watch\"",
-    "start": "npm run server",
-    "lint": "eslint --fix"
+    "build": "npm --prefix client run build && npm --prefix server run build",
+    "start": "npm --prefix server run start",
+    "lint": "npm --prefix client run lint && npm --prefix server run lint",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "release": "release-it"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1"
+    "concurrently": "^9.0.1",
+    "release-it": "^20.2.1"
   }
 }

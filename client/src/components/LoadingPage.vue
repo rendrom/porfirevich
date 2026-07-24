@@ -18,31 +18,19 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, computed } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-export default defineComponent({
-  name: 'LoadingComponent',
-  props: {
-    loading: {
-      type: Boolean,
-      default: true,
-    },
-    error: {
-      type: String,
-      default: '',
-    },
+const props = withDefaults(
+  defineProps<{ loading?: boolean; error?: string }>(),
+  {
+    loading: true,
+    error: '',
   },
-  setup(props) {
-    const isLoading = computed(() => props.loading);
-    const errorMessage = computed(() => props.error);
+);
 
-    return {
-      isLoading,
-      errorMessage,
-    };
-  },
-});
+const isLoading = computed(() => props.loading);
+const errorMessage = computed(() => props.error);
 </script>
 
 <style scoped>

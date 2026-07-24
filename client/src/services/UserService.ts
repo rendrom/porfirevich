@@ -1,5 +1,6 @@
 import { useAppStore } from '../store/app';
 import { getAuthHeaders } from '../utils/getAuthHeaders';
+import { readJson } from '../utils/http';
 
 import type { Like } from '@shared/types/Like';
 import type { User } from '@shared/types/User';
@@ -9,8 +10,7 @@ export default {
     const resp = await fetch('/api/user', {
       ...getAuthHeaders(token),
     });
-    const json = (await resp.json()) as User;
-    return json;
+    return readJson<User>(resp);
   },
 
   async edit(id: string, data: Partial<User>) {
@@ -21,15 +21,13 @@ export default {
       body: JSON.stringify(data),
       ...getAuthHeaders(token),
     });
-    const json = (await resp.json()) as User;
-    return json;
+    return readJson<User>(resp);
   },
 
   async getLikes(token: string): Promise<Like[]> {
     const resp = await fetch('/api/user/likes', {
       ...getAuthHeaders(token),
     });
-    const json = (await resp.json()) as Like[];
-    return json;
+    return readJson<Like[]>(resp);
   },
 };

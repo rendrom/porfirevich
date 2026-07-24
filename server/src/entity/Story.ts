@@ -1,5 +1,6 @@
+import { randomBytes } from 'node:crypto';
+
 import { IsNotEmpty } from 'class-validator';
-import shortid from 'shortid';
 import {
   BeforeInsert,
   Column,
@@ -13,12 +14,23 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import type { Story as S } from '../../../shared/types/Story';
 import { Like } from './Like';
 // import { ModelWithUser } from '../interfaces';
 import { User } from './User';
 import { Violation } from './Violation';
 
-import type { Story as S } from '../../../shared/types/Story';
+const STORY_ID_ALPHABET =
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+const STORY_ID_LENGTH = 9;
+
+function generateStoryId(): string {
+  const bytes = randomBytes(STORY_ID_LENGTH);
+  return Array.from(
+    bytes,
+    (value) => STORY_ID_ALPHABET[value % STORY_ID_ALPHABET.length],
+  ).join('');
+}
 
 @Entity()
 @Unique(['id', 'editId'])
@@ -81,6 +93,6 @@ export class Story implements S {
 
   @BeforeInsert()
   protected beforeInsert() {
-    this.id = shortid.generate();
+    this.id = generateStoryId();
   }
 }

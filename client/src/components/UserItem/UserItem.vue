@@ -31,6 +31,27 @@
   </div>
 </template>
 
-<script lang="ts" src="./UserItem.ts"></script>
+<script setup lang="ts">
+import { BButton, BTooltip } from 'buefy';
+import { ref } from 'vue';
 
-<style scoped></style>
+import type { User } from '@shared/types/User';
+
+import UserService from '@/services/UserService';
+
+const user = defineModel<User>('user', { required: true });
+const isBanLoading = ref(false);
+
+async function onBanBtnClick() {
+  isBanLoading.value = true;
+  try {
+    const isBanned = !user.value.isBanned;
+    await UserService.edit(String(user.value.id), { isBanned });
+    user.value = { ...user.value, isBanned };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isBanLoading.value = false;
+  }
+}
+</script>

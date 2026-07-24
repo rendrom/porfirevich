@@ -1,10 +1,9 @@
 import { validate } from 'class-validator';
+import type { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 
 import { User } from '../entity/User';
-import { generateAccessToken } from '../token';
-
-import type { Request, Response } from 'express';
+import { generateAccessToken, setRefreshTokenCookie } from '../token';
 
 class AuthController {
   static login = async (req: Request, res: Response) => {
@@ -12,6 +11,7 @@ class AuthController {
     const { username, password } = req.body;
     if (!(username && password)) {
       res.status(400).send();
+      return;
     }
 
     //Get user from database
@@ -21,6 +21,7 @@ class AuthController {
       user = await userRepository.findOneOrFail({ where: { username } });
     } catch (error) {
       res.status(401).send();
+      return;
     }
 
     if (user) {
@@ -30,8 +31,9 @@ class AuthController {
         return;
       }
 
-      //Sing JWT, valid for 1 hour
+      // Sign a short-lived access token; the refresh token stays in HttpOnly cookie.
       const token = generateAccessToken(user.uid);
+      setRefreshTokenCookie(res, user.uid);
 
       //Send the jwt in the response
       res.send(token);

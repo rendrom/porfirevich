@@ -17,7 +17,7 @@
     <div class="field">
       <b-field label="Креативность (шиз)">
         <b-slider
-          :value="temperatureToSliderValue(store.temperature)"
+          v-model="temperatureSliderValue"
           size="is-small"
           rounded
           indicator
@@ -26,7 +26,6 @@
           :max="10"
           :step="0.1"
           :custom-formatter="formatTemperature"
-          @input="updateTemperature"
         />
       </b-field>
     </div>
@@ -50,7 +49,35 @@
   </div>
 </template>
 
-<script src="./TransformerSettings.ts"></script>
+<script setup lang="ts">
+import { BField, BRadioButton, BSlider } from 'buefy';
+import { computed } from 'vue';
+
+import { useTransformerStore } from '@/store/transformerStore';
+
+const store = useTransformerStore();
+
+function temperatureToSliderValue(temperature: number) {
+  return temperature <= 1
+    ? temperature * 5
+    : 5 + (temperature - 1) * (5 / 9);
+}
+
+function sliderValueToTemperature(value: number) {
+  return value <= 5 ? value / 5 : 1 + (value - 5) * (9 / 5);
+}
+
+const temperatureSliderValue = computed({
+  get: () => temperatureToSliderValue(store.temperature),
+  set: (value: number) =>
+    store.setTemperature(sliderValueToTemperature(value)),
+});
+
+function formatTemperature(value: number) {
+  const temperature = sliderValueToTemperature(value);
+  return temperature <= 1 ? temperature.toFixed(1) : temperature.toFixed(0);
+}
+</script>
 
 <style scoped>
 .settings-control {

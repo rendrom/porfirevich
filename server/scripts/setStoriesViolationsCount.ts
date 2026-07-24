@@ -1,9 +1,8 @@
 import { createConnection } from 'typeorm';
 
-
+import { ormconfig } from '../ormconfig';
 import { Story } from '../src/entity/Story';
 import { Violation } from '../src/entity/Violation';
-import { ormconfig } from '../orm';
 
 
 

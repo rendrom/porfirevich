@@ -1,25 +1,25 @@
 import express from 'express';
 import { resolve } from 'path';
-import { createConnection } from 'typeorm';
 
-import { appendOgImage } from './middlewares/appendOgImage';
-import { idDef } from './routers/story';
+import { ormconfig } from '../ormconfig';
 import { api } from './api';
 import { appConfig } from './appConfig';
 import config from './config';
-import { ormconfig } from '../orm';
+import { connectDatabase } from './database';
+import { appendOgImage } from './middlewares/appendOgImage';
+import { idDef } from './routers/story';
 
-createConnection(ormconfig)
-  .then(async () => {
-    const app = express();
-    appConfig(app);
-    api(app);
+async function start(): Promise<void> {
+  await connectDatabase(ormconfig);
 
-    const publicPath = resolve(__dirname, '../../client/dist');
+  const app = express();
+  appConfig(app);
+  api(app);
 
+  const publicPath = resolve(process.cwd(), '../client/dist');
 
-
-    app.use(express.static(publicPath, {
+  app.use(
+    express.static(publicPath, {
       maxAge: '1y',
       etag: false,
       setHeaders: (res, filePath) => {
@@ -29,11 +29,20 @@ createConnection(ormconfig)
           res.setHeader('Expires', '0');
         }
       },
-    }));
-    app.use(idDef, appendOgImage);
-    const port = config.get('http.port');
-    app.listen(port, () => {
-      console.log('Server started on port ' + port + '!');
-    });
-  })
-  .catch((error) => console.log(error));
+    }),
+  );
+  app.get(idDef, appendOgImage);
+  app.get('*', (_request, response) => {
+    response.sendFile(resolve(publicPath, 'index.html'));
+  });
+
+  const port = config.get('http.port');
+  app.listen(port, () => {
+    console.log('Server started on port ' + port + '!');
+  });
+}
+
+start().catch((error) => {
+  console.error('Unable to start server', error);
+  process.exitCode = 1;
+});

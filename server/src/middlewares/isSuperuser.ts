@@ -1,28 +1,20 @@
-import { getRepository } from 'typeorm';
+import type { NextFunction, Request, Response } from 'express';
 
 import { User } from '../entity/User';
 
-import type { NextFunction, Request, Response } from 'express';
-
 export const isSuperuser = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    //Get the user ID from previous midleware
-    const userId = res.locals.jwtPayload.userId;
-    const id: string = req.params.id;
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as User | undefined;
 
-    const repository = getRepository(User);
-    let obj: User | undefined;
-    try {
-      obj = await repository.findOneOrFail(id);
-    } catch (id) {
-      res.status(401).send();
+    if (!user) {
+      res.status(401).json({ message: 'Authentication required' });
+      return;
+    }
+    if (!user.isSuperuser) {
+      res.status(403).json({ message: 'Administrator access required' });
+      return;
     }
 
-    //Check if array of authorized roles includes the user's role
-    if (obj && obj.isSuperuser) {
-      next();
-    } else {
-      res.status(401).send();
-    }
+    next();
   };
 };

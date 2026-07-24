@@ -31,7 +31,6 @@
           <div class="tools is-pulled-right">
             <b-button
               size="is-small"
-              type
               :icon-right="
                 store.isLoading || !store.history.length
                   ? 'close'
@@ -46,14 +45,60 @@
   </div>
 </template>
 
-<script lang="ts" src="./Transformer.ts"></script>
+<script setup lang="ts">
+import { BButton, SnackbarProgrammatic } from 'buefy';
+import { onMounted, onUnmounted } from 'vue';
+
+import { useTransformerStore } from '@/store/transformerStore';
+
+const store = useTransformerStore();
+const snackbar = new SnackbarProgrammatic();
+
+function handleRequestError() {
+  snackbar.open({
+    duration: 5000,
+    message: '<b>Ошибка</b></br>Нейросеть не отвечает.',
+    type: 'is-danger',
+    position: 'is-bottom',
+    actionText: 'Повторить',
+    queue: false,
+    onAction: () => store.transform(),
+  });
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Tab') {
+    event.preventDefault();
+    if (store.isLoading) store.abort();
+    else store.transform();
+  } else if (event.key === 'Escape') {
+    store.easyEscape();
+  } else if ((event.metaKey || event.ctrlKey) && event.code === 'KeyZ') {
+    store.historyBack();
+  }
+}
+
+onMounted(async () => {
+  await store.getModels();
+  store.initialize();
+  store.createEditor('#editorjs');
+  window.addEventListener('keydown', onKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+  store.removeWindowUnloadListener();
+});
+
+store.$patch({ handleRequestError });
+</script>
 
 <style>
 #editorjs {
   white-space: pre-wrap;
 
   box-sizing: border-box;
-  color: rgb(74, 74, 74);
+  color: var(--porfirevich-editor-text);
   display: block;
   font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Helvetica,
@@ -88,7 +133,4 @@
   padding-top: 10px;
 }
 
-/* .transform-btn {
-  width: 120px;
-} */
 </style>

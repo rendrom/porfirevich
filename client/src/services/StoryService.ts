@@ -6,14 +6,14 @@ import type { Story, StoriesResponse } from '@shared/types/Story';
 import type { GetStoriesOptions } from '../interfaces';
 
 import { getAuthHeaders } from '@/utils/getAuthHeaders';
+import { ensureResponseOk, readJson } from '@/utils/http';
 
 export default {
   async one(id: string) {
     const appModule = useAppStore();
     const token = appModule.token;
     const resp = await fetch('/api/story/' + id, { ...getAuthHeaders(token) });
-    const json = (await resp.json()) as Story;
-    return json;
+    return readJson<Story>(resp);
   },
 
   async all(opt?: GetStoriesOptions) {
@@ -21,18 +21,18 @@ export default {
     const resp = await fetch('/api/story/' + (opt ? getQueryString(opt) : ''), {
       ...getAuthHeaders(appModule.token),
     });
-    const json = (await resp.json()) as StoriesResponse;
-    return json;
+    return readJson<StoriesResponse>(resp);
   },
 
   async like(story: Story) {
     const appModule = useAppStore();
     const token = appModule.token;
     if (token) {
-      await fetch('/api/story/' + story.id + '/like', {
+      const response = await fetch('/api/story/' + story.id + '/like', {
         method: 'POST',
         ...getAuthHeaders(token),
       });
+      ensureResponseOk(response);
       return true;
     }
     throw new Error('No user set');
@@ -42,10 +42,11 @@ export default {
     const appModule = useAppStore();
     const token = appModule.token;
     if (token) {
-      await fetch('/api/story/' + story.id + '/dislike', {
+      const response = await fetch('/api/story/' + story.id + '/dislike', {
         method: 'POST',
         ...getAuthHeaders(token),
       });
+      ensureResponseOk(response);
       return true;
     }
     throw new Error('No user set');
@@ -55,10 +56,11 @@ export default {
     const appModule = useAppStore();
     const token = appModule.token;
 
-    await fetch('/api/story/' + story.id + '/violation', {
+    const response = await fetch('/api/story/' + story.id + '/violation', {
       method: 'POST',
       ...getAuthHeaders(token),
     });
+    ensureResponseOk(response);
     return true;
   },
 
@@ -74,8 +76,7 @@ export default {
       body: JSON.stringify(data),
       ...getAuthHeaders(opt.token),
     });
-    const json = (await resp.json()) as Story;
-    return json;
+    return readJson<Story>(resp);
   },
 
   async edit(id: string, data: Partial<Story>) {
@@ -86,7 +87,6 @@ export default {
       body: JSON.stringify(data),
       ...getAuthHeaders(token),
     });
-    const json = (await resp.json()) as Story;
-    return json;
+    return readJson<Story>(resp);
   },
 };

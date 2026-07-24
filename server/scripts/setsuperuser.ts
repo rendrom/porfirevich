@@ -1,9 +1,8 @@
-import chalk from 'chalk';
 import prompts from 'prompts';
 import { createConnection } from 'typeorm';
 
+import { ormconfig } from '../ormconfig';
 import { User } from '../src/entity/User';
-import { ormconfig } from '../orm';
 
 let email: string | null = null;
 // const myArgs = process.argv.slice(2);
@@ -26,9 +25,9 @@ const setSuperuser = async () => {
       const user = await userRepository.findOneOrFail({ where: { email } });
       user.isSuperuser = true;
       await userRepository.save(user);
-      console.log(chalk.green(`User ${email} in now superuser`));
+      console.log(`User ${email} is now superuser`);
     } catch {
-      console.log(chalk.red(`Can't find user with email ${email}`));
+      console.error(`Can't find user with email ${email}`);
     }
   }
 };

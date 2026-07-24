@@ -1,40 +1,21 @@
-version: '3.1'
+name: porfirevich-dev
 
 services:
   app:
-    image: porfirevich-front:latest
-    build: ./
-    depends_on:
-      - db
-    env_file: 
-      - .env
+    extends:
+      file: docker-compose.yml
+      service: app
+    image: porfirevich:dev
     environment:
-      - NODE_ENV=development
-    ports:
-      - 3000:3000
-    command: npm start
-    working_dir: /app/server
-    volumes:
-      - ./media:/app/media
+      NODE_ENV: development
+    restart: on-failure:5
+
   db:
-    image: postgres:14-alpine
-    restart: always
-    command:
-      - postgres
-      - -c
-      - 'tcp_keepalives_idle=600'
-      - -c
-      - 'tcp_keepalives_interval=30'
-      - -c
-      - 'tcp_keepalives_count=10'
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes: 
-      - db:/var/lib/postgresql/data
-    ports:
-      - 5433:5432
+    extends:
+      file: docker-compose.yml
+      service: db
+    image: postgres:17-alpine
+    restart: "no"
 
 volumes:
-  db: {}
+  db:

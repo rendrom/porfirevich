@@ -8,6 +8,8 @@ import type { Story } from '@shared/types/Story';
 
 export type CopyType = 'html' | 'text' | 'quote';
 
+const toast = new Toast();
+
 export function copyToClipboard(str: string) {
   const el = document.createElement('textarea');
   el.value = str;
@@ -21,13 +23,13 @@ export function copyToClipboard(str: string) {
   el.select();
   try {
     document.execCommand('copy');
-    Toast.open({
+    toast.open({
       message: 'Копирование завершено',
       type: 'is-success',
       position: 'is-bottom',
     });
   } catch (err) {
-    Toast.open({
+    toast.open({
       message: 'Не удаётся скоприовать историю',
       type: 'is-danger',
       position: 'is-bottom',

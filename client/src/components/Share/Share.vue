@@ -12,7 +12,12 @@
           <p>Не удалось сгенерировать "открытку" из вашей истории.</p>
         </div>
         <div v-else class="image-share-container">
-          <img :src="output" class="image-share" />
+          <img
+            :src="output"
+            class="image-share"
+            alt="Generated story postcard"
+            @error="imageError = true"
+          />
         </div>
         <div>
           <p v-if="isError">Копировать:</p>
@@ -57,7 +62,7 @@
           >
             <b-field>
               <b-checkbox
-                v-model="story.isPublic"
+                v-model="isPublic"
                 :disabled="!user || changePublicStatusLoading"
                 >Публиковать в галерее</b-checkbox
               >
@@ -76,11 +81,111 @@
         <br />
       </b-notification>
     </div>
-    <b-loading :active.sync="isLoading" />
+    <b-loading :active="isLoading" />
   </div>
 </template>
 
-<script lang="ts" src="./Share.ts"></script>
+<script setup lang="ts">
+import {
+  BButton,
+  BCheckbox,
+  BField,
+  BLoading,
+  BNotification,
+  BTooltip,
+  SnackbarProgrammatic,
+} from 'buefy';
+import { computed, ref, watch } from 'vue';
+
+import type { Story } from '@shared/types/Story';
+
+import { SITE } from '@/config';
+import StoryService from '@/services/StoryService';
+import { useAppStore } from '@/store/app';
+import { copyStory, type CopyType } from '@/utils/copyToClipboard';
+import { schemeToHtml } from '@/utils/schemeUtils';
+
+const props = defineProps<{ story: Story }>();
+const appStore = useAppStore();
+const snackbar = new SnackbarProgrammatic();
+
+const imageError = ref(false);
+const changePublicStatusLoading = ref(false);
+const isPublic = ref(props.story.isPublic);
+
+const user = computed(() => appStore.user);
+const shareUrl = computed(() => `${SITE}/${props.story.id}`);
+const isLoading = computed(() => !props.story);
+const html = computed(() => schemeToHtml(JSON.parse(props.story.content)));
+const output = computed(() => {
+  const postcard = props.story.postcard;
+  if (!postcard) return '';
+  if (/^https?:\/\//i.test(postcard) || postcard.startsWith('/media/')) {
+    return postcard;
+  }
+
+  const fileName = postcard.replace(/\\/g, '/').split('/').pop();
+  return fileName ? `/media/${fileName}` : '';
+});
+const isError = computed(() => !output.value || imageError.value);
+const isUserAuthor = computed(
+  () =>
+    Boolean(props.story.editId) ||
+    Boolean(
+      user.value &&
+        (props.story.userId === user.value.id ||
+          props.story.user?.id === user.value.id),
+    ),
+);
+
+watch(output, () => {
+  imageError.value = false;
+});
+
+watch(
+  isPublic,
+  async (isPublic, previousValue) => {
+    if (previousValue === undefined || !user.value) return;
+
+    try {
+      changePublicStatusLoading.value = true;
+      const edited = await StoryService.edit(props.story.id, {
+        editId: props.story.editId,
+        isPublic,
+      });
+      if (!edited) return;
+
+      if (edited.isPublic) {
+        appStore.appendStories(props.story);
+        snackbar.open({
+          duration: 5000,
+          message:
+            '<b>Ваша история опубликована в галерее</b></br>Теперь любой желающий может с ней ознакомиться.',
+          type: 'is-success',
+          position: 'is-bottom',
+        });
+      } else {
+        appStore.removeFromStories(props.story);
+      }
+    } catch {
+      snackbar.open({
+        duration: 5000,
+        message:
+          '<b>Ошибка</b></br>Не удаётся поменять статус публикации вашей истории.',
+        type: 'is-danger',
+        position: 'is-bottom',
+      });
+    } finally {
+      changePublicStatusLoading.value = false;
+    }
+  },
+);
+
+function copyToClipboard(type?: CopyType, value?: string | false) {
+  const text = value ?? html.value;
+  if (text) copyStory(text, type, props.story);
+}
+</script>
 
 <style>
 .animation-content {

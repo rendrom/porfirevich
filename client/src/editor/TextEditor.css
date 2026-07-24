@@ -1,0 +1,30 @@
+#editorjs {
+  color: var(--porfirevich-editor-text);
+  caret-color: var(--porfirevich-editor-text);
+}
+
+#editorjs:empty::before {
+  color: var(--porfirevich-editor-placeholder);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+#editorjs [data-type='0'] {
+  color: var(--porfirevich-editor-text);
+  font-weight: 400;
+}
+
+#editorjs [data-type='1'] {
+  color: var(--porfirevich-editor-accent);
+  font-weight: 700;
+}
+
+#editorjs .active-text {
+  color: var(--porfirevich-editor-accent);
+  background-color: var(--porfirevich-editor-active-background);
+}
+
+#editorjs::selection,
+#editorjs *::selection {
+  background-color: var(--porfirevich-editor-selection-background);
+}

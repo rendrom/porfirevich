@@ -1,73 +1,73 @@
 import path from 'node:path';
 
-import puppeteer from 'puppeteer';
-
 import config from '../../../shared/config';
-import { escapeHtml } from '../../../shared/utils/escapeHtml';
-
-import type { Page } from 'puppeteer';
-
 import type { Scheme } from '../../../shared/types/Scheme';
+import { escapeHtml } from '../../../shared/utils/escapeHtml';
 import type { Story } from '../entity/Story';
 
 interface DomScreenshotOptions {
   selector: string;
-  page: Page;
   path: string;
   padding?: number;
 }
 
 export async function postcard(story: Story) {
+  const { default: puppeteer } = await import('puppeteer');
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     ignoreDefaultArgs: ['--disable-extensions'],
   });
-  const page = await browser.newPage();
-  await page.setViewport({
-    width: 1300,
-    height: 200000,
-    deviceScaleFactor: 1,
-  });
-  const postcardPath = path.join('..', 'media', story.id + '.png');
-  await page.setContent(getHtml(story));
-  await screenshotDOMElement({
-    page,
-    path: postcardPath,
-    selector: '#postcard',
-    padding: 0,
-  });
-  await browser.close();
-  return postcardPath;
-}
+  const fileName = `${story.id}.png`;
+  const postcardPath = path.resolve(process.cwd(), '..', 'media', fileName);
 
-async function screenshotDOMElement(opts: DomScreenshotOptions) {
-  const padding = opts.padding !== undefined ? opts.padding : 0;
-  const path = opts.path;
-  const selector = opts.selector;
-  const page = opts.page;
+  try {
+    const page = await browser.newPage();
+    const screenshotDOMElement = async (opts: DomScreenshotOptions) => {
+      const padding = opts.padding ?? 0;
+      const selector = opts.selector;
 
-  if (!selector) throw Error('Please provide a selector.');
+      if (!selector) throw Error('Please provide a selector.');
 
-  const rect = await page.evaluate((selector) => {
-    const element = document.querySelector(selector);
-    if (!element) return null;
-    const { x, y, width, height } = element.getBoundingClientRect();
-    return { left: x, top: y, width, height, id: element.id };
-  }, selector);
+      const rect = await page.evaluate((elementSelector) => {
+        const element = document.querySelector(elementSelector);
+        if (!element) return null;
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { left: x, top: y, width, height };
+      }, selector);
 
-  if (!rect)
-    throw Error(`Could not find element that matches selector: ${selector}.`);
+      if (!rect) {
+        throw Error(
+          `Could not find element that matches selector: ${selector}.`,
+        );
+      }
 
-  return await page.screenshot({
-    path,
-    clip: {
-      x: rect.left - padding,
-      y: rect.top - padding,
-      width: rect.width + padding * 2,
-      height: rect.height + padding * 2,
-    },
-  });
+      return page.screenshot({
+        path: opts.path,
+        clip: {
+          x: rect.left - padding,
+          y: rect.top - padding,
+          width: rect.width + padding * 2,
+          height: rect.height + padding * 2,
+        },
+      });
+    };
+
+    await page.setViewport({
+      width: 1300,
+      height: 200000,
+      deviceScaleFactor: 1,
+    });
+    await page.setContent(getHtml(story));
+    await screenshotDOMElement({
+      path: postcardPath,
+      selector: '#postcard',
+      padding: 0,
+    });
+    return `/media/${fileName}`;
+  } finally {
+    await browser.close();
+  }
 }
 
 function getHtml(story: Story) {

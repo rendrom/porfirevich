@@ -18,11 +18,22 @@ const jwtOptions = {
 
 passport.use(
   new passportJwt.Strategy(jwtOptions, async (payload: any, done) => {
+    if (payload.type && payload.type !== 'access') {
+      return done(null, false);
+    }
+
     const userRepository = getRepository(User);
     try {
       const user = await userRepository.findOneOrFail({
         where: { uid: payload.sub },
-        select: ['id', 'uid', 'username', 'photoUrl', 'isSuperuser'],
+        select: [
+          'id',
+          'uid',
+          'username',
+          'photoUrl',
+          'isSuperuser',
+          'isBanned',
+        ],
       });
       return done(null, user, payload);
     } catch (error) {

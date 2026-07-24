@@ -1,7 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import { IsEmail, Length } from 'class-validator';
 import {
-  AfterUpdate,
   BeforeUpdate,
   Column,
   CreateDateColumn,
@@ -69,11 +68,10 @@ export class User {
   }
 
   @BeforeUpdate()
-  beforeUpdate() {
-    getRepository(Story)
-      .createQueryBuilder('story')
-      .where('story.userId = :userId', { userId: this.id })
-      .update({ isBanned: this.isBanned })
-      .execute();
+  async beforeUpdate() {
+    await getRepository(Story).update(
+      { userId: this.id },
+      { isBanned: this.isBanned },
+    );
   }
 }

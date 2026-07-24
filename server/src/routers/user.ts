@@ -4,12 +4,8 @@ import passport from 'passport';
 import UserController from '../controllers/UserController';
 import { isSelf } from '../middlewares/isSelf';
 import { isSuperuser } from '../middlewares/isSuperuser';
-// import { isSuperuser } from '../middlewares/isSuperuser';
 
 const router = Router();
-
-//Get all users
-// router.get('/', [isSuperuser()], UserController.listAll);
 
 // Get one user
 router.get(
@@ -32,6 +28,20 @@ router.get(
   (req, res) => {
     res.send(req.user);
   },
+);
+
+router.get(
+  '/admin',
+  passport.authenticate(['jwt'], { session: false }),
+  isSuperuser(),
+  UserController.listAdminUsers,
+);
+
+router.patch(
+  '/admin/:id([0-9]+)/ban',
+  passport.authenticate(['jwt'], { session: false }),
+  isSuperuser(),
+  UserController.setBanStatus,
 );
 
 //Create a new user
