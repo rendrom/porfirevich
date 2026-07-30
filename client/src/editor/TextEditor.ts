@@ -429,10 +429,7 @@ export class TextEditor {
       this.deleteSelection();
 
       if (this.isDataBlock(parentElement)) {
-        if (
-          (!fromApi && this.isUserBlock(parentElement)) ||
-          (fromApi && this.isApiBlock(parentElement))
-        ) {
+        if (!fromApi && this.isUserBlock(parentElement)) {
           span = this.insertSameInput({
             text,
             parentElement,
