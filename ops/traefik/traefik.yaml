@@ -1,0 +1,48 @@
+# Native Traefik v3 configuration. No defaultRuleSyntax/ruleSyntax=v2 overrides.
+entryPoints:
+  pelevin:
+    address: :8096
+    forwardedHeaders:
+      trustedIPs: ["127.0.0.1/32", "::1/128", "172.17.0.1/32"]
+    transport:
+      respondingTimeouts:
+        readTimeout: 190s
+        writeTimeout: 190s
+        idleTimeout: 190s
+      lifeCycle:
+        graceTimeOut: 190s
+  poetry:
+    address: :8097
+    forwardedHeaders:
+      trustedIPs: ["127.0.0.1/32", "::1/128", "172.17.0.1/32"]
+    transport:
+      respondingTimeouts:
+        readTimeout: 190s
+        writeTimeout: 190s
+        idleTimeout: 190s
+      lifeCycle:
+        graceTimeOut: 190s
+  dash:
+    address: :8080
+
+api:
+  dashboard: true
+  insecure: false
+
+ping:
+  entryPoint: dash
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yaml
+    watch: true
+
+log:
+  level: INFO
+
+accessLog:
+  filters:
+    statusCodes: ["400-599"]
+  fields:
+    headers:
+      defaultMode: drop

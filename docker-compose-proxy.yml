@@ -1,0 +1,31 @@
+name: porfirevich-proxy
+
+services:
+  proxy:
+    image: traefik:v3.7.12@sha256:9c2a54d87f76f5c2f5f2682c68394af92fb12c0a2686798d6462a3f84bd78eaf
+    command: ["--configFile=/etc/traefik/traefik.yaml"]
+    network_mode: bridge
+    ports:
+      - "8096:8096"
+      - "8097:8097"
+      - "127.0.0.1:8098:8080"
+    volumes:
+      - ./ops/traefik:/etc/traefik:ro
+    secrets:
+      - dashboard_users
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+    stop_grace_period: 200s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  dashboard_users:
+    file: ${TRAEFIK_DASHBOARD_USERS_FILE:-/home/ubuntu/traefik-secrets/dashboard.htpasswd}

@@ -1,11 +1,9 @@
-import { createConnection } from 'typeorm';
-
-import { ormconfig } from '../ormconfig';
+import { connectDatabase } from '../src/database';
 import { Story } from '../src/entity/Story';
 
 
 const setBannedStories = async () => {
-  const connection = await createConnection(ormconfig );
+  const connection = await connectDatabase();
   try {
     const rep = connection.getRepository(Story);
     const list = rep

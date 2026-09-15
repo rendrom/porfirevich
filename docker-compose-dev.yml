@@ -8,14 +8,14 @@ services:
     image: porfirevich:dev
     environment:
       NODE_ENV: development
+      TYPEORM_SYNCHRONIZE: "true"
     restart: on-failure:5
 
   db:
     extends:
       file: docker-compose.yml
       service: db
-    image: postgres:17-alpine
     restart: "no"
 
 volumes:
-  db:
+  db18:

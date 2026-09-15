@@ -1,7 +1,6 @@
 import prompts from 'prompts';
-import { createConnection } from 'typeorm';
 
-import { ormconfig } from '../ormconfig';
+import { connectDatabase } from '../src/database';
 import { User } from '../src/entity/User';
 
 let email: string | null = null;
@@ -10,7 +9,7 @@ let email: string | null = null;
 // email = myArgs[0];
 
 const setSuperuser = async () => {
-  const connection = await createConnection(ormconfig);
+  const connection = await connectDatabase();
 
   const response = await prompts({
     type: 'text',

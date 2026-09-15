@@ -1,13 +1,12 @@
 import type { Application } from 'express';
 
-import { ormconfig } from '../ormconfig';
 import { api } from './api';
 import { appConfig } from './appConfig';
 import config from './config';
 import { connectDatabase } from './database';
 
 export default async (app: Application): Promise<void> => {
-  await connectDatabase(ormconfig);
+  await connectDatabase();
 
   appConfig(app);
   api(app);

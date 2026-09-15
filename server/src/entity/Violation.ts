@@ -3,11 +3,11 @@ import {
   BeforeRemove,
   Column,
   Entity,
-  getRepository,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import dataSource from '../data-source';
 import { Story } from './Story';
 import { User } from './User';
 
@@ -21,32 +21,33 @@ export class Violation {
   userId?: number | null;
   @ManyToOne(() => Story, (story: Story) => story.violations)
   story?: Story;
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   storyId?: string | null;
   @Column({ nullable: true })
   comment?: string;
 
   @AfterInsert()
   protected async afterInsert() {
-    const storyRepository = getRepository(Story);
+    const storyRepository = dataSource.getRepository(Story);
     if (this.storyId) {
-      const story = await storyRepository.findOne(this.storyId);
-      if (story) {
-        story.likesCount = story.violationsCount + 1;
-        await storyRepository.save(story);
-      }
+      await storyRepository.increment(
+        { id: this.storyId },
+        'violationsCount',
+        1,
+      );
     }
   }
 
   @BeforeRemove()
   protected async beforeRemove() {
-    const storyRepository = getRepository(Story);
+    const storyRepository = dataSource.getRepository(Story);
     if (this.storyId) {
-      const story = await storyRepository.findOne(this.storyId);
-      if (story && story.likesCount) {
-        story.likesCount = story.violationsCount - 1;
-        await storyRepository.save(story);
-      }
+      await storyRepository
+        .createQueryBuilder()
+        .update(Story)
+        .set({ violationsCount: () => 'GREATEST("violationsCount" - 1, 0)' })
+        .where({ id: this.storyId })
+        .execute();
     }
   }
 }

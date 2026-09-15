@@ -58,7 +58,11 @@ router.post('/logout', (req, res) => {
 });
 
 //Change my password
-router.post('/change-password', [], AuthController.changePassword);
+router.post(
+  '/change-password',
+  passport.authenticate('jwt', { session: false }),
+  AuthController.changePassword,
+);
 
 router.get(
   '/google/start',

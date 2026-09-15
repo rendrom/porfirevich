@@ -5,7 +5,15 @@ import StoryController from '../controllers/StoryController';
 
 const router = Router();
 
-export const idDef = '/:id([0-9A-z_-]+)';
+export const idDef = '/:id';
+
+router.param('id', (req, res, next, id: string) => {
+  if (!/^[0-9A-Za-z_-]+$/.test(id)) {
+    res.status(404).send('Story not found');
+    return;
+  }
+  next();
+});
 
 router.get(
   '/',

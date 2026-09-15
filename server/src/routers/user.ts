@@ -7,6 +7,14 @@ import { isSuperuser } from '../middlewares/isSuperuser';
 
 const router = Router();
 
+router.param('id', (_req, res, next, id: string) => {
+  if (!/^[1-9][0-9]*$/.test(id)) {
+    res.status(404).send('User not found');
+    return;
+  }
+  next();
+});
+
 // Get one user
 router.get(
   '/',
@@ -38,7 +46,7 @@ router.get(
 );
 
 router.patch(
-  '/admin/:id([0-9]+)/ban',
+  '/admin/:id/ban',
   passport.authenticate(['jwt'], { session: false }),
   isSuperuser(),
   UserController.setBanStatus,
@@ -49,13 +57,18 @@ router.post('/', UserController.newUser);
 
 //Edit one user
 router.patch(
-  '/:id([0-9]+)',
+  '/:id',
   passport.authenticate(['jwt'], { session: false }),
   // [isSelf(), isSuperuser()],
   UserController.editUser,
 );
 
 //Delete one user
-router.delete('/:id([0-9]+)', [isSelf()], UserController.deleteUser);
+router.delete(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  isSelf(),
+  UserController.deleteUser,
+);
 
 export default router;

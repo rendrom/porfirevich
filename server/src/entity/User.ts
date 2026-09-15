@@ -1,22 +1,25 @@
 import * as bcrypt from 'bcryptjs';
-import { IsEmail, Length } from 'class-validator';
+import { IsEmail, IsOptional, Length } from 'class-validator';
 import {
   BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
-  getRepository,
   Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import dataSource from '../data-source';
 import { Like } from './Like';
 import { Story } from './Story';
 
 @Entity()
-@Index(['email'], { unique: true, where: 'email IS NOT NULL' })
+@Index('IDX_9e3516cf97a57b6f6199fa95a8', ['email'], {
+  unique: true,
+  where: 'email IS NOT NULL',
+})
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -31,6 +34,7 @@ export class User {
   likes!: Like[];
 
   @Column()
+  @Length(1, 100)
   username!: string;
 
   @Column()
@@ -38,6 +42,7 @@ export class User {
   password!: string;
 
   @Column({ nullable: true })
+  @IsOptional()
   @IsEmail()
   email?: string;
 
@@ -69,9 +74,8 @@ export class User {
 
   @BeforeUpdate()
   async beforeUpdate() {
-    await getRepository(Story).update(
-      { userId: this.id },
-      { isBanned: this.isBanned },
-    );
+    await dataSource
+      .getRepository(Story)
+      .update({ userId: this.id }, { isBanned: this.isBanned });
   }
 }

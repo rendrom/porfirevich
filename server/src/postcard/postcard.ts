@@ -55,7 +55,7 @@ export async function postcard(story: Story) {
 
     await page.setViewport({
       width: 1300,
-      height: 200000,
+      height: 900,
       deviceScaleFactor: 1,
     });
     await page.setContent(getHtml(story));
@@ -146,7 +146,7 @@ function getHtml(story: Story) {
 <body>
   <div id="postcard">
     <div class="content">
-      <div class="story" style="font-size=${fontSize}px">
+      <div class="story" style="font-size:${fontSize}px">
       ${text}
       </div>
 

@@ -1,0 +1,49 @@
+name: Test
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6-alpine
+        env:
+          POSTGRES_USER: porf
+          POSTGRES_PASSWORD: regression-only
+          POSTGRES_DB: porf_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U porf -d porf_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: porf
+      POSTGRES_PASSWORD: regression-only
+      POSTGRES_DB: porf_test
+      TYPEORM_SYNCHRONIZE: "true"
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+      CHROME_PATH: /usr/bin/google-chrome
+      SMOKE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.20.0
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+      - run: npm --prefix client ci && npm --prefix server ci
+      - run: npm run build && npm run lint
+      - run: npm --prefix client test && npm --prefix server test
+      - run: |
+          npm --prefix server start &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/health; then break; fi
+            sleep 1
+          done
+          npm --prefix client run test:browser
+      - run: npm --prefix client audit && npm --prefix server audit

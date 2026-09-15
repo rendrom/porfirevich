@@ -1,8 +1,8 @@
 import passport from 'passport';
 import passportJwt from 'passport-jwt';
-import { getRepository } from 'typeorm';
 
 import config from '../config';
+import dataSource from '../data-source';
 import { User } from '../entity/User';
 
 const audience = config.get('auth.token.audience');
@@ -18,24 +18,28 @@ const jwtOptions = {
 
 passport.use(
   new passportJwt.Strategy(jwtOptions, async (payload: any, done) => {
-    if (payload.type && payload.type !== 'access') {
+    if (
+      typeof payload.sub !== 'string' ||
+      !payload.sub ||
+      (payload.type && payload.type !== 'access')
+    ) {
       return done(null, false);
     }
 
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     try {
-      const user = await userRepository.findOneOrFail({
+      const user = await userRepository.findOne({
         where: { uid: payload.sub },
-        select: [
-          'id',
-          'uid',
-          'username',
-          'photoUrl',
-          'isSuperuser',
-          'isBanned',
-        ],
+        select: {
+          id: true,
+          uid: true,
+          username: true,
+          photoUrl: true,
+          isSuperuser: true,
+          isBanned: true,
+        },
       });
-      return done(null, user, payload);
+      return done(null, user || false, payload);
     } catch (error) {
       return done(error);
     }

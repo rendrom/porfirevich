@@ -17,6 +17,18 @@ export default tseslint.config(
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
+    files: ['tests/browser/**/*.cjs'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        editor: 'readonly',
+        store: 'readonly',
+        requests: 'readonly',
+        tick: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.{ts,vue}'],
     languageOptions: {
       globals: {

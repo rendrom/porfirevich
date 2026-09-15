@@ -11,7 +11,7 @@ async function loadSource(entry) {
   const result = await build({
     entryPoints: [path.resolve(__dirname, '..', entry)],
     bundle: true, write: false, platform: 'node', format: 'cjs',
-    packages: 'external',
+    external: ['vue', 'pinia'],
     plugins: [{
       name: 'editor-stub',
       setup(builder) {
@@ -134,7 +134,8 @@ test('malformed settings and unavailable storage do not break initialization', a
 function setEditor(store, inserted) {
   store.editor = {
     getTextBeforeSelection: () => 'Начало',
-    getBlockText: () => '',
+    captureSelection: () => undefined,
+    setPlaceHolder() {},
     removeActiveBlocks() {}, deleteBlocks() {}, focus() {},
     getText: () => 'Начало', getContents: () => [],
     insertText(reply) { inserted.push(reply); return { id: 'reply' }; },
@@ -157,6 +158,7 @@ test('an old cancelled request cannot insert text or stop a newer loading indica
   await newRequest;
   assert.deepEqual(inserted, ['new']);
   assert.equal(store.isLoading, false);
+  assert.equal(store.isError, false);
   store.$dispose();
 });
 

@@ -4,9 +4,9 @@ import { validate } from 'class-validator';
 import passport from 'passport';
 import type { IOAuth2StrategyOption } from 'passport-google-oauth';
 import { OAuth2Strategy } from 'passport-google-oauth';
-import { getRepository } from 'typeorm';
 
 import config from '../config';
+import dataSource from '../data-source';
 import { User } from '../entity/User';
 
 const clientID = config.get('auth.google.clientId');
@@ -30,8 +30,8 @@ if (passportConfig.clientID) {
     new OAuth2Strategy(
       passportConfig,
       async (accessToken, refreshToken, profile, done) => {
-        const userRepository = getRepository(User);
-        let user: User | undefined;
+        const userRepository = dataSource.getRepository(User);
+        let user: User | null = null;
         const verifiedEmail =
           // @ts-ignore
           profile.emails && profile.emails.find((x) => x.verified);
@@ -39,13 +39,13 @@ if (passportConfig.clientID) {
         if (email) {
           user = await userRepository.findOne({
             where: { email: email },
-            select: ['id', 'uid', 'username'], // We don't want to send the password on response
+            select: { id: true, uid: true, username: true }, // We don't want to send the password on response
           });
         }
         if (!user) {
           user = await userRepository.findOne({
             where: { uid: profile.id },
-            select: ['id', 'uid', 'username'], // We don't want to send the password on response
+            select: { id: true, uid: true, username: true }, // We don't want to send the password on response
           });
         }
         if (!user) {

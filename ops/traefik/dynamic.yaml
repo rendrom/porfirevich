@@ -1,0 +1,63 @@
+http:
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        usersFile: /run/secrets/dashboard_users
+        removeHeader: true
+
+  routers:
+    dashboard:
+      entryPoints: [dash]
+      rule: PathPrefix(`/api`) || PathPrefix(`/dashboard`)
+      service: api@internal
+      middlewares: [dashboard-auth]
+    pelevin:
+      entryPoints: [pelevin]
+      rule: PathPrefix(`/`)
+      service: pelevin
+    poetry:
+      entryPoints: [poetry]
+      rule: PathPrefix(`/`)
+      service: poetry
+
+  serversTransports:
+    inference:
+      forwardingTimeouts:
+        dialTimeout: 5s
+        responseHeaderTimeout: 185s
+        idleConnTimeout: 190s
+
+  services:
+    pelevin:
+      loadBalancer:
+        serversTransport: inference
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 5s
+        servers:
+          - url: http://gpt.mine.toys:8200/
+          - url: http://gpt.mine.toys:8281/
+          - url: http://185.244.175.119:8201/
+          - url: http://185.244.175.119:8202/
+          - url: http://185.244.175.119:8203/
+    poetry:
+      loadBalancer:
+        serversTransport: inference
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 5s
+        servers:
+          - url: http://gpt.mine.toys:8250/
+          - url: http://gpt.mine.toys:8251/
+          - url: http://gpt.mine.toys:8252/
+          - url: http://gpt.mine.toys:8253/
+          - url: http://gpt.mine.toys:8254/
+          - url: http://gpt.mine.toys:8255/
+          - url: http://gpt.mine.toys:8256/
+          - url: http://gpt.mine.toys:8257/
+          - url: http://gpt.mine.toys:8258/
+          - url: http://poetry.bbb.mine.toys/
+          - url: http://gpt.mine.toys:8291/
+          - url: http://185.244.175.119:8251/

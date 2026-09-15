@@ -9,13 +9,13 @@
     "build": "npm --prefix client run build && npm --prefix server run build",
     "start": "npm --prefix server run start",
     "lint": "npm --prefix client run lint && npm --prefix server run lint",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --wait",
+    "docker:down": "docker compose down",
     "release": "release-it"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1",
-    "release-it": "^20.2.1"
+    "concurrently": "^10.0.5",
+    "release-it": "^21.0.2"
   }
 }

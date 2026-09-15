@@ -1,16 +1,16 @@
 import { validate } from 'class-validator';
-import { getRepository, MoreThan } from 'typeorm';
+import type { NextFunction, Request, Response } from 'express';
+import type { SelectQueryBuilder } from 'typeorm';
+import { MoreThan } from 'typeorm';
 
+import type { StoriesResponse } from '../../../shared/types/Story';
+import { isScheme } from '../../../shared/utils/isScheme';
+import dataSource from '../data-source';
 import { Like } from '../entity/Like';
 import { Story } from '../entity/Story';
 import { User } from '../entity/User';
 import { Violation } from '../entity/Violation';
 import { postcard } from '../postcard/postcard';
-
-import type { NextFunction, Request, Response } from 'express';
-import type { SelectQueryBuilder } from 'typeorm';
-
-import type { StoriesResponse } from '../../../shared/types/Story';
 
 const select: (keyof Story)[] = [
   'id',
@@ -23,6 +23,16 @@ const select: (keyof Story)[] = [
   'isPublic',
   'violationsCount',
 ];
+
+function validContent(content: unknown): content is string {
+  if (typeof content !== 'string') return false;
+  try {
+    const parsed: unknown = JSON.parse(content);
+    return isScheme(parsed) && parsed.some(([text]) => text.trim().length > 0);
+  } catch {
+    return false;
+  }
+}
 
 const updateQuery = (
   queryBuilder: SelectQueryBuilder<Story | Violation>,
@@ -56,7 +66,7 @@ export default class StoryController {
   static all = async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
     const userId = req.user && req.user.id;
-    const offset = Number(req.query.offset as string);
+    const offset = Number(req.query.offset || 0);
     const queryParam = req.query.query as string;
     const tagsParam = req.query.tags as string;
 
@@ -65,11 +75,37 @@ export default class StoryController {
 
     const afterDate = req.query.afterDate as string;
     let limit = Number(req.query.limit as string);
-    limit = limit && limit < 21 ? limit : 20;
+    limit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 20) : 20;
     const orderBy = req.query.orderBy as string;
+    if ((my || filter === 'favorite') && !userId) {
+      res.status(401).send();
+      return;
+    }
+    const allowedOrder = [
+      'createdAt',
+      'likesCount',
+      'viewsCount',
+      'violationsCount',
+      'RAND()',
+    ];
+    if (
+      !Number.isInteger(offset) ||
+      offset < 0 ||
+      (orderBy !== undefined &&
+        (typeof orderBy !== 'string' ||
+          !orderBy.split(',').every((x) => allowedOrder.includes(x)))) ||
+      (tagsParam !== undefined && typeof tagsParam !== 'string') ||
+      (queryParam !== undefined && typeof queryParam !== 'string') ||
+      (afterDate !== undefined &&
+        (!Number.isFinite(Number(afterDate)) ||
+          !Number.isFinite(new Date(Number(afterDate)).getTime())))
+    ) {
+      res.status(400).json({ message: 'Invalid story filters' });
+      return;
+    }
     // Get stories from database
     try {
-      const repository = getRepository(Story);
+      const repository = dataSource.getRepository(Story);
       const list = repository.createQueryBuilder('s');
       updateQuery(list, {
         afterDate,
@@ -82,9 +118,9 @@ export default class StoryController {
       if (orderBy) {
         orderBy.split(',').forEach((x) => {
           if (x === 'RAND()') {
-            list.orderBy('random()');
+            list.addOrderBy('random()');
           } else {
-            list.orderBy(`s.${x}`, 'DESC');
+            list.addOrderBy(`s.${x}`, 'DESC');
           }
         });
       } else {
@@ -106,8 +142,10 @@ export default class StoryController {
         });
       }
       if (tagsParam) {
-        tagsParam.split(',').forEach((x) => {
-          list.andWhere(`s.content LIKE '%${x}%'`);
+        tagsParam.split(',').forEach((x, index) => {
+          list.andWhere(`s.content LIKE :tag${index}`, {
+            [`tag${index}`]: `%${x}%`,
+          });
         });
       }
 
@@ -129,8 +167,8 @@ export default class StoryController {
     // @ts-ignore
     const isSuperuser = req.user && req.user.isSuperuser;
     //Get the ID from the url
-    const id: string = req.params.id;
-    const repository = getRepository(Story);
+    const id: string = String(req.params.id);
+    const repository = dataSource.getRepository(Story);
     try {
       const storyRep = repository
         .createQueryBuilder('story')
@@ -154,7 +192,7 @@ export default class StoryController {
       const story = await storyRep.getOne();
       if (story) {
         story.viewsCount = story.viewsCount + 1;
-        repository.save(story);
+        await repository.increment({ id }, 'viewsCount', 1);
         res.send(story);
       } else {
         res.status(404).send('Story not found');
@@ -166,16 +204,24 @@ export default class StoryController {
 
   static create = async (req: Request, res: Response) => {
     const { content, description } = req.body;
+    if (
+      !validContent(content) ||
+      (description !== undefined &&
+        (typeof description !== 'string' || description.length > 300))
+    ) {
+      res.status(400).json({ message: 'Invalid story content' });
+      return;
+    }
     const story = new Story();
     let newStory: Story | undefined;
     story.content = content;
     story.description = description;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    const repository = getRepository(Story);
+    const repository = dataSource.getRepository(Story);
     if (userId) {
-      const userRepository = getRepository(User);
-      const user = await userRepository.findOne(userId);
+      const userRepository = dataSource.getRepository(User);
+      const user = await userRepository.findOneBy({ id: userId });
 
       if (!user) {
         res.status(400).send();
@@ -235,7 +281,6 @@ export default class StoryController {
       // return;
     }
     try {
-      newStory = await repository.save(story);
       res.send(newStory);
     } catch (error) {
       res.status(500).send({ message: "can't save story", error });
@@ -246,17 +291,22 @@ export default class StoryController {
     const storyId = req.params.id;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    const storyRepository = getRepository(Story);
-    const likeReposytory = getRepository(Like);
-    const userReposytory = getRepository(User);
+    const storyRepository = dataSource.getRepository(Story);
+    const likeReposytory = dataSource.getRepository(Like);
+    const userReposytory = dataSource.getRepository(User);
     try {
-      const existLike = await likeReposytory.findOne({ userId, storyId });
+      const existLike = await likeReposytory.findOneBy({
+        userId,
+        storyId: String(storyId),
+      });
       if (existLike) {
         res.status(409).send('Like from this user already exists');
         return;
       }
-      const story = await storyRepository.findOneOrFail(storyId);
-      const user = await userReposytory.findOneOrFail(userId);
+      const story = await storyRepository.findOneByOrFail({
+        id: String(storyId),
+      });
+      const user = await userReposytory.findOneByOrFail({ id: userId });
 
       const like = new Like();
       like.user = user;
@@ -276,11 +326,13 @@ export default class StoryController {
     const isSuperuser = req.user && req.user.isSuperuser;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    const storyRepository = getRepository(Story);
-    const violationReposytory = getRepository(Violation);
-    const userReposytory = getRepository(User);
+    const storyRepository = dataSource.getRepository(Story);
+    const violationReposytory = dataSource.getRepository(Violation);
+    const userReposytory = dataSource.getRepository(User);
     try {
-      const story = await storyRepository.findOneOrFail(storyId);
+      const story = await storyRepository.findOneByOrFail({
+        id: String(storyId),
+      });
 
       if (isSuperuser) {
         story.isBanned = true;
@@ -291,8 +343,8 @@ export default class StoryController {
       violation.story = story;
 
       if (userId) {
-        const user = await userReposytory.findOne(userId);
-        violation.user = user;
+        const user = await userReposytory.findOneBy({ id: userId });
+        violation.user = user || undefined;
       }
       await violationReposytory.save(violation);
       res.status(200).send();
@@ -305,10 +357,13 @@ export default class StoryController {
     const storyId = req.params.id;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    const likeReposytory = getRepository(Like);
+    const likeReposytory = dataSource.getRepository(Like);
     try {
-      const existLike = await likeReposytory.findOneOrFail({ userId, storyId });
-      likeReposytory.remove(existLike);
+      const existLike = await likeReposytory.findOneByOrFail({
+        userId,
+        storyId: String(storyId),
+      });
+      await likeReposytory.remove(existLike);
       res.send();
     } catch (error) {
       res.status(500).send(error);
@@ -316,23 +371,23 @@ export default class StoryController {
   };
 
   static edit = async (req: Request, res: Response) => {
-    const id = req.params.id;
+    const id = String(req.params.id);
     const { editId, ...params } = req.body;
     // @ts-ignore
     const userId = req.user && req.user.id;
-    let user: User | undefined;
+    let user: User | null = null;
 
-    const repository = getRepository(Story);
+    const repository = dataSource.getRepository(Story);
     let story: Story;
     try {
-      story = await repository.findOneOrFail(id);
+      story = await repository.findOneByOrFail({ id });
     } catch (error) {
       res.status(404).send('Story not found');
       return;
     }
     if (userId) {
-      const userReposytory = getRepository(User);
-      user = await userReposytory.findOne(userId);
+      const userReposytory = dataSource.getRepository(User);
+      user = await userReposytory.findOneBy({ id: userId });
     }
     const isSuperuser = user && user.isSuperuser;
     const isOwner = user && story.userId === user.id;
@@ -341,12 +396,24 @@ export default class StoryController {
       return;
     }
     // Validate the new values on model
-    for (const p in params) {
-      if (p in story) {
-        // @ts-ignore
-        story[p] = params[p];
+    if ('content' in params && !validContent(params.content)) {
+      res.status(400).json({ message: 'Invalid story content' });
+      return;
+    }
+    const allowedFields = ['content', 'description', 'isPublic', 'isDeleted'];
+    if (isSuperuser) allowedFields.push('isBanned');
+    for (const key of Object.keys(params)) {
+      if (
+        !allowedFields.includes(key) ||
+        (key.startsWith('is') && typeof params[key] !== 'boolean') ||
+        (key === 'description' &&
+          (typeof params[key] !== 'string' || params[key].length > 300))
+      ) {
+        res.status(400).json({ message: 'Invalid story fields' });
+        return;
       }
     }
+    Object.assign(story, params);
     const errors = await validate(story);
     if (errors.length > 0) {
       res.status(400).send(errors);
@@ -364,16 +431,16 @@ export default class StoryController {
 
   static delete = async (req: Request, res: Response) => {
     // Get the ID from the url
-    const id = req.params.id;
+    const id = String(req.params.id);
 
-    const repository = getRepository(Story);
+    const repository = dataSource.getRepository(Story);
     try {
-      await repository.findOneOrFail(id);
+      await repository.findOneByOrFail({ id });
     } catch (error) {
       res.status(404).send('Story not found');
       return;
     }
-    repository.delete(id);
+    await repository.delete(id);
 
     // After all send a 204 (no content, but accepted) response
     res.status(204).send();
@@ -381,16 +448,19 @@ export default class StoryController {
 
   static postcard = async (req: Request, res: Response) => {
     //Get the ID from the url
-    const id: string = req.params.id;
+    const id: string = String(req.params.id);
 
-    const repository = getRepository(Story);
+    const repository = dataSource.getRepository(Story);
     try {
-      const story = await repository.findOneOrFail(id, {
-        select,
+      const story = await repository.findOneOrFail({
+        where: { id },
+        select: Object.fromEntries(select.map((key) => [key, true])),
       });
-      story.viewsCount = story.viewsCount + 1;
-      repository.save(story);
-      // await postcard(story);
+      if (!story.postcard) {
+        res.status(404).send('Postcard not found');
+        return;
+      }
+      res.redirect(story.postcard);
     } catch (error) {
       res.status(404).send('Story not found');
     }

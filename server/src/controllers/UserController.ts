@@ -1,11 +1,13 @@
+import { randomUUID } from 'node:crypto';
+
 import { validate } from 'class-validator';
 import type { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
 
 import type {
   AdminUserListResponse,
   AdminUserSummary,
 } from '../../../shared/types/AdminUser';
+import dataSource from '../data-source';
 import { Like } from '../entity/Like';
 import { User } from '../entity/User';
 // import { Story } from '../entity/Story';
@@ -27,7 +29,7 @@ class UserController {
     const role = req.query.role;
     const status = req.query.status;
 
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     const query = userRepository
       .createQueryBuilder('user')
       .select([
@@ -94,8 +96,8 @@ class UserController {
       return;
     }
 
-    const userRepository = getRepository(User);
-    const user = await userRepository.findOne(id);
+    const userRepository = dataSource.getRepository(User);
+    const user = await userRepository.findOneBy({ id });
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
@@ -119,11 +121,13 @@ class UserController {
     const id = Number(req.params.id);
 
     //Get the user from database
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     try {
-      await userRepository.findOneOrFail(id, {
-        select: ['uid', 'username', 'isSuperuser'], //We dont want to send the password on response
+      const user = await userRepository.findOneOrFail({
+        where: { id },
+        select: { uid: true, username: true, isSuperuser: true }, //We dont want to send the password on response
       });
+      res.json(user);
     } catch (error) {
       res.status(404).send('User not found');
     }
@@ -134,7 +138,7 @@ class UserController {
     const userId = req.user && req.user.id;
 
     //Get the user from database
-    const likeRepository = getRepository(Like);
+    const likeRepository = dataSource.getRepository(Like);
     try {
       const likes = await likeRepository
         .createQueryBuilder()
@@ -152,6 +156,7 @@ class UserController {
     //Get parameters from the body
     const { username, password } = req.body;
     const user = new User();
+    user.uid = randomUUID();
     user.username = username;
     user.password = password;
 
@@ -166,7 +171,7 @@ class UserController {
     user.hashPassword();
 
     //Try to save. If fails, the username is already in use
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     try {
       await userRepository.save(user);
     } catch (e) {
@@ -182,7 +187,7 @@ class UserController {
     // @ts-ignore
     const isSuperuser = req.user && req.user.isSuperuser;
     //Get the ID from the url
-    const id = req.params.id;
+    const id = Number(req.params.id);
 
     // @ts-ignore
     const userId = req.user && req.user.id;
@@ -190,10 +195,10 @@ class UserController {
     const { username, isBanned } = req.body;
 
     //Try to find user on database
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     let user;
     try {
-      user = await userRepository.findOneOrFail(id);
+      user = await userRepository.findOneByOrFail({ id });
     } catch (error) {
       //If not found, send a 404 response
       res.status(404).send('User not found');
@@ -246,17 +251,17 @@ class UserController {
 
   static deleteUser = async (req: Request, res: Response) => {
     //Get the ID from the url
-    const id = req.params.id;
+    const id = Number(req.params.id);
 
-    const userRepository = getRepository(User);
+    const userRepository = dataSource.getRepository(User);
     let user: User;
     try {
-      user = await userRepository.findOneOrFail(id);
+      user = await userRepository.findOneByOrFail({ id });
     } catch (error) {
       res.status(404).send('User not found');
       return;
     }
-    userRepository.delete(id);
+    await userRepository.delete(id);
 
     //After all send a 204 (no content, but accepted) response
     res.status(204).send();

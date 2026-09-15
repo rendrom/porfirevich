@@ -32,7 +32,7 @@
             <b-button
               size="is-small"
               :icon-right="
-                store.isLoading || !store.history.length
+                store.isLoading || store.history.length < 2
                   ? 'close'
                   : 'arrow-left'
               "
@@ -97,9 +97,8 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  store.abort();
+  store.destroy();
   window.removeEventListener('keydown', onKeydown);
-  store.removeWindowUnloadListener();
 });
 
 store.$patch({ handleRequestError });

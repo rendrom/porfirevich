@@ -65,10 +65,11 @@
 
 <script setup lang="ts">
 import { BButton, BDropdown, BDropdownItem, BModal } from 'buefy';
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { Scheme } from '@shared/types/Scheme';
+import { isScheme } from '@shared/utils/isScheme';
+import StoryService from '@/services/StoryService';
 
 import LikeButton from '@/components/LikeButton.vue';
 import LoadingPage from '@/components/LoadingPage.vue';
@@ -91,6 +92,9 @@ const isShareModalActive = ref(false);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const error = ref('');
+let restoring = false;
+let disposed = false;
+let restoreId = 0;
 
 const hasShareableText = computed(() => {
   const text = transformer.text.trim();
@@ -116,12 +120,23 @@ async function pushRoute(path: string) {
 }
 
 async function restore(id: string) {
-  const restoredStory = await appStore.getStory(id);
-  if (!restoredStory) return;
-
-  transformer.setScheme(JSON.parse(restoredStory.content) as Scheme);
-  transformer.editor?.setCursorToEnd();
-  transformer.removeWindowUnloadListener();
+  const currentRestoreId = ++restoreId;
+  restoring = true;
+  try {
+    const restoredStory = await StoryService.one(id);
+    if (!restoredStory || disposed || currentRestoreId !== restoreId) return;
+    const scheme: unknown = JSON.parse(restoredStory.content);
+    if (!isScheme(scheme)) throw new Error('Invalid story');
+    appStore.story = restoredStory;
+    transformer.setScheme(scheme, true);
+    transformer.removeWindowUnloadListener();
+    await nextTick();
+  } catch {
+    if (!disposed && currentRestoreId === restoreId)
+      error.value = 'Не удалось загрузить историю';
+  } finally {
+    if (currentRestoreId === restoreId) restoring = false;
+  }
 }
 
 async function clean() {
@@ -133,6 +148,8 @@ async function clean() {
 async function onRouteChange() {
   const id = route.params.id;
   if (typeof id !== 'string' || !id) {
+    restoreId += 1;
+    restoring = false;
     await clean();
   } else if (appStore.story?.id !== id) {
     await restore(id);
@@ -175,27 +192,23 @@ function copyToClipboard() {
 }
 
 onMounted(async () => {
-  isLoading.value = true;
-  try {
-    await transformer.getModels();
-    let stopReadyWatch: () => void = () => {};
-    stopReadyWatch = watch(
-      () => transformer.isReady,
-      async (ready) => {
-        if (!ready) return;
+  // Mount the editor even when the inference API is unavailable. Transformer
+  // owns model loading and its retry action; saved stories need only the site API.
+  isLoading.value = false;
+  await nextTick();
+  if (props.id && !disposed) await restore(props.id);
+});
 
-        stopReadyWatch();
-        if (props.id) await restore(props.id);
-        watch(() => transformer.text, clean);
-      },
-      { immediate: true },
-    );
-  } catch {
-    error.value = 'Ошибка соединения с сервером';
-  } finally {
-    isLoading.value = false;
-    watch(() => route.fullPath, onRouteChange);
-  }
+watch(
+  () => transformer.text,
+  () => {
+    if (!restoring && !isLoading.value) void clean();
+  },
+);
+watch(() => route.fullPath, onRouteChange);
+onUnmounted(() => {
+  disposed = true;
+  restoreId += 1;
 });
 </script>
 

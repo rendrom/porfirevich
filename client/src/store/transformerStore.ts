@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
 import debounce from 'debounce';
 import { generateApi, getModelsApi } from '@/api/porfirevich';
 import { TextEditor } from '@/editor/TextEditor';
@@ -7,7 +7,7 @@ import { TextEditor } from '@/editor/TextEditor';
 import type { Scheme } from '@shared/types/Scheme';
 
 export const useTransformerStore = defineStore('transformer', () => {
-  const editor = ref<TextEditor>();
+  const editor = shallowRef<TextEditor>();
   const text = ref('');
   const prompt = computed(() => text.value.trim());
   const isReady = ref(false);
@@ -81,7 +81,10 @@ export const useTransformerStore = defineStore('transformer', () => {
   });
 
   const createEditor = (selector: string) => {
+    editor.value?.destroy();
     editor.value = new TextEditor(selector, { onTextChange });
+    history.value = [[]];
+    text.value = '';
 
     setPlaceholder();
     editor.value.focus();
@@ -89,18 +92,10 @@ export const useTransformerStore = defineStore('transformer', () => {
   };
 
   const getPrompt = () => {
-    const lastReplyText =
-      lastReply.value && editor.value
-        ? editor.value.getBlockText(lastReply.value)
-        : null;
-    let str = editor.value?.getTextBeforeSelection() || '';
-    if (lastReplyText) {
-      str = str.replace(lastReplyText, '').trimStart();
-    }
-    return str.trimStart();
+    return (editor.value?.getTextBeforeSelection(lastReply.value || undefined) || '').trimStart();
   };
 
-  let debouncedHistory: () => void;
+  const debouncedHistory = debounce(updateHistory, historyInterval);
 
   function onTextChange() {
     setPlaceholder();
@@ -134,6 +129,8 @@ export const useTransformerStore = defineStore('transformer', () => {
       if (!prompt) {
         return;
       }
+      updateHistory();
+      const selection = editor.value?.captureSelection();
       isLoading.value = true;
       let currentReplies: string[] | undefined;
       if (replies.value.length) {
@@ -145,16 +142,19 @@ export const useTransformerStore = defineStore('transformer', () => {
       if (currentTransformId !== transformId) return;
       if (currentReplies && editor.value) {
         const reply = currentReplies.pop() || '';
+        const replacing = !!lastReply.value;
         deleteLastReply();
         const lastBlock = editor.value.insertText(reply, {
           isApi: true,
           isActive: true,
           silent: true,
           atCurrentSelection: true,
+          selection: replacing ? undefined : selection,
         });
         text.value = editor.value.getText();
         lastReply.value = `#${lastBlock.id}`;
-        debouncedHistory();
+        updateHistory();
+        setPlaceholder();
 
         replies.value = currentReplies;
       }
@@ -171,16 +171,11 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   function historyBack() {
     abort();
-    deleteLastReply();
-    const currentHistory = [...history.value];
-    currentHistory.pop(); // last changes
-    const prev = currentHistory.pop();
-    if (prev) {
-      setScheme(prev, true);
-    } else {
-      clean();
-    }
-    history.value = currentHistory;
+    debouncedHistory.flush();
+    updateHistory();
+    cleanLastReply();
+    if (history.value.length > 1) history.value.pop();
+    setScheme(history.value.at(-1) || [], true, false);
   }
 
   function escape() {
@@ -188,7 +183,7 @@ export const useTransformerStore = defineStore('transformer', () => {
 
     if (isLoading.value) {
       abort();
-    } else if (history.value.length) {
+    } else if (history.value.length > 1) {
       historyBack();
     } else {
       clean();
@@ -213,8 +208,8 @@ export const useTransformerStore = defineStore('transformer', () => {
 
   function setPlaceholder() {
     if (editor.value) {
-      const text = editor.value.getText();
-      editor.value.setPlaceHolder(text.length > 1 ? '' : placeholder.value);
+      const text = editor.value.getText(false);
+      editor.value.setPlaceHolder(text.length ? '' : placeholder.value);
     }
   }
 
@@ -228,7 +223,9 @@ export const useTransformerStore = defineStore('transformer', () => {
       'Вы действительно хотите покинуть страницу? История будет утеряна.';
   }
 
-  function setScheme(newScheme: Scheme, cursorToEnd = false) {
+  function setScheme(newScheme: Scheme, cursorToEnd = false, recordHistory = true) {
+    abort();
+    cleanLastReply();
     if (editor.value) {
       editor.value.setContents(newScheme);
       text.value = editor.value.getText();
@@ -237,15 +234,23 @@ export const useTransformerStore = defineStore('transformer', () => {
       } else {
         setCursor();
       }
+      if (recordHistory) updateHistory();
+      setPlaceholder();
+      if (text.value.trim()) addWindowUnloadListener();
+      else removeWindowUnloadListener();
     }
   }
 
   function clean() {
+    debouncedHistory.flush();
+    updateHistory();
     abort();
     cleanLastReply();
     removeWindowUnloadListener();
     editor.value?.clean();
     text.value = '';
+    updateHistory();
+    setPlaceholder();
   }
 
   function deleteLastReply() {
@@ -260,6 +265,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     lastReply.value = '';
     editor.value?.removeActiveBlocks();
     replies.value = [];
+    text.value = editor.value?.getText() || text.value;
   }
 
   function setCursor() {
@@ -302,6 +308,7 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   function appendHistory(scheme: Scheme) {
+    if (JSON.stringify(history.value.at(-1)) === JSON.stringify(scheme)) return;
     history.value = [...history.value, scheme].slice(-historyLength);
   }
 
@@ -320,7 +327,18 @@ export const useTransformerStore = defineStore('transformer', () => {
   }
 
   function initialize() {
-    debouncedHistory = debounce(updateHistory, historyInterval);
+    debouncedHistory.clear();
+  }
+
+  function destroy() {
+    abort();
+    debouncedHistory.clear();
+    editor.value?.destroy();
+    editor.value = undefined;
+    isReady.value = false;
+    lastReply.value = '';
+    replies.value = [];
+    removeWindowUnloadListener();
   }
 
   return {
@@ -350,6 +368,7 @@ export const useTransformerStore = defineStore('transformer', () => {
     changeModel,
     historyBack,
     initialize,
+    destroy,
     easyEscape,
     transform,
     getModels,

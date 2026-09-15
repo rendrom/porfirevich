@@ -1,28 +1,21 @@
-import { getRepository } from 'typeorm';
-
-import { User } from '../entity/User';
-
 import type { NextFunction, Request, Response } from 'express';
+
+import type { User } from '../entity/User';
 
 export const isSelf = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     //Get the user ID from previous midleware
-    const userId = res.locals.jwtPayload.userId;
-    const id: string = req.params.id;
-
-    const repository = getRepository(User);
-    let obj: User | undefined;
-    try {
-      obj = await repository.findOneOrFail(id);
-    } catch (id) {
+    const user = req.user as User | undefined;
+    if (!user) {
       res.status(401).send();
+      return;
     }
 
     //Check if array of authorized roles includes the user's role
-    if (obj && obj.uid === userId) {
+    if (user.id === Number(req.params.id)) {
       next();
     } else {
-      res.status(401).send();
+      res.status(403).send();
     }
   };
 };

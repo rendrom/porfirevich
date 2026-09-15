@@ -1,8 +1,6 @@
-import {
-  type Connection,
-  type ConnectionOptions,
-  getConnectionManager,
-} from 'typeorm';
+import type { DataSource } from 'typeorm';
+
+import dataSource from './data-source';
 
 const DEFAULT_MAX_ATTEMPTS = 15;
 const DEFAULT_RETRY_DELAY_MS = 2_000;
@@ -17,8 +15,8 @@ function wait(milliseconds: number): Promise<void> {
 }
 
 export async function connectDatabase(
-  options: ConnectionOptions,
-): Promise<Connection> {
+  connection: DataSource = dataSource,
+): Promise<DataSource> {
   const maxAttempts = readPositiveInteger(
     process.env.DATABASE_CONNECT_MAX_ATTEMPTS,
     DEFAULT_MAX_ATTEMPTS,
@@ -27,16 +25,11 @@ export async function connectDatabase(
     process.env.DATABASE_CONNECT_RETRY_DELAY_MS,
     DEFAULT_RETRY_DELAY_MS,
   );
-  const connectionName = options.name ?? 'default';
-  const connectionManager = getConnectionManager();
-  const connection = connectionManager.has(connectionName)
-    ? connectionManager.get(connectionName)
-    : connectionManager.create(options);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      if (!connection.isConnected) {
-        await connection.connect();
+      if (!connection.isInitialized) {
+        await connection.initialize();
       }
       return connection;
     } catch (error) {

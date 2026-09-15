@@ -1,18 +1,19 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:24-bookworm-slim AS client-deps
+FROM node:24.20.0-bookworm-slim AS client-deps
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 WORKDIR /app/client
 COPY client/package.json client/package-lock.json ./
 RUN --mount=type=cache,id=client-npm,target=/root/.npm npm ci
 
-FROM node:24-bookworm-slim AS client-build
+FROM node:24.20.0-bookworm-slim AS client-build
 WORKDIR /app
 COPY --from=client-deps /app/client/node_modules ./client/node_modules
 COPY shared ./shared
 COPY client ./client
 RUN npm --prefix client run build
 
-FROM node:24-bookworm-slim AS server-build
+FROM node:24.20.0-bookworm-slim AS server-build
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
@@ -22,7 +23,7 @@ COPY shared ./shared
 COPY server ./server
 RUN npm --prefix server run build
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:24.20.0-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium

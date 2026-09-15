@@ -1,7 +1,6 @@
 import express from 'express';
 import { resolve } from 'path';
 
-import { ormconfig } from '../ormconfig';
 import { api } from './api';
 import { appConfig } from './appConfig';
 import config from './config';
@@ -10,7 +9,7 @@ import { appendOgImage } from './middlewares/appendOgImage';
 import { idDef } from './routers/story';
 
 async function start(): Promise<void> {
-  await connectDatabase(ormconfig);
+  await connectDatabase();
 
   const app = express();
   appConfig(app);
@@ -32,7 +31,7 @@ async function start(): Promise<void> {
     }),
   );
   app.get(idDef, appendOgImage);
-  app.get('*', (_request, response) => {
+  app.get('/{*splat}', (_request, response) => {
     response.sendFile(resolve(publicPath, 'index.html'));
   });
 
